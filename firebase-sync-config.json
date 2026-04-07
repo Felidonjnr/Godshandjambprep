@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "provider": "firebase-firestore",
+  "firebaseConfig": {
+    "apiKey": "AIzaSyAM_q9pw3x18u0MNvKXQTW-G07zA4loXQE",
+    "authDomain": "group-mind-13c6c.firebaseapp.com",
+    "projectId": "group-mind-13c6c",
+    "storageBucket": "group-mind-13c6c.firebasestorage.app",
+    "messagingSenderId": "326553782516",
+    "appId": "1:326553782516:web:56ae741e324c9c153736a1"
+  },
+  "collection": "quizApps",
+  "documentId": "godshand-main-bank"
+}

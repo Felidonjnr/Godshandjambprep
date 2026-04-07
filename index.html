@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Godshand Tutorials – JAMB Physics Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --gold:#F5A623;--gold2:#C47F0C;--deep:#08090F;--card:#11141F;--card2:#181D2E;
+  --text:#EEF0F8;--muted:#6B7490;--green:#27AE60;--red:#C0392B;--blue:#3A7BD5;
+  --radius:16px;--shadow:0 8px 32px rgba(0,0,0,0.5);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--deep);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 60% 40% at 15% 10%,rgba(245,166,35,0.10) 0%,transparent 70%),
+  radial-gradient(ellipse 50% 40% at 85% 90%,rgba(58,123,213,0.08) 0%,transparent 70%);
+  pointer-events:none;z-index:0;}
+.screen{display:none;min-height:100vh;position:relative;z-index:1;}
+.screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem;}
+/* HOME */
+.logo-wrap{text-align:center;margin-bottom:2rem;}
+.logo-icon{width:80px;height:80px;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.2rem;
+  margin:0 auto 1rem;box-shadow:0 0 40px rgba(245,166,35,0.35);}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:2.6rem;letter-spacing:2px;
+  background:linear-gradient(90deg,var(--gold),#fff,var(--gold));-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;line-height:1;}
+.tagline{color:var(--muted);font-size:.9rem;margin-top:.4rem;letter-spacing:1px;}
+.home-card{background:var(--card);border:1px solid rgba(245,166,35,0.15);border-radius:var(--radius);
+  padding:2rem;width:100%;max-width:480px;box-shadow:var(--shadow);}
+.home-card h2{font-size:1.1rem;font-weight:600;margin-bottom:1.5rem;color:var(--gold);}
+.stats-row{display:flex;gap:.8rem;margin-bottom:1.5rem;}
+.stat-pill{flex:1;background:var(--card2);border-radius:10px;padding:.7rem;text-align:center;}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold);}
+.stat-lbl{font-size:.7rem;color:var(--muted);letter-spacing:.5px;}
+.form-group{margin-bottom:1.2rem;}
+.form-group label{display:block;font-size:.8rem;font-weight:600;color:var(--muted);
+  letter-spacing:.8px;text-transform:uppercase;margin-bottom:.5rem;}
+.form-group input,.form-group select{width:100%;background:var(--card2);border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;padding:.75rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:.95rem;outline:none;transition:border-color .2s;}
+.form-group input:focus,.form-group select:focus{border-color:var(--gold);}
+.form-group select option{background:var(--card2);}
+.form-help{font-size:.75rem;color:var(--muted);margin-top:.45rem;line-height:1.45;}
+.home-actions{display:flex;flex-direction:column;gap:.8rem;margin-top:.9rem;}
+.btn-ghost{width:100%;padding:.95rem;background:transparent;border:1.5px solid rgba(245,166,35,0.4);
+  border-radius:12px;color:var(--gold);font-family:'DM Sans',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;
+  transition:background .2s,border-color .2s,transform .15s;}
+.btn-ghost:hover{background:rgba(245,166,35,0.08);border-color:var(--gold);transform:translateY(-1px);}
+.overlay{position:fixed;inset:0;background:rgba(5,8,15,0.82);backdrop-filter:blur(6px);display:none;
+  align-items:flex-start;justify-content:center;padding:1rem;z-index:20;overflow-y:auto;}
+.overlay.show{display:flex;}
+.pin-panel{width:100%;max-width:420px;background:var(--card);border:1px solid rgba(245,166,35,0.18);
+  border-radius:22px;box-shadow:var(--shadow);padding:1.15rem;}
+.pin-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem;}
+.pin-head h3{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;color:var(--gold);line-height:1;}
+.pin-head p{color:var(--muted);font-size:.9rem;line-height:1.5;margin-top:.35rem;}
+.pin-msg{display:none;margin:.8rem 0;padding:.8rem .95rem;border-radius:12px;font-size:.86rem;font-weight:600;}
+.pin-msg.show{display:block;}
+.pin-msg.err{background:rgba(192,57,43,0.14);border:1px solid rgba(192,57,43,0.35);color:#ff9a8f;}
+.pin-msg.ok{background:rgba(39,174,96,0.14);border:1px solid rgba(39,174,96,0.35);color:#63d78f;}
+.admin-panel{width:100%;max-width:980px;background:var(--card);border:1px solid rgba(245,166,35,0.18);
+  border-radius:22px;box-shadow:var(--shadow);padding:1.1rem;}
+.admin-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem;}
+.admin-head h3{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;color:var(--gold);line-height:1;}
+.admin-head p{color:var(--muted);font-size:.9rem;line-height:1.5;margin-top:.35rem;}
+.admin-kicker{font-size:.72rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:.35rem;}
+.icon-btn{border:1px solid rgba(255,255,255,0.08);background:var(--card2);color:var(--text);width:40px;height:40px;
+  border-radius:12px;cursor:pointer;font-size:1rem;}
+.icon-btn:hover{border-color:var(--gold);color:var(--gold);}
+.admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;}
+.admin-card{background:var(--card2);border:1px solid rgba(255,255,255,0.06);border-radius:18px;padding:1rem;}
+.admin-card.admin-wide{grid-column:1 / -1;}
+.admin-card h4{font-size:1rem;color:var(--gold);margin-bottom:.85rem;}
+.admin-card textarea,.admin-card input,.admin-card select{width:100%;background:#0D1220;border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;padding:.75rem .9rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.92rem;outline:none;}
+.admin-card textarea{min-height:170px;resize:vertical;line-height:1.45;}
+.admin-card textarea:focus,.admin-card input:focus,.admin-card select:focus{border-color:var(--gold);}
+.admin-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem;}
+.admin-row-4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem;}
+.admin-actions{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:.9rem;}
+.btn-mini{padding:.75rem 1rem;border:none;border-radius:12px;background:var(--gold);color:#000;
+  font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;}
+.btn-mini.alt{background:transparent;border:1.5px solid rgba(245,166,35,0.4);color:var(--gold);}
+.btn-mini.warn{background:rgba(192,57,43,0.18);border:1px solid rgba(192,57,43,0.4);color:#ffb3ad;}
+.btn-mini:hover{transform:translateY(-1px);}
+.admin-note{font-size:.78rem;color:var(--muted);line-height:1.5;margin-top:.5rem;}
+.admin-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;margin-bottom:1rem;}
+.admin-pill{background:var(--card2);border-radius:14px;padding:.9rem;border:1px solid rgba(255,255,255,0.06);}
+.admin-pill strong{display:block;font-family:'Bebas Neue',sans-serif;font-size:1.55rem;color:var(--gold);letter-spacing:1px;}
+.admin-pill span{font-size:.78rem;color:var(--muted);}
+.admin-msg{display:none;margin-bottom:1rem;padding:.85rem 1rem;border-radius:12px;font-size:.88rem;font-weight:600;}
+.admin-msg.show{display:block;}
+.admin-msg.ok{background:rgba(39,174,96,0.14);border:1px solid rgba(39,174,96,0.35);color:#63d78f;}
+.admin-msg.err{background:rgba(192,57,43,0.14);border:1px solid rgba(192,57,43,0.35);color:#ff9a8f;}
+.template-box{background:#0B101B;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:.85rem;margin-top:.8rem;overflow:auto;}
+.template-box pre{white-space:pre-wrap;font-size:.78rem;color:#d7dbec;line-height:1.45;}
+.file-input{padding:.6rem .75rem !important;background:transparent !important;}
+.sync-strip{margin-top:.4rem;padding:.9rem 1rem;border-radius:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);}
+.sync-pill{display:inline-flex;align-items:center;gap:.45rem;padding:.35rem .7rem;border-radius:999px;font-size:.75rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;border:1px solid rgba(255,255,255,0.08);}
+.sync-pill::before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.9;}
+.sync-pill.local{color:#9aa4c4;background:rgba(154,164,196,0.10);}
+.sync-pill.connecting,.sync-pill.syncing{color:var(--gold);background:rgba(245,166,35,0.12);}
+.sync-pill.cloud{color:#63d78f;background:rgba(39,174,96,0.14);}
+.sync-pill.error{color:#ff9a8f;background:rgba(192,57,43,0.15);}
+.sync-note{font-size:.78rem;color:var(--muted);line-height:1.55;margin-top:.55rem;}
+.status-card{background:#0D1220;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:.9rem 1rem;}
+.status-card .sync-pill{margin-bottom:.2rem;}
+.config-tip{font-size:.76rem;color:var(--muted);line-height:1.5;margin-top:.7rem;}
+@media (max-width:760px){
+  .admin-grid,.admin-row,.admin-row-4{grid-template-columns:1fr;}
+  .admin-panel{padding:.95rem;}
+}
+.btn-start{width:100%;padding:1rem;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border:none;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:1.4rem;
+  letter-spacing:2px;color:#000;cursor:pointer;transition:transform .15s,box-shadow .15s;
+  box-shadow:0 4px 20px rgba(245,166,35,0.4);margin-top:.5rem;}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(245,166,35,0.55);}
+/* QUIZ */
+#quizScreen{padding:0;justify-content:flex-start;}
+.quiz-inner{width:100%;max-width:640px;margin:0 auto;padding:1.5rem 1rem 2rem;}
+.quiz-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;gap:1rem;}
+.q-brand{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:1px;color:var(--gold);}
+.q-progress-wrap{flex:1;}
+.q-progress-bar{height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;}
+.q-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--blue));border-radius:3px;transition:width .4s;}
+.q-count{font-size:.8rem;color:var(--muted);margin-top:.3rem;text-align:right;}
+.timer-box{display:flex;align-items:center;gap:.5rem;background:var(--card2);
+  border-radius:10px;padding:.4rem .8rem;border:1px solid rgba(245,166,35,0.2);}
+.timer-val{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;min-width:28px;text-align:center;}
+.timer-val.urgent{color:var(--red);animation:pulse .6s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.topic-badge{display:inline-block;background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.3);
+  color:var(--gold);border-radius:20px;padding:.25rem .8rem;font-size:.75rem;font-weight:600;margin-bottom:.8rem;}
+.question-card{background:var(--card);border:1px solid rgba(255,255,255,0.06);
+  border-radius:var(--radius);padding:1.5rem;margin-bottom:1.2rem;box-shadow:var(--shadow);}
+.question-year{font-size:.75rem;color:var(--muted);margin-bottom:.5rem;font-style:italic;}
+.question-text{font-size:1.05rem;font-weight:500;line-height:1.6;}
+.options-grid{display:flex;flex-direction:column;gap:.7rem;}
+.option-btn{background:var(--card2);border:1.5px solid rgba(255,255,255,0.07);border-radius:12px;
+  padding:.85rem 1rem;text-align:left;cursor:pointer;display:flex;align-items:flex-start;gap:.8rem;
+  transition:border-color .15s,background .15s,transform .1s;font-family:'DM Sans',sans-serif;
+  font-size:.92rem;color:var(--text);line-height:1.4;}
+.option-btn:hover:not(:disabled){border-color:var(--gold);background:rgba(245,166,35,0.06);transform:translateX(3px);}
+.option-btn:disabled{cursor:default;}
+.option-letter{width:28px;height:28px;min-width:28px;border-radius:8px;
+  background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:.8rem;color:var(--muted);}
+.option-btn.correct{border-color:var(--green);background:rgba(39,174,96,0.12);}
+.option-btn.correct .option-letter{background:var(--green);color:#fff;}
+.option-btn.wrong{border-color:var(--red);background:rgba(192,57,43,0.12);}
+.option-btn.wrong .option-letter{background:var(--red);color:#fff;}
+.option-btn.reveal{border-color:var(--green);background:rgba(39,174,96,0.08);}
+.option-btn.reveal .option-letter{background:var(--green);color:#fff;}
+.feedback-box{border-radius:12px;padding:.8rem 1rem;margin-bottom:1rem;display:flex;
+  align-items:flex-start;gap:.7rem;font-size:.9rem;font-weight:600;opacity:0;transition:opacity .3s;}
+.feedback-box.show{opacity:1;}
+.feedback-box.fb-ok{background:rgba(39,174,96,0.15);border:1px solid rgba(39,174,96,0.3);color:#2ecc71;}
+.feedback-box.fb-no{background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.3);color:#e74c3c;}
+.fb-icon{font-size:1.3rem;line-height:1;}
+.fb-main{flex:1;}
+.fb-exp{font-size:.8rem;font-weight:400;color:var(--muted);margin-top:.3rem;line-height:1.5;}
+.btn-next{width:100%;padding:.9rem;background:var(--gold);border:none;border-radius:12px;
+  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;color:#000;
+  cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s,transform .1s;}
+.btn-next.show{opacity:1;pointer-events:auto;}
+.btn-next:hover{transform:translateY(-1px);}
+
+.option-btn.selected{border-color:var(--blue);background:rgba(58,123,213,0.12);}
+.option-btn.selected .option-letter{background:var(--blue);color:#fff;}
+.quiz-actions-row{display:flex;gap:.8rem;align-items:stretch;}
+.quiz-actions-row .btn-next,.quiz-actions-row .btn-outline{flex:1;}
+.btn-nav{display:none;}
+.btn-nav.show{display:block;}
+.btn-submit-quiz{width:100%;margin-top:.8rem;display:none;padding:.9rem;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-family:'DM Sans',sans-serif;font-weight:800;cursor:pointer;}
+.btn-submit-quiz.show{display:block;}
+.form-group.is-disabled{opacity:.62;}
+.form-group.is-disabled select,.form-group.is-disabled input{pointer-events:none;}
+/* RESULTS */
+#resultsScreen{padding:1.5rem 1rem;overflow-y:auto;}
+.results-card{background:var(--card);border:1px solid rgba(245,166,35,0.2);
+  border-radius:var(--radius);padding:2rem;width:100%;max-width:500px;box-shadow:var(--shadow);}
+.results-header{text-align:center;margin-bottom:1.5rem;}
+.results-header h2{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:2px;color:var(--gold);}
+.score-ring{width:120px;height:120px;margin:1rem auto;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.score-ring circle{fill:none;stroke-width:10;}
+.bg-c{stroke:rgba(255,255,255,0.08);}
+.fg-c{stroke:var(--gold);stroke-linecap:round;transition:stroke-dashoffset 1.2s ease,stroke .5s;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-pct{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);}
+.score-lbl{font-size:.7rem;color:var(--muted);}
+.results-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;margin:1rem 0;}
+.res-stat{background:var(--card2);border-radius:12px;padding:.8rem;text-align:center;}
+.res-num{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;}
+.res-num.g{color:var(--green);}
+.res-num.r{color:var(--red);}
+.res-num.o{color:var(--gold);}
+.res-lbl{font-size:.72rem;color:var(--muted);}
+.perf-bar{height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;margin:.5rem 0 1.5rem;}
+.perf-fill{height:100%;border-radius:4px;transition:width 1.2s ease;}
+.btn-row{display:flex;gap:.8rem;}
+.btn-outline{flex:1;padding:.8rem;background:transparent;border:1.5px solid var(--gold);
+  border-radius:12px;color:var(--gold);font-family:'DM Sans',sans-serif;font-weight:600;
+  font-size:.9rem;cursor:pointer;transition:background .2s;}
+.btn-outline:hover{background:rgba(245,166,35,0.1);}
+.btn-solid{flex:1;padding:.8rem;background:var(--gold);border:none;border-radius:12px;
+  color:#000;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;}
+.review-section{margin-top:1.5rem;}
+.review-title{font-size:.8rem;font-weight:700;color:var(--muted);letter-spacing:.8px;
+  text-transform:uppercase;margin-bottom:.8rem;}
+.rev-item{background:var(--card2);border-radius:10px;padding:.8rem 1rem;margin-bottom:.6rem;
+  border-left:4px solid var(--red);}
+.rev-item.ok{border-left-color:var(--green);}
+.rev-q{font-size:.85rem;color:var(--text);margin-bottom:.4rem;line-height:1.5;}
+.rev-ans{font-size:.78rem;display:flex;gap:.5rem;flex-wrap:wrap;}
+.rev-yours{color:var(--red);background:rgba(192,57,43,0.12);padding:.15rem .5rem;border-radius:4px;}
+.rev-right{color:var(--green);background:rgba(39,174,96,0.12);padding:.15rem .5rem;border-radius:4px;}
+.greeting{background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);
+  border-radius:20px;padding:.3rem .9rem;font-size:.8rem;color:var(--gold);
+  display:inline-block;margin-bottom:1rem;}
+.global-home-btn{position:fixed;top:1rem;right:1rem;z-index:60;display:none;align-items:center;gap:.45rem;
+  padding:.72rem 1rem;background:rgba(17,20,31,0.92);border:1px solid rgba(245,166,35,0.35);
+  border-radius:999px;color:var(--gold);font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;
+  cursor:pointer;box-shadow:var(--shadow);backdrop-filter:blur(8px);transition:transform .15s,background .2s,border-color .2s;}
+.global-home-btn.show{display:inline-flex;}
+.global-home-btn:hover{background:rgba(245,166,35,0.12);border-color:var(--gold);transform:translateY(-1px);}
+@media (max-width:520px){
+  .global-home-btn{top:.8rem;right:.8rem;padding:.65rem .9rem;font-size:.82rem;}
+}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:rgba(245,166,35,0.3);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<button class="global-home-btn" id="globalHomeBtn" type="button" onclick="goHomeUniversal()">🏠 Home</button>
+
+<!-- HOME -->
+<div class="screen active" id="homeScreen">
+  <div class="logo-wrap">
+    <div class="logo-icon">✝️</div>
+    <div class="brand">Godshand Tutorials</div>
+    <div class="tagline" id="homeTagline">JAMB Physics • Live Practice Mode</div>
+  </div>
+  <div class="home-card">
+    <div class="stats-row">
+      <div class="stat-pill"><div class="stat-num" id="statQuestions">100</div><div class="stat-lbl">Questions</div></div>
+      <div class="stat-pill"><div class="stat-num" id="statTopics">7</div><div class="stat-lbl">Topics</div></div>
+      <div class="stat-pill"><div class="stat-num" id="statPerQ">30s</div><div class="stat-lbl" id="statTimeLabel">Per Q</div></div>
+    </div>
+    <h2>⚡ Start Practice Session</h2>
+    <div class="form-group">
+      <label>Your Name</label>
+      <input type="text" id="studentName" placeholder="Enter your name…" autocomplete="off"/>
+    </div>
+    <div class="form-group">
+      <label>Select Subject</label>
+      <select id="subjectSelect"></select>
+      <div class="form-help">Physics is already loaded. You can now add Chemistry, Biology, and more topics from the manager below.</div>
+    </div>
+    <div class="form-group">
+      <label>Select Mode</label>
+      <select id="modeSelect">
+        <option value="practice">⚡ Live Practice Mode</option>
+        <option value="cbt">🖥️ CBT Practice Mode (40 Minutes)</option>
+      </select>
+      <div class="form-help" id="modeHelp">Practice mode uses the selected topic and your saved per-question timer.</div>
+    </div>
+    <div class="form-group" id="topicGroup">
+      <label>Select Topic</label>
+      <select id="topicSelect"></select>
+    </div>
+    <div class="form-group" id="timeGroup">
+      <label>Default Time Per Question (Seconds)</label>
+      <input type="number" id="timePerQuestion" min="5" max="300" step="5" value="30"/>
+      <div class="form-help">This saves on this device and is used whenever you start a quiz.</div>
+    </div>
+    <div class="home-actions">
+      <button class="btn-start" id="startMainBtn" onclick="startSelectedMode()">START QUIZ →</button>
+      <button class="btn-ghost" type="button" onclick="openAdmin()">⚙️ MANAGE QUESTION BANK</button>
+    </div>
+    <div class="sync-strip">
+      <div class="sync-pill local" id="cloudStatusPill">Device Only</div>
+      <div class="sync-note" id="cloudStatusNote">This deployed file is currently using browser storage only. Add cloud sync to make the same question bank appear on every phone.</div>
+    </div>
+    <pre id="cloudDiagnosticsPanel" style="display:none;margin-top:.7rem;padding:.7rem 1rem;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:.7rem;color:#9aa4c4;white-space:pre-wrap;word-break:break-word;text-align:left;max-width:100%;"></pre>
+  </div>
+</div>
+
+<div class="overlay" id="adminPinOverlay">
+  <div class="pin-panel">
+    <div class="pin-head">
+      <div>
+        <div class="admin-kicker">Protected Area</div>
+        <h3>Admin PIN Required</h3>
+        <p>Enter the admin PIN to unlock the question bank manager.</p>
+      </div>
+      <button class="icon-btn" type="button" onclick="closeAdminPin()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Admin PIN</label>
+      <input type="password" id="adminPinInput" placeholder="Enter PIN" autocomplete="off" inputmode="numeric"/>
+      <div class="form-help">Default PIN is <strong>1234</strong>. Change it after unlocking.</div>
+    </div>
+    <div class="pin-msg" id="adminPinMsg"></div>
+    <div class="admin-actions">
+      <button class="btn-mini" type="button" onclick="unlockAdmin()">Unlock Manager</button>
+      <button class="btn-mini alt" type="button" onclick="closeAdminPin()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="adminOverlay">
+  <div class="admin-panel">
+    <div class="admin-head">
+      <div>
+        <div class="admin-kicker">Admin Setup</div>
+        <h3>Question Bank Manager</h3>
+        <p>Add new subjects, add topics under each subject, enter questions manually, or import a JSON bank for Chemistry, Biology, and more.</p>
+      </div>
+      <button class="icon-btn" type="button" onclick="closeAdmin()">✕</button>
+    </div>
+
+    <div class="admin-msg" id="adminMsg"></div>
+    <div class="admin-summary" id="adminSummary"></div>
+
+    <div class="admin-grid">
+      <div class="admin-card">
+        <h4>1) Add Subject</h4>
+        <div class="form-group">
+          <label>Subject Name</label>
+          <input type="text" id="newSubjectLabel" placeholder="e.g. JAMB Chemistry"/>
+        </div>
+        <div class="form-group">
+          <label>Custom Key (Optional)</label>
+          <input type="text" id="newSubjectKey" placeholder="e.g. chemistry"/>
+        </div>
+        <div class="form-group">
+          <label>Tagline (Optional)</label>
+          <input type="text" id="newSubjectTagline" placeholder="e.g. JAMB Chemistry • Live Practice Mode"/>
+        </div>
+        <div class="admin-actions">
+          <button class="btn-mini" type="button" onclick="addSubject()">Add Subject</button>
+        </div>
+        <div class="admin-note">Use this once per subject. Topics and questions can be added after the subject exists.</div>
+      </div>
+
+      <div class="admin-card">
+        <h4>2) Add Topic</h4>
+        <div class="form-group">
+          <label>Subject</label>
+          <select id="adminSubjectForTopic"></select>
+        </div>
+        <div class="form-group">
+          <label>Topic Name</label>
+          <input type="text" id="newTopicName" placeholder="e.g. Atomic Structure"/>
+        </div>
+        <div class="admin-actions">
+          <button class="btn-mini" type="button" onclick="addTopic()">Add Topic</button>
+        </div>
+        <div class="admin-note">Example: add more Physics topics now, then later create Chemistry and Biology topics.</div>
+      </div>
+
+      <div class="admin-card">
+        <h4>3) Change Admin PIN</h4>
+        <div class="form-group">
+          <label>New PIN</label>
+          <input type="password" id="newAdminPin" placeholder="Enter new PIN" autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <label>Confirm New PIN</label>
+          <input type="password" id="confirmAdminPin" placeholder="Confirm new PIN" autocomplete="off"/>
+        </div>
+        <div class="admin-actions">
+          <button class="btn-mini" type="button" onclick="saveAdminPin()">Save PIN</button>
+        </div>
+        <div class="admin-note">Use any simple PIN you can remember. Default PIN is 1234 until you change it.</div>
+      </div>
+
+      <div class="admin-card">
+        <h4>4) Shared Online Bank</h4>
+        <div class="status-card">
+          <div class="sync-pill local" id="adminCloudStatusPill">Device Only</div>
+          <div class="sync-note" id="adminCloudStatusNote">Cloud sync is not active yet. Once you connect Firebase, new imports, topics, and PIN changes will sync to all users of this link.</div>
+        </div>
+        <div class="config-tip">To turn this into a true shared bank, upload a file named <strong>firebase-sync-config.json</strong> beside this HTML on Netlify, then redeploy.</div>
+        <div class="template-box">
+          <pre id="cloudConfigTemplate"></pre>
+        </div>
+      </div>
+
+      <div class="admin-card admin-wide">
+        <h4>5) Add One Question Manually</h4>
+        <div class="admin-row">
+          <div class="form-group">
+            <label>Subject</label>
+            <select id="questionSubject"></select>
+          </div>
+          <div class="form-group">
+            <label>Topic</label>
+            <select id="questionTopic"></select>
+          </div>
+        </div>
+        <div class="admin-row">
+          <div class="form-group">
+            <label>Year / Source</label>
+            <input type="text" id="questionYear" placeholder="e.g. JAMB 2021"/>
+          </div>
+          <div class="form-group">
+            <label>Correct Option</label>
+            <select id="questionCorrect">
+              <option value="0">A</option>
+              <option value="1">B</option>
+              <option value="2">C</option>
+              <option value="3">D</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Question</label>
+          <textarea id="questionText" placeholder="Type the full question here"></textarea>
+        </div>
+        <div class="admin-row-4">
+          <div class="form-group"><label>Option A</label><input type="text" id="optionA" placeholder="Option A"/></div>
+          <div class="form-group"><label>Option B</label><input type="text" id="optionB" placeholder="Option B"/></div>
+          <div class="form-group"><label>Option C</label><input type="text" id="optionC" placeholder="Option C"/></div>
+          <div class="form-group"><label>Option D</label><input type="text" id="optionD" placeholder="Option D"/></div>
+        </div>
+        <div class="form-group">
+          <label>Explanation (Optional)</label>
+          <textarea id="questionExplanation" placeholder="Add a short explanation for the answer"></textarea>
+        </div>
+        <div class="admin-actions">
+          <button class="btn-mini" type="button" onclick="addQuestion()">Save Question</button>
+          <button class="btn-mini alt" type="button" onclick="clearQuestionForm()">Clear Form</button>
+        </div>
+      </div>
+
+      <div class="admin-card admin-wide">
+        <h4>6) Import / Export Question Bank</h4>
+        <div class="form-group">
+          <label>Import JSON File</label>
+          <input class="file-input" type="file" id="importFile" accept=".json,application/json"/>
+        </div>
+        <div class="form-group">
+          <label>Paste JSON</label>
+          <textarea id="importText" placeholder='Paste a full bank here. Example: {"chemistry":{"label":"JAMB Chemistry","topics":["Atomic Structure"],"questions":[{"t":0,"yr":"JAMB 2022","q":"...","o":["A","B","C","D"],"a":1,"exp":"..."}]}}'></textarea>
+        </div>
+        <div class="admin-actions">
+          <button class="btn-mini" type="button" onclick="importBank()">Import / Merge</button>
+          <button class="btn-mini alt" type="button" onclick="exportBank()">Export Current Bank</button>
+          <button class="btn-mini warn" type="button" onclick="resetBank()">Reset To Original Physics Only</button>
+        </div>
+        <div class="admin-note">Imported topics are matched by name. If the subject does not exist yet, it will be created automatically. Changes now save with browser storage plus a cookie fallback for hosts like Netlify/mobile browsers.</div>
+        <div class="template-box">
+          <pre id="jsonTemplate"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="quizScreen">
+  <div class="quiz-inner">
+    <div class="quiz-header">
+      <div class="q-brand" id="quizBrand">Godshand</div>
+      <div class="q-progress-wrap">
+        <div class="q-progress-bar"><div class="q-progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="q-count" id="qCount"></div>
+      </div>
+      <div class="timer-box">⏱ <span class="timer-val" id="timerVal">30</span></div>
+    </div>
+    <div class="topic-badge" id="topicBadge"></div>
+    <div class="question-card">
+      <div class="question-year" id="qYear"></div>
+      <div class="question-text" id="qText"></div>
+    </div>
+    <div class="options-grid" id="optionsGrid"></div>
+    <div class="feedback-box" id="feedbackBox">
+      <span class="fb-icon" id="fbIcon"></span>
+      <div class="fb-main"><div id="fbMain"></div><div id="fbExp" class="fb-exp"></div></div>
+    </div>
+    <div class="quiz-actions-row" id="quizActionsRow">
+      <button class="btn-outline btn-nav" id="btnPrev" type="button" onclick="prevQuestion()">← Previous</button>
+      <button class="btn-next" id="btnNext" type="button" onclick="nextQuestion()">NEXT QUESTION →</button>
+    </div>
+    <button class="btn-submit-quiz" id="btnSubmitQuiz" type="button" onclick="submitQuizEarly()">✅ Submit Test</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="resultsScreen">
+  <div class="results-card">
+    <div class="results-header">
+      <div class="greeting" id="greetEl"></div>
+      <h2>QUIZ COMPLETE!</h2>
+      <div class="score-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle class="bg-c" cx="60" cy="60" r="50" stroke-dasharray="314" stroke-dashoffset="0"/>
+          <circle class="fg-c" id="fgCircle" cx="60" cy="60" r="50" stroke-dasharray="314" stroke-dashoffset="314"/>
+        </svg>
+        <div class="score-center"><div class="score-pct" id="sPct">0%</div><div class="score-lbl">Score</div></div>
+      </div>
+    </div>
+    <div class="results-grid">
+      <div class="res-stat"><div class="res-num g" id="rC">0</div><div class="res-lbl">Correct</div></div>
+      <div class="res-stat"><div class="res-num r" id="rW">0</div><div class="res-lbl">Wrong</div></div>
+      <div class="res-stat"><div class="res-num o" id="rT">0s</div><div class="res-lbl">Time</div></div>
+    </div>
+    <div class="perf-bar"><div class="perf-fill" id="pFill" style="width:0%"></div></div>
+    <div class="btn-row">
+      <button class="btn-outline" onclick="toggleReview()">📋 Review</button>
+      <button class="btn-solid" onclick="goHome()">🔁 Try Again</button>
+    </div>
+    <div class="review-section" id="reviewSec" style="display:none;">
+      <div class="review-title">Answer Review</div>
+      <div id="reviewList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOPICS=["Units & Measurements","Motion","Work, Energy & Power","Heat Energy","Electric Charges","Elastic Properties","Fluids at Rest & in Motion"];
+
+const Q=[
+// ── TOPIC 0: UNITS & MEASUREMENTS (15) ──
+{t:0,yr:"JAMB 2002",q:"Which of the following is a fundamental (base) SI unit?",o:["Newton","Joule","Watt","Kilogram"],a:3,exp:"Kilogram is an SI base unit. Newton, Joule and Watt are all derived units."},
+{t:0,yr:"JAMB 2005",q:"The dimension of pressure is",o:["ML⁻¹T⁻²","MLT⁻²","ML²T⁻²","ML⁻¹T⁻¹"],a:0,exp:"Pressure = Force/Area = MLT⁻²/L² = ML⁻¹T⁻²."},
+{t:0,yr:"JAMB 2008",q:"A micrometer screw gauge has a pitch of 0.5 mm and 50 divisions on its thimble. Its least count is",o:["0.01 mm","0.02 mm","0.05 mm","0.10 mm"],a:0,exp:"Least count = Pitch ÷ Divisions = 0.5 ÷ 50 = 0.01 mm."},
+{t:0,yr:"JAMB 2011",q:"Which of the following pairs are BOTH vector quantities?",o:["Speed and distance","Velocity and displacement","Mass and weight","Force and time"],a:1,exp:"Velocity and displacement both have magnitude and direction — they are vectors."},
+{t:0,yr:"JAMB 2014",q:"The least possible error (least count) in a metre rule is",o:["0.1 cm","0.1 mm","1.0 mm","0.5 mm"],a:3,exp:"A metre rule has smallest division of 1 mm. The least count is half of that = 0.5 mm."},
+{t:0,yr:"JAMB 2016",q:"Which of the following is a DERIVED unit?",o:["Metre","Candela","Newton","Kelvin"],a:2,exp:"Newton (N = kg·m/s²) is derived from base units. Metre, Candela and Kelvin are base SI units."},
+{t:0,yr:"JAMB 2019",q:"The number of significant figures in 0.005060 is",o:["3","4","5","6"],a:1,exp:"Leading zeros are not significant. The digits 5, 0, 6, 0 are significant = 4 significant figures."},
+{t:0,yr:"JAMB 2022",q:"The dimension of impulse is the same as that of",o:["Force","Momentum","Energy","Power"],a:1,exp:"Impulse = Force × time = MLT⁻² × T = MLT⁻¹, same as momentum (mv = MLT⁻¹)."},
+{t:0,yr:"JAMB Past Q",q:"A measuring cylinder reads 25 cm³ before and 37 cm³ after a stone is immersed. The volume of the stone is",o:["12 cm³","62 cm³","25 cm³","37 cm³"],a:0,exp:"Volume = Final − Initial = 37 − 25 = 12 cm³."},
+{t:0,yr:"JAMB Past Q",q:"A Vernier calliper has a least count of 0.1 mm. Main scale reads 12 mm and Vernier reads 3 divisions. The actual reading is",o:["12.3 mm","12.03 mm","1.23 cm","12.30 cm"],a:0,exp:"Reading = 12 + (3 × 0.1) = 12.3 mm."},
+{t:0,yr:"JAMB Past Q",q:"Which of the following is a SCALAR quantity?",o:["Displacement","Momentum","Velocity","Speed"],a:3,exp:"Speed has magnitude only — no direction. Displacement, momentum and velocity are vectors."},
+{t:0,yr:"JAMB Past Q",q:"The SI unit of power is",o:["Joule","Newton","Watt","Pascal"],a:2,exp:"Power = Energy/Time. The SI unit is Watt (W = J/s)."},
+{t:0,yr:"JAMB Past Q",q:"Energy expressed in terms of base SI units is",o:["kg m² s⁻²","kg m s⁻¹","kg m² s⁻¹","kg m s⁻²"],a:0,exp:"Energy (Joule) = Force × Distance = kg·m·s⁻² × m = kg·m²·s⁻²."},
+{t:0,yr:"JAMB Past Q",q:"A micrometer reads 3.50 mm with a zero error of +0.02 mm. The actual diameter is",o:["3.52 mm","3.48 mm","3.70 mm","3.30 mm"],a:1,exp:"Actual = Observed − Zero error = 3.50 − 0.02 = 3.48 mm."},
+{t:0,yr:"JAMB Past Q",q:"Which of the following pairs of quantities has the SAME dimensions?",o:["Work and power","Force and momentum","Energy and work","Pressure and density"],a:2,exp:"Both energy and work have dimensions ML²T⁻². Work is energy transferred, so they are dimensionally identical."},
+// ── TOPIC 1: MOTION (20) ──
+{t:1,yr:"JAMB 2001",q:"A car starts from rest and accelerates uniformly at 2 m/s² for 10 s. Its final velocity is",o:["5 m/s","10 m/s","20 m/s","40 m/s"],a:2,exp:"v = u + at = 0 + 2 × 10 = 20 m/s."},
+{t:1,yr:"JAMB 2003",q:"A body is thrown vertically upward at 20 m/s. The maximum height reached is (g = 10 m/s²)",o:["10 m","20 m","30 m","40 m"],a:1,exp:"v² = u² − 2gh → 0 = 400 − 20h → h = 20 m."},
+{t:1,yr:"JAMB 2006",q:"The distance covered by a body starting from rest with uniform acceleration in the nth second is",o:["u + ½a(2n−1)","½a(2n−1)","u + at","ut + ½at²"],a:1,exp:"For u = 0, distance in nth second = ½a(2n−1)."},
+{t:1,yr:"JAMB 2009",q:"A stone is released from a height of 80 m. Time to hit the ground is (g = 10 m/s²)",o:["2 s","4 s","8 s","16 s"],a:1,exp:"h = ½gt² → 80 = 5t² → t² = 16 → t = 4 s."},
+{t:1,yr:"JAMB 2012",q:"Two forces of 5 N and 12 N act at right angles to each other. Their resultant is",o:["7 N","13 N","17 N","60 N"],a:1,exp:"R = √(5² + 12²) = √169 = 13 N."},
+{t:1,yr:"JAMB 2015",q:"A ball projected horizontally from the top of a tower follows which path?",o:["Circular","Parabolic","Hyperbolic","Straight line"],a:1,exp:"Horizontal projection combines constant horizontal velocity with free-fall — the resulting path is parabolic."},
+{t:1,yr:"JAMB 2017",q:"A car moving at 30 m/s decelerates at 3 m/s². Distance before stopping is",o:["90 m","150 m","300 m","450 m"],a:1,exp:"v² = u² − 2as → 0 = 900 − 6s → s = 150 m."},
+{t:1,yr:"JAMB 2020",q:"The SI unit of angular velocity is",o:["rad/s","m/s","rev/s","deg/s"],a:0,exp:"Angular velocity is measured in radians per second (rad/s)."},
+{t:1,yr:"JAMB 2023",q:"A particle moves in a circle of radius 2 m at constant speed 4 m/s. Its centripetal acceleration is",o:["2 m/s²","4 m/s²","8 m/s²","16 m/s²"],a:2,exp:"a = v²/r = 16/2 = 8 m/s²."},
+{t:1,yr:"JAMB Past Q",q:"A body projected vertically upward at 40 m/s. Maximum height reached is (g = 10 m/s²)",o:["80 m","160 m","40 m","20 m"],a:0,exp:"h = u²/2g = 1600/20 = 80 m."},
+{t:1,yr:"JAMB Past Q",q:"A body accelerates from rest and covers 12.5 m in 5 s. Its acceleration is",o:["1.0 m/s²","2.5 m/s²","0.4 m/s²","5.0 m/s²"],a:0,exp:"s = ½at² → 12.5 = ½a(25) → a = 1.0 m/s²."},
+{t:1,yr:"JAMB Past Q",q:"A particle released from rest falls freely. Distance fallen after 4 s is (g = 10 m/s²)",o:["80 m","20 m","40 m","160 m"],a:0,exp:"s = ½gt² = ½ × 10 × 16 = 80 m."},
+{t:1,yr:"JAMB Past Q",q:"A displacement-time graph is a straight line inclined to the time axis. The object moves with",o:["Uniform acceleration","Uniform velocity","Uniform deceleration","Zero velocity"],a:1,exp:"A straight d-t graph has constant slope = constant velocity."},
+{t:1,yr:"JAMB Past Q",q:"A train with initial velocity 20 m/s decelerates uniformly at 2 m/s². Distance before stopping is",o:["100 m","10 m","200 m","400 m"],a:0,exp:"v² = u² − 2as → 0 = 400 − 4s → s = 100 m."},
+{t:1,yr:"JAMB Past Q",q:"A ball thrown horizontally from a 45 m cliff at 10 m/s. Horizontal distance from base of cliff is (g = 10 m/s²)",o:["20 m","30 m","45 m","50 m"],a:1,exp:"t = √(2h/g) = √9 = 3 s. Horizontal = 10 × 3 = 30 m."},
+{t:1,yr:"JAMB Past Q",q:"A block of weight 20 N on a 30° incline. Component of weight parallel to the incline is",o:["10 N","20 N","17.3 N","5 N"],a:0,exp:"F∥ = W sin 30° = 20 × 0.5 = 10 N."},
+{t:1,yr:"JAMB Past Q",q:"The wheels of a moving car undergo which type of motion?",o:["Rotational and translational","Translational only","Random","Circular only"],a:0,exp:"Wheels rotate about the axle (rotational) while the axle moves forward (translational) — both occur together."},
+{t:1,yr:"JAMB Past Q",q:"An object on a frictionless 30° inclined plane has acceleration (g = 10 m/s²)",o:["5 m/s²","8.66 m/s²","10 m/s²","2.5 m/s²"],a:0,exp:"a = g sin 30° = 10 × 0.5 = 5 m/s²."},
+{t:1,yr:"JAMB Past Q",q:"The physical quantity that describes the stopping distance of a vehicle is",o:["Displacement","Acceleration","Momentum","Velocity"],a:0,exp:"Stopping distance is the distance (with direction) from initial to final position — that is displacement."},
+{t:1,yr:"JAMB Past Q",q:"In which of the following types of motion is a body constantly accelerating?",o:["Uniform circular motion","Uniform rectilinear motion","Uniform translational motion","Rest"],a:0,exp:"In uniform circular motion the direction of velocity continuously changes, so the body is always accelerating (centripetally)."},
+// ── TOPIC 2: WORK, ENERGY & POWER (15) ──
+{t:2,yr:"JAMB 2000",q:"A man of mass 50 kg climbs 10 m in 20 s. His power output is (g = 10 m/s²)",o:["25 W","250 W","500 W","2500 W"],a:1,exp:"P = mgh/t = (50×10×10)/20 = 250 W."},
+{t:2,yr:"JAMB 2004",q:"The energy stored in a stretched spring is called",o:["Kinetic energy","Gravitational potential energy","Elastic potential energy","Mechanical energy"],a:2,exp:"A stretched spring stores elastic potential energy (strain energy)."},
+{t:2,yr:"JAMB 2007",q:"A body of mass 2 kg moving at 5 m/s. Its kinetic energy is",o:["5 J","10 J","25 J","50 J"],a:2,exp:"KE = ½mv² = ½ × 2 × 25 = 25 J."},
+{t:2,yr:"JAMB 2010",q:"A machine has velocity ratio 5 and efficiency 80%. Its mechanical advantage is",o:["2","4","6.25","8"],a:1,exp:"MA = Efficiency × VR = 0.80 × 5 = 4."},
+{t:2,yr:"JAMB 2013",q:"A 10 kg block is raised vertically 2 m. Work done is (g = 10 m/s²)",o:["20 J","50 J","100 J","200 J"],a:3,exp:"W = mgh = 10 × 10 × 2 = 200 J."},
+{t:2,yr:"JAMB 2018",q:"A boy pulls 200 N load with a rope at 30° to horizontal over 10 m. Work done is",o:["1000√3 J","1000 J","2000 J","2000√3 J"],a:0,exp:"W = Fd cosθ = 200 × 10 × cos30° = 2000 × (√3/2) = 1000√3 J ≈ 1732 J."},
+{t:2,yr:"JAMB 2024",q:"Power of a pump lifting 100 kg of water per minute from 10 m deep well is (g = 10 m/s²)",o:["166.7 W","1000 W","10000 W","60000 W"],a:0,exp:"P = mgh/t = (100×10×10)/60 ≈ 166.7 W."},
+{t:2,yr:"JAMB Past Q",q:"A 60 W lamp switched on for 5 hours. Electrical energy consumed is",o:["300 J","1.08 × 10⁶ J","1.08 × 10³ J","3600 J"],a:1,exp:"E = Pt = 60 × 5 × 3600 = 1,080,000 J = 1.08 × 10⁶ J."},
+{t:2,yr:"JAMB Past Q",q:"A car at 50 m/s overcomes frictional resistance of 100 N. Power developed is",o:["0.002 MW","5 kW","2 W","50 kW"],a:1,exp:"P = Fv = 100 × 50 = 5000 W = 5 kW."},
+{t:2,yr:"JAMB Past Q",q:"A body of mass 2 kg is raised to height 5 m. Potential energy gained is (g = 10 m/s²)",o:["10 J","100 J","25 J","50 J"],a:1,exp:"PE = mgh = 2 × 10 × 5 = 100 J."},
+{t:2,yr:"JAMB Past Q",q:"A ball of mass 0.5 kg thrown upward at 20 m/s. Its maximum kinetic energy is",o:["100 J","50 J","200 J","10 J"],a:0,exp:"Max KE = ½mv² = ½ × 0.5 × 400 = 100 J (at point of projection)."},
+{t:2,yr:"JAMB Past Q",q:"A 5 kg body released from rest at 10 m height. Kinetic energy just before hitting ground is (g = 10 m/s²)",o:["500 J","50 J","5 J","250 J"],a:0,exp:"KE = mgh = 5 × 10 × 10 = 500 J (by energy conservation)."},
+{t:2,yr:"JAMB Past Q",q:"An electric motor lifts 50 kg to height 30 m in 10 s. Motor power is (g = 10 m/s²)",o:["15 kW","1.5 kW","150 W","150 kW"],a:1,exp:"P = mgh/t = (50×10×30)/10 = 1500 W = 1.5 kW."},
+{t:2,yr:"JAMB Past Q",q:"A waterfall 42 m high. Rise in water temperature at the bottom is approximately (c = 4200 J/kgK, g = 10 m/s²)",o:["0.1°C","42°C","1°C","4.2°C"],a:0,exp:"mgh = mcΔT → ΔT = gh/c = (10×42)/4200 = 0.1°C."},
+{t:2,yr:"JAMB Past Q",q:"Which of the following is NOT a form of energy?",o:["Heat","Light","Work","Sound"],a:2,exp:"Work is a process of energy transfer, NOT a stored form of energy. Heat, light and sound are forms of energy."},
+// ── TOPIC 3: HEAT ENERGY (15) ──
+{t:3,yr:"JAMB 2001",q:"Specific heat capacity is the quantity of heat required to",o:["Raise temperature of 1 kg by 1 K","Change 1 kg to vapour","Melt 1 kg of solid","Raise 1 g by 1°C"],a:0,exp:"Specific heat capacity c = heat needed to raise 1 kg of the substance by 1 Kelvin."},
+{t:3,yr:"JAMB 2006",q:"Latent heat of fusion of ice is 336 J/g. Energy to melt 5 g of ice is",o:["67.2 J","336 J","1680 J","3360 J"],a:2,exp:"Q = mL = 5 × 336 = 1680 J."},
+{t:3,yr:"JAMB 2009",q:"Which of the following is a good conductor of heat?",o:["Wood","Rubber","Copper","Air"],a:2,exp:"Copper is a metal with free electrons that readily transfer thermal energy."},
+{t:3,yr:"JAMB 2012",q:"Heat transfer in fluids is mainly by",o:["Conduction","Convection","Radiation","Expansion"],a:1,exp:"In fluids, heated portions rise and cooler portions sink — this bulk movement is convection."},
+{t:3,yr:"JAMB 2015",q:"The temperature at which the Fahrenheit reading is twice the Celsius reading is",o:["160°C","100°C","40°C","20°C"],a:0,exp:"F = 2C and F = 9C/5 + 32 → 2C = 9C/5 + 32 → C = 160°C."},
+{t:3,yr:"JAMB 2018",q:"A black body radiates 1000 W at 27°C (300 K). Its radiation rate at 327°C (600 K) is",o:["2000 W","4000 W","8000 W","16000 W"],a:3,exp:"Stefan's law: P ∝ T⁴. P₂ = P₁(T₂/T₁)⁴ = 1000×(600/300)⁴ = 1000×16 = 16000 W."},
+{t:3,yr:"JAMB 2021",q:"Heat to raise 2 kg water from 30°C to 50°C is (c = 4200 J/kgK)",o:["84 kJ","168 kJ","252 kJ","336 kJ"],a:1,exp:"Q = mcΔT = 2 × 4200 × 20 = 168,000 J = 168 kJ."},
+{t:3,yr:"JAMB Past Q",q:"Steam at 100°C causes more severe burns than boiling water at 100°C because",o:["Steam has higher temperature","Steam releases extra latent heat as it condenses","Steam is a better conductor","Steam is at higher pressure"],a:1,exp:"Steam releases an additional ~2260 J/g of latent heat of vaporisation when it condenses on skin."},
+{t:3,yr:"JAMB Past Q",q:"50 g of water at 20°C is mixed with 200 g of water at 80°C. The final temperature is",o:["68°C","40°C","56°C","75°C"],a:0,exp:"200(80−T) = 50(T−20) → 16000−200T = 50T−1000 → T = 68°C."},
+{t:3,yr:"JAMB Past Q",q:"Water at 20°C is mixed with water at 70°C to give final temp 40°C. Ratio of hot:cold mass is",o:["2:3","3:2","2:5","5:2"],a:0,exp:"mₕ(70−40) = m꜀(40−20) → 30mₕ = 20m꜀ → mₕ:m꜀ = 2:3."},
+{t:3,yr:"JAMB Past Q",q:"Which method of heat transfer does NOT require a material medium?",o:["Conduction","Convection","Radiation","Insulation"],a:2,exp:"Radiation is electromagnetic wave transfer and can travel through vacuum. Conduction and convection need matter."},
+{t:3,yr:"JAMB Past Q",q:"Cubic expansivity of a metal is 3.6×10⁻⁵ K⁻¹. Its superficial (area) expansivity is",o:["1.2×10⁻⁵ K⁻¹","2.4×10⁻⁵ K⁻¹","3.6×10⁻⁵ K⁻¹","4.8×10⁻⁵ K⁻¹"],a:1,exp:"Superficial expansivity = ⅔ × Cubic = ⅔ × 3.6×10⁻⁵ = 2.4×10⁻⁵ K⁻¹."},
+{t:3,yr:"JAMB Past Q",q:"The Fahrenheit equivalent of 35°C is",o:["63°F","32°F","95°F","75°F"],a:2,exp:"F = (9/5)C + 32 = 63 + 32 = 95°F."},
+{t:3,yr:"JAMB Past Q",q:"A 28 W heater raises temperature of 1 kg liquid by 10°C in 5 minutes. Specific heat capacity of liquid is",o:["840 J/kgK","1400 J/kgK","4200 J/kgK","2800 J/kgK"],a:0,exp:"Q = Pt = 28×300 = 8400 J. c = Q/(mΔT) = 8400/10 = 840 J/kgK."},
+{t:3,yr:"JAMB Past Q",q:"Vapour over a liquid in a closed container is saturated when",o:["Rate of condensation equals rate of vaporisation","Neither condensation nor vaporisation occurs","Condensation rate is less than vaporisation rate","Condensation rate exceeds vaporisation rate"],a:0,exp:"Saturated vapour is in dynamic equilibrium: rate of evaporation = rate of condensation."},
+// ── TOPIC 4: ELECTRIC CHARGES (15) ──
+{t:4,yr:"JAMB 2000",q:"A positive rod near a neutral electroscope causes the leaves to diverge because",o:["Electrons move from leaves to the rod","Protons move to the leaves","The rod attracts positive charges","Charge induction occurs on the electroscope"],a:3,exp:"The rod induces opposite charges on the cap and like charges on the leaves by induction, causing divergence."},
+{t:4,yr:"JAMB 2004",q:"The SI unit of electric charge is",o:["Ampere","Volt","Coulomb","Ohm"],a:2,exp:"The unit of charge is the Coulomb (C). Q = It."},
+{t:4,yr:"JAMB 2007",q:"Charges +2 μC and −4 μC are 0.1 m apart. Force between them is (k = 9×10⁹ Nm²/C²)",o:["7.2 N attractive","7.2 N repulsive","3.6 N attractive","3.6 N repulsive"],a:0,exp:"F = kq₁q₂/r² = (9×10⁹×2×10⁻⁶×4×10⁻⁶)/(0.01) = 7.2 N. Opposite charges → attractive."},
+{t:4,yr:"JAMB 2010",q:"A 5 μF capacitor charged to 100 V. Energy stored is",o:["0.025 J","0.05 J","0.5 J","2.5 J"],a:0,exp:"E = ½CV² = ½ × 5×10⁻⁶ × 10000 = 0.025 J."},
+{t:4,yr:"JAMB 2013",q:"Lightning conductors work on the principle of",o:["Corona discharge only","Earthing only","Electrostatic shielding","Both corona discharge and earthing"],a:3,exp:"Lightning conductors use corona discharge (sharp tip leaks charge) AND earthing to safely neutralise clouds."},
+{t:4,yr:"JAMB 2016",q:"Capacitors 2 μF, 4 μF and 6 μF connected in series. Equivalent capacitance is",o:["12 μF","1.09 μF","2 μF","6 μF"],a:1,exp:"1/C = 1/2 + 1/4 + 1/6 = 11/12 → C = 12/11 ≈ 1.09 μF."},
+{t:4,yr:"JAMB 2019",q:"Electric field intensity at 0.3 m from a 1 nC charge is (k = 9×10⁹ Nm²/C²)",o:["100 N/C","300 N/C","1000 N/C","3000 N/C"],a:0,exp:"E = kq/r² = (9×10⁹×10⁻⁹)/(0.09) = 9/0.09 = 100 N/C."},
+{t:4,yr:"JAMB 2022",q:"A gold leaf electroscope can be used to detect",o:["Charge only","Charge and type of charge","Charge and its magnitude","Magnitude only"],a:1,exp:"The electroscope detects whether charge is present AND identifies its type (positive or negative)."},
+{t:4,yr:"JAMB Past Q",q:"Work done in moving a charge of 4 C through a potential difference of 5 V is",o:["20 J","0.8 J","1.25 J","4 J"],a:0,exp:"W = QV = 4 × 5 = 20 J."},
+{t:4,yr:"JAMB Past Q",q:"A 15 μF capacitor connected to a 100 V battery. Energy stored is",o:["0.075 J","0.15 J","7.5 J","0.0075 J"],a:0,exp:"E = ½CV² = ½ × 15×10⁻⁶ × 10000 = 0.075 J."},
+{t:4,yr:"JAMB Past Q",q:"Two identical +3 μC charges are 0.2 m apart. Force of repulsion is (k = 9×10⁹ Nm²/C²)",o:["2.025 N","20.25 N","0.2025 N","202.5 N"],a:0,exp:"F = kq²/r² = (9×10⁹×9×10⁻¹²)/0.04 = 81×10⁻³/0.04 = 2.025 N."},
+{t:4,yr:"JAMB Past Q",q:"Electric potential at 0.5 m from a charge of 2×10⁻⁸ C is (k = 9×10⁹ Nm²/C²)",o:["360 V","36 V","3600 V","0.36 V"],a:0,exp:"V = kq/r = (9×10⁹×2×10⁻⁸)/0.5 = 360 V."},
+{t:4,yr:"JAMB Past Q",q:"Coulomb's law states that force between two charges is",o:["Proportional to product of charges and inversely proportional to square of distance","Proportional to the distance between them","Inversely proportional to product of charges","Independent of the medium"],a:0,exp:"F = kq₁q₂/r² — proportional to product of charges, inversely proportional to r²."},
+{t:4,yr:"JAMB Past Q",q:"A conductor charged by induction acquires a charge that is",o:["Same type as the inducing charge","Opposite to the inducing charge","Zero","Greater than the inducing charge"],a:1,exp:"Induction leaves the conductor with the opposite type of charge to the inducing body."},
+{t:4,yr:"JAMB Past Q",q:"A parallel plate capacitor has area 0.01 m² and separation 0.001 m. Capacitance in air is approximately (ε₀ = 8.85×10⁻¹² F/m)",o:["88.5 pF","8.85 pF","885 pF","0.885 pF"],a:0,exp:"C = ε₀A/d = (8.85×10⁻¹²×0.01)/0.001 = 88.5×10⁻¹² F = 88.5 pF."},
+// ── TOPIC 5: ELASTIC PROPERTIES (10) ──
+{t:5,yr:"JAMB 2005",q:"Hooke's law states that extension is directly proportional to the applied force provided",o:["The elastic limit is not exceeded","The material is ductile","The temperature is constant","The cross-section is uniform"],a:0,exp:"Hooke's law holds only within the elastic limit. Beyond it, permanent deformation occurs."},
+{t:5,yr:"JAMB 2008",q:"A spring of force constant 200 N/m extends by 0.05 m. Work done in stretching it is",o:["0.25 J","0.5 J","5 J","10 J"],a:0,exp:"W = ½ke² = ½ × 200 × (0.05)² = 0.25 J."},
+{t:5,yr:"JAMB 2011",q:"A wire with Young's modulus 2×10¹¹ N/m², length 2 m, area 1×10⁻⁶ m². Force for 0.1 mm extension is",o:["10 N","20 N","100 N","200 N"],a:0,exp:"F = YAΔl/L = (2×10¹¹×10⁻⁶×10⁻⁴)/2 = 10 N."},
+{t:5,yr:"JAMB 2014",q:"Steel wire length 1.5 m, diameter 0.5 mm extends 1.2 mm under 50 N. Stress on the wire is",o:["2.55×10⁸ N/m²","1.27×10⁸ N/m²","2.55×10⁷ N/m²","1.27×10⁷ N/m²"],a:0,exp:"Area = π(0.25×10⁻³)² ≈ 1.96×10⁻⁷ m². Stress = 50/1.96×10⁻⁷ ≈ 2.55×10⁸ N/m²."},
+{t:5,yr:"JAMB 2017",q:"A material is said to be elastic if it",o:["Regains its original shape after deformation","Breaks under a small force","Does not stretch at all","Has a very large Young's modulus"],a:0,exp:"Elasticity is the ability to return to original shape and size after the deforming force is removed."},
+{t:5,yr:"JAMB Past Q",q:"Steel wire 2 m long, area 1 mm², Young's modulus 2×10¹¹ N/m². Extension under 200 N load is",o:["0.5 mm","2 mm","10 mm","1 mm"],a:1,exp:"ΔL = FL/(AY) = (200×2)/(10⁻⁶×2×10¹¹) = 400/2×10⁵ = 2×10⁻³ m = 2 mm."},
+{t:5,yr:"JAMB Past Q",q:"The slope of a stress-strain graph for a material represents",o:["Surface tension","Elasticity","Viscosity","Young's modulus"],a:3,exp:"Young's modulus = Stress/Strain, so the gradient of the stress-strain graph gives Young's modulus."},
+{t:5,yr:"JAMB Past Q",q:"A force of 4 N stretches a wire by 0.08 m. By Hooke's law, force to stretch it 0.32 m is",o:["16 N","1 N","20 N","8 N"],a:0,exp:"F ∝ e → F₂ = F₁×(e₂/e₁) = 4×(0.32/0.08) = 16 N."},
+{t:5,yr:"JAMB Past Q",q:"Among these materials, which has the HIGHEST elasticity (best recovery)?",o:["Rubber","Glass","Steel","Copper"],a:2,exp:"Steel has the highest Young's modulus and recovers most perfectly — it is the most elastic in the scientific sense."},
+{t:5,yr:"JAMB Past Q",q:"A wire extends 0.4 mm under 100 N. Same material, twice the length and twice the diameter. Extension under same force is",o:["0.2 mm","0.4 mm","0.8 mm","1.6 mm"],a:0,exp:"ΔL = FL/(AY). New: L'=2L, A'=4A. ΔL' = F(2L)/(4AY) = ½(FL/AY) = 0.2 mm."},
+{t:5,yr:"JAMB Past Q",q:"The area under a force-extension graph for a spring represents",o:["The spring constant","The elastic potential energy stored","The Young's modulus","The stress on the spring"],a:1,exp:"Work done = elastic potential energy = area under force-extension graph = ½Fe = ½ke²."},
+// ── TOPIC 6: FLUIDS AT REST & IN MOTION (10) ──
+{t:6,yr:"JAMB 2002",q:"A body of density 800 kg/m³ placed in water (1000 kg/m³). It will",o:["Sink completely","Float fully immersed","Float partially above the surface","Dissolve"],a:2,exp:"Body density < water density → it floats, partially immersed, until upthrust balances weight."},
+{t:6,yr:"JAMB 2006",q:"Pressure at depth 10 m in water is (g = 10 m/s², ρ = 1000 kg/m³)",o:["1×10⁴ Pa","1×10⁵ Pa","2×10⁵ Pa","1×10⁶ Pa"],a:1,exp:"P = ρgh = 1000×10×10 = 10⁵ Pa."},
+{t:6,yr:"JAMB 2010",q:"U-tube: oil height 10 cm, mercury level diff 0.8 cm, ρ_mercury = 13600 kg/m³. Density of oil is",o:["1088 kg/m³","1360 kg/m³","1700 kg/m³","10880 kg/m³"],a:0,exp:"Pressure balance: ρ_oil × 10 = 13600 × 0.8 → ρ_oil = 1088 kg/m³."},
+{t:6,yr:"JAMB 2013",q:"The hydraulic press operates based on",o:["Pascal's law","Archimedes' principle","Bernoulli's theorem","Hooke's law"],a:0,exp:"Pascal's law: pressure applied to an enclosed fluid is transmitted equally in all directions."},
+{t:6,yr:"JAMB Past Q",q:"A hydrometer is an instrument for measuring",o:["Relative density of a liquid","Humidity","Atmospheric pressure","Temperature"],a:0,exp:"A hydrometer floats at different depths in different liquids, giving the relative density from its scale."},
+{t:6,yr:"JAMB Past Q",q:"An object weighing 50 N in air displaces 3.7 kg of water when partially immersed. Upthrust is (g = 10 m/s²)",o:["37 N","87 N","13 N","8.7 N"],a:0,exp:"Upthrust = weight of displaced fluid = 3.7 × 10 = 37 N."},
+{t:6,yr:"JAMB Past Q",q:"Pressure at bottom of a lake 20 m deep is (ρ=1000 kg/m³, g=10 m/s², P_atm=10⁵ Pa)",o:["3×10⁵ Pa","2×10⁵ Pa","1.5×10⁵ Pa","10⁵ Pa"],a:0,exp:"P = P_atm + ρgh = 10⁵ + (1000×10×20) = 10⁵ + 2×10⁵ = 3×10⁵ Pa."},
+{t:6,yr:"JAMB Past Q",q:"Archimedes' principle states that a body immersed in a fluid experiences an upthrust equal to",o:["Weight of the fluid displaced","Pressure at the depth of immersion","Weight of the body","Volume of the fluid"],a:0,exp:"Upthrust = Weight of fluid displaced = ρ_fluid × V_displaced × g."},
+{t:6,yr:"JAMB Past Q",q:"Cork floats in water because",o:["Upthrust when fully immersed exceeds its weight","Water surface acts like an elastic skin","Upthrust equals its weight in air","There is no upthrust on it"],a:0,exp:"Cork density < water density. When fully immersed, upthrust > weight, so it rises until partially submerged."},
+{t:6,yr:"JAMB Past Q",q:"Relative density of paraffin is 0.8. Bottle mass: 20 g empty, 70 g full of paraffin. Mass of water filling same bottle is",o:["40 g","62.5 g","50 g","80 g"],a:1,exp:"Mass of paraffin = 70−20 = 50 g. RD = 50/m_water = 0.8 → m_water = 62.5 g."}
+];
+
+const BASE_SUBJECT_BANK={
+  physics:{
+    label:"JAMB Physics",
+    tagline:"JAMB Physics • Live Practice Mode",
+    topics:TOPICS,
+    questions:Q
+  }
+};
+
+const REMOTE_SYNC_INLINE={
+  enabled:false,
+  provider:'firebase-firestore',
+  configUrl:'./firebase-sync-config.json',
+  firebaseConfig:{
+    apiKey:'PASTE_YOUR_FIREBASE_API_KEY',
+    authDomain:'your-project-id.firebaseapp.com',
+    projectId:'your-project-id',
+    storageBucket:'your-project-id.appspot.com',
+    messagingSenderId:'PASTE_YOUR_SENDER_ID',
+    appId:'PASTE_YOUR_APP_ID'
+  },
+  collection:'quizApps',
+  documentId:'godshand-main-bank'
+};
+
+
+// ─── STATE ───
+const STORAGE_KEY_BANK='godshandQuizQuestionBankV2';
+const ADMIN_PIN_KEY='godshandQuizAdminPinV1';
+let ACTIVE_REMOTE_SYNC=null;
+let cloudFns=null;
+let cloudSaveTimer=null;
+const CLOUD_STATE={enabled:false,ready:false,mode:'local',note:'',error:'',docRef:null,unsubscribe:null,pinOverride:null,lastUpdatedAt:''};
+let SUBJECT_BANK=loadSubjectBank();
+let pool=[],idx=0,correct=0,missed=[];
+let qTimer=null,sessTimer=null,timeLeft=30,elapsed=0;
+let name='Student';
+let currentSubjectKey=getInitialSubjectKey();
+let currentSubject=SUBJECT_BANK[currentSubjectKey];
+let timePerQuestion=30;
+let adminUnlocked=false;
+let quizMode='practice';
+let userAnswers=[];
+const CBT_TOTAL_SECONDS=40*60;
+const CBT_QUESTION_LIMIT=40;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function col(p){return p>=70?'#27AE60':p>=50?'#F5A623':'#C0392B';}
+function fmt(s){const m=Math.floor(s/60),r=s%60;return m?`${m}m ${r}s`:`${r}s`;}
+function formatCountdown(seconds){const total=Math.max(0,seconds);const m=Math.floor(total/60);const s=total%60;return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
+function clamp(v,min,max){return Math.min(max,Math.max(min,v));}
+function optionLetters(count){return Array.from({length:count},(_,i)=>String.fromCharCode(65+i));}
+function deepClone(obj){return JSON.parse(JSON.stringify(obj));}
+function getCookieValue(key){
+  try{
+    const name=encodeURIComponent(key)+'=';
+    const parts=document.cookie?document.cookie.split(';'):[];
+    for(const part of parts){
+      const item=part.trim();
+      if(item.startsWith(name)) return decodeURIComponent(item.slice(name.length));
+    }
+  }catch(e){}
+  return null;
+}
+function setCookieValue(key,value){
+  try{
+    document.cookie=`${encodeURIComponent(key)}=${encodeURIComponent(value)}; path=/; max-age=31536000; SameSite=Lax`;
+  }catch(e){}
+}
+function removeCookieValue(key){
+  try{
+    document.cookie=`${encodeURIComponent(key)}=; path=/; max-age=0; SameSite=Lax`;
+  }catch(e){}
+}
+function safeStorageGet(key){
+  try{
+    const value=localStorage.getItem(key);
+    if(value!==null) return value;
+  }catch(e){}
+  return getCookieValue(key);
+}
+function safeStorageSet(key,value){
+  try{localStorage.setItem(key,value);}catch(e){}
+  setCookieValue(key,value);
+}
+function safeStorageRemove(key){
+  try{localStorage.removeItem(key);}catch(e){}
+  removeCookieValue(key);
+}
+function getAdminPin(){return CLOUD_STATE.pinOverride || safeStorageGet(ADMIN_PIN_KEY) || '1234';}
+function showAdminPinMsg(message,type='err'){
+  const el=document.getElementById('adminPinMsg');
+  if(!el) return;
+  el.textContent=message;
+  el.className=`pin-msg ${type} show`;
+}
+function clearAdminPinMsg(){
+  const el=document.getElementById('adminPinMsg');
+  if(!el) return;
+  el.textContent='';
+  el.className='pin-msg';
+}
+function slugify(value){return String(value||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'subject';}
+function getInitialSubjectKey(){return Object.keys(SUBJECT_BANK)[0]||'physics';}
+function getSavedTime(){
+  const raw=parseInt(safeStorageGet('quizDefaultTime')||'30',10);
+  return Number.isFinite(raw)?clamp(raw,5,300):30;
+}
+function getBaseBank(){return deepClone(BASE_SUBJECT_BANK);}
+
+function normalizeQuestion(raw){
+  if(!raw || typeof raw!=='object') return null;
+  const optionsSource=Array.isArray(raw.o) ? raw.o : (Array.isArray(raw.options) ? raw.options : []);
+  const options=optionsSource.map(x=>String(x??'').trim()).filter(Boolean);
+  const prompt=String(raw.q || raw.question || '').trim();
+  let answerRaw=(raw.a ?? raw.answer ?? raw.correct ?? raw.correctOption ?? raw.correct_answer);
+  let answer=Number(answerRaw);
+  if(!Number.isFinite(answer)){
+    const answerText=String(answerRaw ?? '').trim();
+    const letterIndex='ABCD'.indexOf(answerText.toUpperCase());
+    if(letterIndex>-1){
+      answer=letterIndex;
+    }else if(answerText){
+      const optionMatch=options.findIndex(opt=>opt.toLowerCase()===answerText.toLowerCase());
+      answer=optionMatch;
+    }
+  }
+  if(!prompt || options.length<2 || !Number.isFinite(answer) || answer<0 || answer>=options.length) return null;
+  const topicIndexRaw=Number(raw.t ?? raw.topicIndex ?? raw.topic_index ?? 0);
+  const topicIndex=Number.isFinite(topicIndexRaw) && topicIndexRaw>=0 ? Math.floor(topicIndexRaw) : 0;
+  return {
+    t:topicIndex,
+    yr:String(raw.yr || raw.year || raw.source || 'Custom').trim() || 'Custom',
+    q:prompt,
+    o:options,
+    a:answer,
+    exp:String(raw.exp || raw.explanation || raw.reason || '').trim()
+  };
+}
+
+function normalizeSubject(key,subject){
+  if(!subject || typeof subject!=='object') return null;
+  const label=String(subject.label||subject.name||key||'Untitled Subject').trim();
+  const topics=Array.isArray(subject.topics)?subject.topics.map(x=>String(x??'').trim()).filter(Boolean):[];
+  const questions=Array.isArray(subject.questions)?subject.questions.map(normalizeQuestion).filter(Boolean):[];
+  const maxTopicIndex=questions.reduce((max,q)=>Math.max(max,q.t),-1);
+  while(topics.length<=maxTopicIndex){
+    topics.push(`Topic ${topics.length+1}`);
+  }
+  return {
+    label,
+    tagline:String(subject.tagline||`${label} • Live Practice Mode`).trim(),
+    topics,
+    questions
+  };
+}
+
+function normalizeBank(raw,fallbackBank=null){
+  const candidate=(raw && raw.subjects && typeof raw.subjects==='object') ? raw.subjects : raw;
+  const bank={};
+  if(candidate && typeof candidate==='object'){
+    Object.entries(candidate).forEach(([key,subject])=>{
+      const cleanKey=slugify(key || subject?.label || subject?.name || 'subject');
+      const normalized=normalizeSubject(cleanKey,subject);
+      if(normalized) bank[cleanKey]=normalized;
+    });
+  }
+  if(Object.keys(bank).length) return bank;
+  return fallbackBank ? deepClone(fallbackBank) : {};
+}
+
+function loadSubjectBank(){
+  const fallback=getBaseBank();
+  const saved=safeStorageGet(STORAGE_KEY_BANK);
+  if(!saved) return fallback;
+  try{
+    return normalizeBank(JSON.parse(saved), fallback);
+  }catch(e){
+    return fallback;
+  }
+}
+
+function persistSubjectBank(){
+  safeStorageSet(STORAGE_KEY_BANK, JSON.stringify(SUBJECT_BANK));
+  queueCloudSave('question-bank-updated');
+}
+
+function localTimeLabel(isoString){
+  if(!isoString) return '';
+  const date=new Date(isoString);
+  if(Number.isNaN(date.getTime())) return '';
+  return date.toLocaleString();
+}
+
+function hasRealConfigValue(value){
+  const text=String(value ?? '').trim();
+  return !!text && !/PASTE_YOUR|your-project-id|xxxxx|example/i.test(text);
+}
+
+async function resolveRemoteSyncConfig(){
+  const merged=deepClone(REMOTE_SYNC_INLINE);
+  const fileUrl=REMOTE_SYNC_INLINE.configUrl || './firebase-sync-config.json';
+  console.log('[CloudSync] Fetching config from:', fileUrl);
+  try{
+    const res=await fetch(fileUrl,{cache:'no-store'});
+    console.log('[CloudSync] Config fetch status:', res.status, res.statusText);
+    if(res.ok){
+      const fileConfig=await res.json();
+      console.log('[CloudSync] Config loaded successfully. enabled:', fileConfig?.enabled, 'collection:', fileConfig?.collection, 'documentId:', fileConfig?.documentId);
+      Object.assign(merged,fileConfig||{});
+      merged.firebaseConfig={...(REMOTE_SYNC_INLINE.firebaseConfig||{}),...((fileConfig||{}).firebaseConfig||{})};
+    }else{
+      console.warn('[CloudSync] Config file not found or returned error:', res.status, '- falling back to inline config');
+    }
+  }catch(error){
+    console.error('[CloudSync] Failed to fetch config file:', error?.message || error);
+  }
+  return merged;
+}
+
+function isRemoteSyncConfigured(config){
+  return !!(config && config.enabled===true && hasRealConfigValue(config.collection) && hasRealConfigValue(config.documentId) && config.firebaseConfig && ['apiKey','authDomain','projectId','appId'].every(key=>hasRealConfigValue(config.firebaseConfig[key])));
+}
+
+function renderCloudConfigTemplate(){
+  const pre=document.getElementById('cloudConfigTemplate');
+  if(!pre) return;
+  const example={
+    enabled:true,
+    provider:'firebase-firestore',
+    firebaseConfig:{
+      apiKey:'PASTE_YOUR_FIREBASE_API_KEY',
+      authDomain:'your-project-id.firebaseapp.com',
+      projectId:'your-project-id',
+      storageBucket:'your-project-id.appspot.com',
+      messagingSenderId:'PASTE_YOUR_SENDER_ID',
+      appId:'PASTE_YOUR_APP_ID'
+    },
+    collection:'quizApps',
+    documentId:'godshand-main-bank'
+  };
+  pre.textContent='Create firebase-sync-config.json with this shape:\n' + JSON.stringify(example,null,2);
+}
+
+function applyCloudStatus(mode,note){
+  CLOUD_STATE.mode=mode || CLOUD_STATE.mode || 'local';
+  if(typeof note==='string') CLOUD_STATE.note=note;
+  const defs={
+    local:{label:'Device Only',note:'This deployed file is currently using browser storage only. Add firebase-sync-config.json to make the same question bank appear on every phone.'},
+    connecting:{label:'Connecting',note:'Trying to connect to the shared online question bank...'},
+    syncing:{label:'Syncing',note:'Saving the latest changes to the shared online bank...'},
+    cloud:{label:'Shared Online',note:'This app is connected to a shared online bank. Changes made by the admin will be available to everyone using this link.'},
+    error:{label:'Cloud Error',note:'Cloud sync could not start. The app has fallen back to device storage only.'}
+  };
+  const def=defs[CLOUD_STATE.mode] || defs.local;
+  const noteText=(typeof note==='string' && note) ? note : (CLOUD_STATE.error ? `${def.note} ${CLOUD_STATE.error}` : def.note);
+  ['cloudStatusPill','adminCloudStatusPill'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.className=`sync-pill ${CLOUD_STATE.mode}`;
+    el.textContent=def.label;
+  });
+  ['cloudStatusNote','adminCloudStatusNote'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    let extra='';
+    if(CLOUD_STATE.lastUpdatedAt && CLOUD_STATE.mode==='cloud'){
+      extra=` Last sync: ${localTimeLabel(CLOUD_STATE.lastUpdatedAt)}.`;
+    }
+    el.textContent=noteText + extra;
+  });
+}
+
+function queueCloudSave(reason='bank-update'){
+  if(!CLOUD_STATE.ready) return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer=setTimeout(()=>{
+    writeRemoteSnapshot(reason);
+  },500);
+}
+
+async function writeRemoteSnapshot(reason='bank-update'){
+  if(!CLOUD_STATE.ready || !cloudFns || !CLOUD_STATE.docRef) return false;
+  try{
+    applyCloudStatus('syncing');
+    const payload={
+      bank:{subjects:SUBJECT_BANK},
+      adminPin:getAdminPin(),
+      meta:{
+        updatedAt:new Date().toISOString(),
+        reason
+      }
+    };
+    await cloudFns.setDoc(CLOUD_STATE.docRef,payload,{merge:true});
+    CLOUD_STATE.lastUpdatedAt=payload.meta.updatedAt;
+    CLOUD_STATE.error='';
+    console.log('[CloudSync] Write succeeded. Reason:', reason);
+    applyCloudStatus('cloud');
+    updateDiagnosticsPanel();
+    return true;
+  }catch(error){
+    CLOUD_STATE.error=error?.message || 'Unable to save to Firebase.';
+    console.error('[CloudSync] Write failed:', CLOUD_STATE.error);
+    applyCloudStatus('error', 'Firestore write failed: ' + CLOUD_STATE.error);
+    updateDiagnosticsPanel();
+    return false;
+  }
+}
+
+function refreshUiFromBank(preferredSubjectKey=null){
+  if(preferredSubjectKey && SUBJECT_BANK[preferredSubjectKey]){
+    setCurrentSubject(preferredSubjectKey);
+  }else{
+    setCurrentSubject(currentSubjectKey);
+  }
+  buildSubjectSelect();
+  updateTopicSelect();
+  syncAdminSelectors();
+  renderAdminSummary();
+  updateHomeStats();
+}
+
+function applyRemotePayload(data,source='remote'){
+  if(!data || typeof data!=='object') return;
+  if(data.adminPin){
+    CLOUD_STATE.pinOverride=String(data.adminPin);
+    safeStorageSet(ADMIN_PIN_KEY, CLOUD_STATE.pinOverride);
+  }
+  if(data.bank){
+    SUBJECT_BANK=normalizeBank(data.bank, SUBJECT_BANK);
+    safeStorageSet(STORAGE_KEY_BANK, JSON.stringify(SUBJECT_BANK));
+    refreshUiFromBank(currentSubjectKey);
+  }
+  const stamp=data?.meta?.updatedAt;
+  if(stamp) CLOUD_STATE.lastUpdatedAt=stamp;
+  if(source==='remote') applyCloudStatus('cloud');
+}
+
+async function initRemoteSync(){
+  renderCloudConfigTemplate();
+  console.log('[CloudSync] Starting remote sync initialization...');
+  ACTIVE_REMOTE_SYNC=await resolveRemoteSyncConfig();
+
+  if(!isRemoteSyncConfigured(ACTIVE_REMOTE_SYNC)){
+    console.warn('[CloudSync] Config not valid or not enabled. enabled:', ACTIVE_REMOTE_SYNC?.enabled,
+      'collection:', ACTIVE_REMOTE_SYNC?.collection, 'documentId:', ACTIVE_REMOTE_SYNC?.documentId,
+      'hasApiKey:', hasRealConfigValue(ACTIVE_REMOTE_SYNC?.firebaseConfig?.apiKey),
+      'hasProjectId:', hasRealConfigValue(ACTIVE_REMOTE_SYNC?.firebaseConfig?.projectId));
+    applyCloudStatus('local','Config file loaded but sync is not enabled or config values are incomplete. Check firebase-sync-config.json.');
+    updateDiagnosticsPanel();
+    return;
+  }
+
+  try{
+    applyCloudStatus('connecting');
+    console.log('[CloudSync] Loading Firebase SDK modules...');
+    const appMod=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    const storeMod=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    console.log('[CloudSync] Firebase SDK loaded. Initializing app for project:', ACTIVE_REMOTE_SYNC.firebaseConfig.projectId);
+    const firebaseApp=appMod.initializeApp(ACTIVE_REMOTE_SYNC.firebaseConfig, `godshand-shared-${ACTIVE_REMOTE_SYNC.documentId}`);
+    const db=storeMod.getFirestore(firebaseApp);
+    cloudFns={
+      getDoc:storeMod.getDoc,
+      setDoc:storeMod.setDoc,
+      onSnapshot:storeMod.onSnapshot
+    };
+    CLOUD_STATE.docRef=storeMod.doc(db, ACTIVE_REMOTE_SYNC.collection, ACTIVE_REMOTE_SYNC.documentId);
+    CLOUD_STATE.enabled=true;
+    CLOUD_STATE.ready=true;
+    console.log('[CloudSync] Firebase initialized. Reading doc:', ACTIVE_REMOTE_SYNC.collection + '/' + ACTIVE_REMOTE_SYNC.documentId);
+
+    const firstSnap=await cloudFns.getDoc(CLOUD_STATE.docRef);
+    if(firstSnap.exists()){
+      console.log('[CloudSync] Firestore document found. Applying remote data...');
+      applyRemotePayload(firstSnap.data(),'remote');
+    }else{
+      console.log('[CloudSync] No existing document. Seeding initial cloud bank...');
+      await writeRemoteSnapshot('seed-initial-cloud-bank');
+    }
+
+    if(CLOUD_STATE.unsubscribe){
+      try{CLOUD_STATE.unsubscribe();}catch(error){}
+    }
+    CLOUD_STATE.unsubscribe=cloudFns.onSnapshot(CLOUD_STATE.docRef,(snap)=>{
+      if(!snap.exists()) return;
+      console.log('[CloudSync] Live snapshot received. Applying update...');
+      applyRemotePayload(snap.data(),'remote');
+      updateDiagnosticsPanel();
+    },(error)=>{
+      console.error('[CloudSync] Live sync error:', error?.message || error);
+      CLOUD_STATE.error=error?.message || 'Live sync failed.';
+      applyCloudStatus('error', 'Firestore live sync error: ' + CLOUD_STATE.error + '. This may be caused by security rules blocking access.');
+      updateDiagnosticsPanel();
+    });
+    console.log('[CloudSync] Cloud sync fully active. Mode: cloud');
+    applyCloudStatus('cloud');
+    updateDiagnosticsPanel();
+  }catch(error){
+    CLOUD_STATE.ready=false;
+    CLOUD_STATE.enabled=false;
+    CLOUD_STATE.error=error?.message || 'Firebase could not be initialized.';
+    console.error('[CloudSync] Init failed:', CLOUD_STATE.error);
+    // Provide specific guidance based on error type
+    let userNote='Cloud sync failed: ' + CLOUD_STATE.error;
+    if(/permission|denied|unauthorized/i.test(CLOUD_STATE.error)){
+      userNote+=' — Firestore security rules may be blocking access to the quiz path.';
+    }else if(/network|timeout|fetch/i.test(CLOUD_STATE.error)){
+      userNote+=' — Network issue. Check your internet connection.';
+    }else if(/invalid|api.key|not.found/i.test(CLOUD_STATE.error)){
+      userNote+=' — Firebase config may be incorrect. Check firebase-sync-config.json.';
+    }
+    applyCloudStatus('error', userNote);
+    updateDiagnosticsPanel();
+  }
+}
+
+// ─── DIAGNOSTICS PANEL ───
+function updateDiagnosticsPanel(){
+  const panel=document.getElementById('cloudDiagnosticsPanel');
+  if(!panel) return;
+  const cfg=ACTIVE_REMOTE_SYNC || {};
+  const lines=[
+    '── Cloud Sync Diagnostics ──',
+    'Config file: ' + (cfg.enabled===true ? 'Loaded ✓' : 'Not loaded or disabled ✗'),
+    'Firebase project: ' + (cfg.firebaseConfig?.projectId || 'N/A'),
+    'Firebase init: ' + (CLOUD_STATE.enabled ? 'Yes ✓' : 'No ✗'),
+    'Firestore path: ' + (cfg.collection || '?') + ' / ' + (cfg.documentId || '?'),
+    'Firestore ready: ' + (CLOUD_STATE.ready ? 'Yes ✓' : 'No ✗'),
+    'Storage mode: ' + (CLOUD_STATE.mode || 'unknown').toUpperCase(),
+    'Last sync: ' + (CLOUD_STATE.lastUpdatedAt ? localTimeLabel(CLOUD_STATE.lastUpdatedAt) : 'Never'),
+    'Error: ' + (CLOUD_STATE.error || 'None')
+  ];
+  panel.textContent=lines.join('\n');
+  panel.style.display='block';
+}
+
+function setCurrentSubject(key){
+  const keys=Object.keys(SUBJECT_BANK);
+  currentSubjectKey=SUBJECT_BANK[key]?key:(keys[0]||'physics');
+  currentSubject=SUBJECT_BANK[currentSubjectKey] || {label:'No Subject',tagline:'',topics:[],questions:[]};
+}
+
+function countTotalQuestions(){
+  return Object.values(SUBJECT_BANK).reduce((sum,subject)=>sum + (subject.questions?.length||0),0);
+}
+
+function populateSubjectSelect(selectEl,selectedValue){
+  if(!selectEl) return;
+  const previous=selectedValue ?? selectEl.value;
+  selectEl.innerHTML='';
+  Object.entries(SUBJECT_BANK).forEach(([key,subject])=>{
+    const opt=document.createElement('option');
+    opt.value=key;
+    opt.textContent=subject.label;
+    selectEl.appendChild(opt);
+  });
+  if(previous && [...selectEl.options].some(opt=>opt.value===previous)){
+    selectEl.value=previous;
+  }else if(selectEl.options.length){
+    selectEl.value=selectEl.options[0].value;
+  }
+}
+
+function populateTopicSelect(selectEl,subjectKey,selectedValue,includeAll=true){
+  if(!selectEl) return;
+  const subject=SUBJECT_BANK[subjectKey];
+  selectEl.innerHTML='';
+  if(!subject) return;
+  if(includeAll){
+    const allOpt=document.createElement('option');
+    allOpt.value='all';
+    allOpt.textContent=`🎯 All Topics (${subject.questions.length} Questions)`;
+    selectEl.appendChild(allOpt);
+  }
+  subject.topics.forEach((topic,topicIndex)=>{
+    const count=subject.questions.filter(q=>q.t===topicIndex).length;
+    const opt=document.createElement('option');
+    opt.value=String(topicIndex);
+    opt.textContent=`${topic} (${count} Qs)`;
+    selectEl.appendChild(opt);
+  });
+  if(selectedValue && [...selectEl.options].some(opt=>opt.value===selectedValue)){
+    selectEl.value=selectedValue;
+  }else if(includeAll && [...selectEl.options].some(opt=>opt.value==='all')){
+    selectEl.value='all';
+  }else if(selectEl.options.length){
+    selectEl.value=selectEl.options[0].value;
+  }
+}
+
+function buildSubjectSelect(){
+  const select=document.getElementById('subjectSelect');
+  populateSubjectSelect(select,currentSubjectKey);
+  setCurrentSubject(select.value || currentSubjectKey);
+}
+
+function updateTopicSelect(){
+  const subjectSelect=document.getElementById('subjectSelect');
+  const topicSelect=document.getElementById('topicSelect');
+  const remembered=topicSelect?.dataset?.lastValue || 'all';
+  setCurrentSubject(subjectSelect?.value || currentSubjectKey);
+  populateTopicSelect(topicSelect,currentSubjectKey,remembered,true);
+  if(topicSelect) topicSelect.dataset.lastValue=topicSelect.value;
+  document.getElementById('homeTagline').textContent=currentSubject.tagline;
+  document.getElementById('quizBrand').textContent=currentSubject.label;
+  updateHomeStats();
+}
+
+function getSelectedMode(){
+  return document.getElementById('modeSelect')?.value || 'practice';
+}
+
+function getSelectedQuestionCount(){
+  if(getSelectedMode()==='cbt'){
+    return Math.min(CBT_QUESTION_LIMIT, currentSubject.questions.length);
+  }
+  const topicValue=document.getElementById('topicSelect')?.value || 'all';
+  if(topicValue==='all') return currentSubject.questions.length;
+  return currentSubject.questions.filter(q=>q.t===Number(topicValue)).length;
+}
+
+function updateModeUI(){
+  const mode=getSelectedMode();
+  const topicGroup=document.getElementById('topicGroup');
+  const timeGroup=document.getElementById('timeGroup');
+  const topicSelect=document.getElementById('topicSelect');
+  const timeInput=document.getElementById('timePerQuestion');
+  const modeHelp=document.getElementById('modeHelp');
+  const startBtn=document.getElementById('startMainBtn');
+
+  if(mode==='cbt'){
+    topicGroup?.classList.add('is-disabled');
+    timeGroup?.classList.add('is-disabled');
+    if(topicSelect) topicSelect.disabled=true;
+    if(timeInput) timeInput.disabled=true;
+    if(startBtn) startBtn.textContent='START CBT MODE →';
+    if(modeHelp) modeHelp.textContent='CBT mode uses the selected subject only, draws up to 40 random questions from all topics, and runs on one fixed 40-minute countdown.';
+  }else{
+    topicGroup?.classList.remove('is-disabled');
+    timeGroup?.classList.remove('is-disabled');
+    if(topicSelect) topicSelect.disabled=false;
+    if(timeInput) timeInput.disabled=false;
+    if(startBtn) startBtn.textContent='START QUIZ →';
+    if(modeHelp) modeHelp.textContent='Practice mode uses the selected topic and your saved per-question timer.';
+  }
+  updateHomeStats();
+}
+
+function updateHomeStats(){
+  document.getElementById('statQuestions').textContent=String(getSelectedQuestionCount());
+  document.getElementById('statTopics').textContent=String(currentSubject.topics.length || 0);
+  const mode=getSelectedMode();
+  const timeLabel=document.getElementById('statTimeLabel');
+  if(mode==='cbt'){
+    document.getElementById('statPerQ').textContent='40m';
+    if(timeLabel) timeLabel.textContent='Fixed Time';
+    return;
+  }
+  const raw=parseInt(document.getElementById('timePerQuestion')?.value,10);
+  const display=Number.isFinite(raw)?clamp(raw,5,300):getSavedTime();
+  document.getElementById('statPerQ').textContent=`${display}s`;
+  if(timeLabel) timeLabel.textContent='Per Q';
+}
+
+function renderAdminSummary(){
+  const wrap=document.getElementById('adminSummary');
+  if(!wrap) return;
+  const subjectCount=Object.keys(SUBJECT_BANK).length;
+  const totalQuestions=countTotalQuestions();
+  const pieces=[
+    `<div class="admin-pill"><strong>${subjectCount}</strong><span>Subjects</span></div>`,
+    `<div class="admin-pill"><strong>${totalQuestions}</strong><span>Total Questions</span></div>`
+  ];
+  Object.values(SUBJECT_BANK).forEach(subject=>{
+    pieces.push(`<div class="admin-pill"><strong>${subject.questions.length}</strong><span>${escapeHtml(subject.label)} • ${subject.topics.length} topics</span></div>`);
+  });
+  wrap.innerHTML=pieces.join('');
+}
+
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g,char=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[char]));
+}
+
+function showAdminMsg(message,type='ok'){
+  const el=document.getElementById('adminMsg');
+  if(!el) return;
+  el.textContent=message;
+  el.className=`admin-msg ${type} show`;
+}
+
+function clearAdminMsg(){
+  const el=document.getElementById('adminMsg');
+  if(!el) return;
+  el.textContent='';
+  el.className='admin-msg';
+}
+
+function syncAdminSelectors(){
+  populateSubjectSelect(document.getElementById('adminSubjectForTopic'), currentSubjectKey);
+  populateSubjectSelect(document.getElementById('questionSubject'), currentSubjectKey);
+  const questionSubject=document.getElementById('questionSubject');
+  populateTopicSelect(document.getElementById('questionTopic'), questionSubject?.value || currentSubjectKey, document.getElementById('questionTopic')?.value, false);
+}
+
+function refreshAfterBankChange(preferredSubjectKey=null){
+  refreshUiFromBank(preferredSubjectKey);
+  persistSubjectBank();
+}
+
+function openAdmin(){
+  if(adminUnlocked){
+    clearAdminMsg();
+    syncAdminSelectors();
+    renderAdminSummary();
+    document.getElementById('adminOverlay').classList.add('show');
+    updateGlobalHomeButton();
+    return;
+  }
+  clearAdminPinMsg();
+  const input=document.getElementById('adminPinInput');
+  if(input) input.value='';
+  document.getElementById('adminPinOverlay').classList.add('show');
+  updateGlobalHomeButton();
+  setTimeout(()=>input?.focus(),40);
+}
+
+function closeAdminPin(){
+  document.getElementById('adminPinOverlay').classList.remove('show');
+  updateGlobalHomeButton();
+}
+
+function unlockAdmin(){
+  const input=document.getElementById('adminPinInput');
+  const entered=(input?.value || '').trim();
+  if(!entered){
+    showAdminPinMsg('Enter the admin PIN first.', 'err');
+    return;
+  }
+  if(entered!==getAdminPin()){
+    showAdminPinMsg('Incorrect PIN. Try again.', 'err');
+    if(input){ input.focus(); input.select(); }
+    return;
+  }
+  adminUnlocked=true;
+  closeAdminPin();
+  clearAdminMsg();
+  syncAdminSelectors();
+  renderAdminSummary();
+  document.getElementById('adminOverlay').classList.add('show');
+  updateGlobalHomeButton();
+}
+
+function closeAdmin(){
+  document.getElementById('adminOverlay').classList.remove('show');
+  updateGlobalHomeButton();
+}
+
+function saveAdminPin(){
+  const pin=(document.getElementById('newAdminPin')?.value || '').trim();
+  const confirm=(document.getElementById('confirmAdminPin')?.value || '').trim();
+  if(pin.length<4){
+    showAdminMsg('PIN must be at least 4 characters.', 'err');
+    return;
+  }
+  if(pin!==confirm){
+    showAdminMsg('The new PIN and confirm PIN do not match.', 'err');
+    return;
+  }
+  CLOUD_STATE.pinOverride=pin;
+  safeStorageSet(ADMIN_PIN_KEY, pin);
+  queueCloudSave('admin-pin-updated');
+  document.getElementById('newAdminPin').value='';
+  document.getElementById('confirmAdminPin').value='';
+  showAdminMsg('Admin PIN updated successfully.', 'ok');
+}
+
+function addSubject(){
+  const label=document.getElementById('newSubjectLabel').value.trim();
+  const manualKey=document.getElementById('newSubjectKey').value.trim();
+  const tagline=document.getElementById('newSubjectTagline').value.trim();
+  if(!label){
+    showAdminMsg('Enter a subject name first.', 'err');
+    return;
+  }
+  let key=slugify(manualKey || label);
+  if(SUBJECT_BANK[key]){
+    let counter=2;
+    while(SUBJECT_BANK[`${key}-${counter}`]) counter++;
+    key=`${key}-${counter}`;
+  }
+  SUBJECT_BANK[key]={
+    label,
+    tagline:tagline || `${label} • Live Practice Mode`,
+    topics:[],
+    questions:[]
+  };
+  document.getElementById('newSubjectLabel').value='';
+  document.getElementById('newSubjectKey').value='';
+  document.getElementById('newSubjectTagline').value='';
+  refreshAfterBankChange(key);
+  showAdminMsg(`${label} added successfully.`, 'ok');
+}
+
+function addTopic(){
+  const subjectKey=document.getElementById('adminSubjectForTopic').value;
+  const topicName=document.getElementById('newTopicName').value.trim();
+  const subject=SUBJECT_BANK[subjectKey];
+  if(!subject){
+    showAdminMsg('Select a valid subject first.', 'err');
+    return;
+  }
+  if(!topicName){
+    showAdminMsg('Enter the topic name you want to add.', 'err');
+    return;
+  }
+  const exists=subject.topics.some(topic=>topic.toLowerCase()===topicName.toLowerCase());
+  if(exists){
+    showAdminMsg('That topic already exists under this subject.', 'err');
+    return;
+  }
+  subject.topics.push(topicName);
+  document.getElementById('newTopicName').value='';
+  refreshAfterBankChange(subjectKey);
+  document.getElementById('questionSubject').value=subjectKey;
+  populateTopicSelect(document.getElementById('questionTopic'), subjectKey, String(subject.topics.length-1), false);
+  showAdminMsg(`${topicName} added to ${subject.label}.`, 'ok');
+}
+
+function clearQuestionForm(){
+  document.getElementById('questionYear').value='';
+  document.getElementById('questionText').value='';
+  document.getElementById('optionA').value='';
+  document.getElementById('optionB').value='';
+  document.getElementById('optionC').value='';
+  document.getElementById('optionD').value='';
+  document.getElementById('questionExplanation').value='';
+  document.getElementById('questionCorrect').value='0';
+}
+
+function addQuestion(){
+  const subjectKey=document.getElementById('questionSubject').value;
+  const topicValue=document.getElementById('questionTopic').value;
+  const subject=SUBJECT_BANK[subjectKey];
+  if(!subject){
+    showAdminMsg('Select a valid subject.', 'err');
+    return;
+  }
+  if(topicValue==='' || !subject.topics.length){
+    showAdminMsg('Add at least one topic before adding questions.', 'err');
+    return;
+  }
+  const questionText=document.getElementById('questionText').value.trim();
+  const options=[
+    document.getElementById('optionA').value.trim(),
+    document.getElementById('optionB').value.trim(),
+    document.getElementById('optionC').value.trim(),
+    document.getElementById('optionD').value.trim()
+  ];
+  if(!questionText || options.some(opt=>!opt)){
+    showAdminMsg('Fill the question text and all four options.', 'err');
+    return;
+  }
+  const correctIndex=parseInt(document.getElementById('questionCorrect').value,10);
+  subject.questions.push({
+    t:Number(topicValue),
+    yr:document.getElementById('questionYear').value.trim() || 'Custom',
+    q:questionText,
+    o:options,
+    a:Number.isFinite(correctIndex)?correctIndex:0,
+    exp:document.getElementById('questionExplanation').value.trim()
+  });
+  refreshAfterBankChange(subjectKey);
+  clearQuestionForm();
+  document.getElementById('questionSubject').value=subjectKey;
+  populateTopicSelect(document.getElementById('questionTopic'), subjectKey, String(topicValue), false);
+  showAdminMsg('Question saved successfully.', 'ok');
+}
+
+function mergeSubjectBank(importedRaw){
+  const imported=normalizeBank(importedRaw, {});
+  const importedKeys=Object.keys(imported);
+  if(!importedKeys.length){
+    throw new Error('No valid subject data was found in the JSON. Check that each question has q, o, a, and exp fields.');
+  }
+  let importedQuestionCount=0;
+  importedKeys.forEach(subjectKey=>{
+    const incoming=imported[subjectKey];
+    importedQuestionCount+=incoming.questions.length;
+    if(!SUBJECT_BANK[subjectKey]){
+      SUBJECT_BANK[subjectKey]=incoming;
+      return;
+    }
+    const target=SUBJECT_BANK[subjectKey];
+    if(incoming.label) target.label=incoming.label;
+    if(incoming.tagline) target.tagline=incoming.tagline;
+    const topicMap=new Map(target.topics.map((topic,index)=>[topic.toLowerCase(), index]));
+    const incomingIndexToTargetIndex={};
+    incoming.topics.forEach((topicName, incomingIndex)=>{
+      const matchKey=topicName.toLowerCase();
+      let targetIndex=topicMap.get(matchKey);
+      if(targetIndex===undefined){
+        target.topics.push(topicName);
+        targetIndex=target.topics.length-1;
+        topicMap.set(matchKey,targetIndex);
+      }
+      incomingIndexToTargetIndex[incomingIndex]=targetIndex;
+    });
+    incoming.questions.forEach(question=>{
+      const mappedIndex=Object.prototype.hasOwnProperty.call(incomingIndexToTargetIndex, question.t)
+        ? incomingIndexToTargetIndex[question.t]
+        : question.t;
+      target.questions.push({...question, t:mappedIndex});
+    });
+  });
+  return { importedKeys, importedQuestionCount };
+}
+
+function importBank(){
+  const text=document.getElementById('importText').value.trim();
+  if(!text){
+    showAdminMsg('Paste JSON or choose a JSON file first.', 'err');
+    return;
+  }
+  try{
+    const parsed=JSON.parse(text);
+    const result=mergeSubjectBank(parsed);
+    const preferredKey=result.importedKeys[0] || currentSubjectKey;
+    refreshAfterBankChange(preferredKey);
+    const subjectLabel=SUBJECT_BANK[preferredKey]?.label || preferredKey;
+    showAdminMsg(`Imported ${result.importedQuestionCount} question(s). Active subject switched to ${subjectLabel}.`, 'ok');
+  }catch(error){
+    showAdminMsg(error.message || 'The JSON could not be imported.', 'err');
+  }
+}
+
+function exportBank(){
+  const dataStr=JSON.stringify({subjects:SUBJECT_BANK}, null, 2);
+  const blob=new Blob([dataStr], {type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='godshand-question-bank.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showAdminMsg('Current question bank exported.', 'ok');
+}
+
+function resetBank(){
+  const confirmed=window.confirm('This will remove all custom subjects, topics and questions and return to the original Physics bank. Continue?');
+  if(!confirmed) return;
+  SUBJECT_BANK=getBaseBank();
+  safeStorageRemove(STORAGE_KEY_BANK);
+  setCurrentSubject(Object.keys(SUBJECT_BANK)[0]||'physics');
+  refreshAfterBankChange(currentSubjectKey);
+  clearQuestionForm();
+  document.getElementById('importText').value='';
+  showAdminMsg('Bank reset to the original Physics-only version.', 'ok');
+}
+
+function handleImportFile(event){
+  const file=event.target.files && event.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    document.getElementById('importText').value=String(reader.result || '');
+    showAdminMsg('JSON file loaded into the import box. Click "Import / Merge" to save it.', 'ok');
+  };
+  reader.onerror=()=>showAdminMsg('The selected file could not be read.', 'err');
+  reader.readAsText(file);
+}
+
+function setTemplatePreview(){
+  const template={
+    chemistry:{
+      label:'JAMB Chemistry',
+      tagline:'JAMB Chemistry • Live Practice Mode',
+      topics:['Atomic Structure','Chemical Combination'],
+      questions:[
+        {
+          t:0,
+          yr:'JAMB 2022',
+          q:'Sample question here',
+          o:['Option A','Option B','Option C','Option D'],
+          a:1,
+          exp:'Short explanation here'
+        }
+      ]
+    }
+  };
+  document.getElementById('jsonTemplate').textContent='JSON format example:\n' + JSON.stringify(template, null, 2);
+}
+
+function prepareQuestion(q){
+  const options=q.o.map((text,index)=>({text,originalIndex:index}));
+  shuffle(options);
+  const correctIndex=options.findIndex(opt=>opt.originalIndex===q.a);
+  return {...q, options, correctIndex};
+}
+
+function startSelectedMode(){
+  if(getSelectedMode()==='cbt'){
+    startCbtQuiz();
+    return;
+  }
+  startQuiz();
+}
+
+function prepareQuizScreen(mode){
+  quizMode=mode;
+  document.getElementById('reviewSec').style.display='none';
+  document.getElementById('feedbackBox').className='feedback-box';
+  document.getElementById('btnNext').className='btn-next';
+  document.getElementById('btnPrev').className='btn-outline btn-nav';
+  document.getElementById('btnSubmitQuiz').className='btn-submit-quiz';
+  document.getElementById('btnSubmitQuiz').style.display='none';
+}
+
+function startQuiz(){
+  name=document.getElementById('studentName').value.trim()||'Student';
+  setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
+  const topicValue=document.getElementById('topicSelect').value;
+  document.getElementById('topicSelect').dataset.lastValue=topicValue;
+
+  const rawTime=parseInt(document.getElementById('timePerQuestion').value,10);
+  timePerQuestion=Number.isFinite(rawTime)?clamp(rawTime,5,300):30;
+  document.getElementById('timePerQuestion').value=timePerQuestion;
+  safeStorageSet('quizDefaultTime', String(timePerQuestion));
+  updateHomeStats();
+
+  const sourceQuestions=topicValue==='all'
+    ? [...currentSubject.questions]
+    : currentSubject.questions.filter(q=>q.t===Number(topicValue));
+
+  if(!sourceQuestions.length){
+    alert('There are no questions in this subject/topic yet. Add some from Manage Question Bank.');
+    return;
+  }
+
+  pool=shuffle(sourceQuestions.map(prepareQuestion));
+  idx=0;correct=0;missed=[];elapsed=0;
+  userAnswers=Array(pool.length).fill(null);
+  clearInterval(qTimer);
+  clearInterval(sessTimer);
+  prepareQuizScreen('practice');
+  show('quizScreen');
+  sessTimer=setInterval(()=>elapsed++,1000);
+  loadQ();
+}
+
+function startCbtQuiz(){
+  name=document.getElementById('studentName').value.trim()||'Student';
+  setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
+  const sourceQuestions=[...currentSubject.questions];
+
+  if(!sourceQuestions.length){
+    alert('There are no questions in this subject yet. Add some from Manage Question Bank.');
+    return;
+  }
+
+  pool=shuffle(sourceQuestions.map(prepareQuestion)).slice(0, Math.min(CBT_QUESTION_LIMIT, sourceQuestions.length));
+  idx=0;correct=0;missed=[];elapsed=0;
+  userAnswers=Array(pool.length).fill(null);
+  clearInterval(qTimer);
+  clearInterval(sessTimer);
+  prepareQuizScreen('cbt');
+  show('quizScreen');
+  timeLeft=CBT_TOTAL_SECONDS;
+  tick();
+  qTimer=setInterval(()=>{
+    timeLeft--;
+    elapsed++;
+    tick();
+    if(timeLeft<=0){
+      clearInterval(qTimer);
+      endQuiz(true);
+    }
+  },1000);
+  loadQ();
+}
+
+function loadQ(){
+  if(idx>=pool.length){endQuiz();return;}
+  const q=pool[idx];
+  const pct=Math.round(((idx)/Math.max(pool.length,1))*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  const answeredCount=userAnswers.filter(value=>value!==null && value!==-1).length;
+  document.getElementById('qCount').textContent=quizMode==='cbt'
+    ? `${idx+1} / ${pool.length} • ${answeredCount} answered`
+    : `${idx+1} / ${pool.length}`;
+  document.getElementById('topicBadge').textContent=quizMode==='cbt'
+    ? `${currentSubject.label} • CBT Mode • ${currentSubject.topics[q.t] || 'Custom Topic'}`
+    : (currentSubject.topics[q.t] || 'Custom Topic');
+  document.getElementById('qYear').textContent=q.yr;
+  document.getElementById('qText').textContent=q.q;
+  const grid=document.getElementById('optionsGrid');
+  grid.innerHTML='';
+  const letters=optionLetters(q.options.length);
+
+  q.options.forEach((option,optionIndex)=>{
+    const b=document.createElement('button');
+    const selectedAnswer=userAnswers[idx];
+    b.className='option-btn'+(quizMode==='cbt' && selectedAnswer===optionIndex ? ' selected' : '');
+    b.innerHTML=`<span class="option-letter">${letters[optionIndex]}</span><span>${escapeHtml(option.text)}</span>`;
+    b.onclick=()=>pick(optionIndex);
+    if(quizMode==='practice' && selectedAnswer!==null){
+      b.disabled=true;
+    }
+    grid.appendChild(b);
+  });
+
+  if(quizMode==='cbt'){
+    document.getElementById('feedbackBox').className='feedback-box';
+    const prevBtn=document.getElementById('btnPrev');
+    const nextBtn=document.getElementById('btnNext');
+    const submitBtn=document.getElementById('btnSubmitQuiz');
+    prevBtn.className='btn-outline btn-nav show';
+    prevBtn.disabled=idx===0;
+    nextBtn.className='btn-next show';
+    nextBtn.textContent=idx===pool.length-1 ? 'FINISH →' : 'NEXT QUESTION →';
+    submitBtn.className='btn-submit-quiz show';
+    submitBtn.style.display='block';
+    return;
+  }
+
+  document.getElementById('btnPrev').className='btn-outline btn-nav';
+  document.getElementById('btnSubmitQuiz').className='btn-submit-quiz';
+  document.getElementById('btnSubmitQuiz').style.display='none';
+  document.getElementById('feedbackBox').className='feedback-box';
+  document.getElementById('btnNext').className='btn-next';
+  clearInterval(qTimer);
+  timeLeft=timePerQuestion;
+  tick();
+  qTimer=setInterval(()=>{
+    timeLeft--;
+    tick();
+    if(timeLeft<=0){
+      clearInterval(qTimer);
+      timeout();
+    }
+  },1000);
+}
+
+function tick(){
+  const el=document.getElementById('timerVal');
+  if(quizMode==='cbt'){
+    el.textContent=formatCountdown(timeLeft);
+    el.className='timer-val'+(timeLeft<=300?' urgent':'');
+    return;
+  }
+  el.textContent=timeLeft;
+  el.className='timer-val'+(timeLeft<=Math.min(10,timePerQuestion)?' urgent':'');
+}
+
+function timeout(){
+  const q=pool[idx];
+  const btns=document.querySelectorAll('.option-btn');
+  const letters=optionLetters(q.options.length);
+  btns.forEach(b=>b.disabled=true);
+  if(btns[q.correctIndex]) btns[q.correctIndex].classList.add('reveal');
+  userAnswers[idx]=-1;
+  missed.push({q,chosen:-1});
+  fb(false,'⏰ Time up! Correct: '+letters[q.correctIndex]+'.', q.exp);
+  document.getElementById('btnNext').className='btn-next show';
+}
+
+function pick(i){
+  if(quizMode==='cbt'){
+    userAnswers[idx]=i;
+    document.querySelectorAll('.option-btn').forEach((btn,buttonIndex)=>{
+      btn.classList.toggle('selected', buttonIndex===i);
+    });
+    document.getElementById('qCount').textContent=`${idx+1} / ${pool.length} • ${userAnswers.filter(value=>value!==null && value!==-1).length} answered`;
+    return;
+  }
+
+  clearInterval(qTimer);
+  const q=pool[idx];
+  const btns=document.querySelectorAll('.option-btn');
+  const letters=optionLetters(q.options.length);
+  btns.forEach(b=>b.disabled=true);
+  userAnswers[idx]=i;
+  if(i===q.correctIndex){
+    correct++;
+    btns[i].classList.add('correct');
+    fb(true,'✅ Correct!',q.exp);
+  } else {
+    btns[i].classList.add('wrong');
+    if(btns[q.correctIndex]) btns[q.correctIndex].classList.add('reveal');
+    fb(false,'❌ Wrong! Correct: '+letters[q.correctIndex]+'.',q.exp);
+    missed.push({q,chosen:i});
+  }
+  document.getElementById('btnNext').className='btn-next show';
+}
+
+function fb(ok,main,exp){
+  const box=document.getElementById('feedbackBox');
+  box.className='feedback-box '+(ok?'fb-ok':'fb-no')+' show';
+  document.getElementById('fbIcon').textContent=ok?'✅':'❌';
+  document.getElementById('fbMain').textContent=main;
+  document.getElementById('fbExp').textContent=exp||'';
+}
+
+function prevQuestion(){
+  if(quizMode!=='cbt') return;
+  if(idx>0){
+    idx--;
+    loadQ();
+  }
+}
+
+function nextQuestion(){
+  if(quizMode==='cbt'){
+    if(idx>=pool.length-1){
+      submitQuizEarly();
+      return;
+    }
+    idx++;
+    loadQ();
+    return;
+  }
+  idx++;
+  loadQ();
+}
+
+function submitQuizEarly(){
+  if(quizMode!=='cbt'){
+    endQuiz();
+    return;
+  }
+  const unanswered=userAnswers.filter(value=>value===null).length;
+  const prompt=unanswered
+    ? `You still have ${unanswered} unanswered question(s). Submit anyway?`
+    : 'Submit this CBT now?';
+  if(window.confirm(prompt)){
+    endQuiz();
+  }
+}
+
+function endQuiz(fromTimer=false){
+  clearInterval(qTimer);
+  clearInterval(sessTimer);
+
+  if(quizMode==='cbt'){
+    correct=0;
+    missed=[];
+    pool.forEach((q,questionIndex)=>{
+      const chosen=userAnswers[questionIndex];
+      if(chosen===q.correctIndex){
+        correct++;
+      }else{
+        missed.push({q,chosen:chosen===null ? -1 : chosen});
+      }
+    });
+    elapsed=CBT_TOTAL_SECONDS-timeLeft;
+  }
+
+  const total=Math.max(pool.length,1),pct=Math.round(correct/total*100);
+  document.getElementById('greetEl').textContent=fromTimer
+    ? `Time up, ${name}!`
+    : `Well done, ${name}! 🎉`;
+  document.getElementById('sPct').textContent=pct+'%';
+  document.getElementById('rC').textContent=correct;
+  document.getElementById('rW').textContent=pool.length-correct;
+  document.getElementById('rT').textContent=fmt(elapsed);
+  const c=document.getElementById('fgCircle');
+  const off=314-(pct/100*314);
+  c.style.strokeDashoffset='314';
+  setTimeout(()=>{c.style.strokeDashoffset=off;c.style.stroke=col(pct);},200);
+  const pf=document.getElementById('pFill');
+  pf.style.width='0%';
+  pf.style.background=col(pct);
+  setTimeout(()=>{pf.style.width=pct+'%';},300);
+  show('resultsScreen');
+}
+
+function toggleReview(){
+  const sec=document.getElementById('reviewSec');
+  if(sec.style.display==='none'){
+    sec.style.display='block';
+    const list=document.getElementById('reviewList');
+    list.innerHTML='';
+    pool.forEach((q,i)=>{
+      const chosen=userAnswers[i];
+      const div=document.createElement('div');
+      const letters=optionLetters(q.options.length);
+      const correctLetter=letters[q.correctIndex];
+      const correctText=q.options[q.correctIndex].text;
+      const isCorrect=chosen===q.correctIndex;
+      div.className='rev-item'+(isCorrect?' ok':'');
+      let yourAnswer='Not answered';
+      if(chosen===-1){
+        yourAnswer='Timeout';
+      }else if(Number.isInteger(chosen) && q.options[chosen]){
+        yourAnswer=`${letters[chosen]}) ${q.options[chosen].text}`;
+      }
+      div.innerHTML=`<div class="rev-q">${i+1}. ${escapeHtml(q.q)}</div><div class="rev-ans">${isCorrect?`<span class="rev-right">✓ ${correctLetter}) ${escapeHtml(correctText)}</span>`:`<span class="rev-yours">Yours: ${escapeHtml(yourAnswer)}</span><span class="rev-right">Correct: ${correctLetter}) ${escapeHtml(correctText)}</span>`}</div>`;
+      list.appendChild(div);
+    });
+  } else {
+    sec.style.display='none';
+  }
+}
+
+function updateGlobalHomeButton(){
+  const btn=document.getElementById('globalHomeBtn');
+  if(!btn) return;
+  const activeScreen=document.querySelector('.screen.active');
+  const isHome=activeScreen?.id==='homeScreen';
+  const overlayOpen=Array.from(document.querySelectorAll('.overlay')).some(el=>el.classList.contains('show'));
+  btn.classList.toggle('show', overlayOpen || !isHome);
+}
+
+function goHome(){
+  clearInterval(qTimer);
+  clearInterval(sessTimer);
+  show('homeScreen');
+  updateModeUI();
+  updateHomeStats();
+}
+
+function goHomeUniversal(){
+  closeAdmin();
+  closeAdminPin();
+  goHome();
+  updateGlobalHomeButton();
+}
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  updateGlobalHomeButton();
+}
+
+function initQuizApp(){
+  setCurrentSubject(getInitialSubjectKey());
+  timePerQuestion=getSavedTime();
+  document.getElementById('timePerQuestion').value=timePerQuestion;
+  buildSubjectSelect();
+  updateTopicSelect();
+  syncAdminSelectors();
+  renderAdminSummary();
+  setTemplatePreview();
+  renderCloudConfigTemplate();
+  applyCloudStatus('local');
+  updateModeUI();
+
+  document.getElementById('subjectSelect').addEventListener('change',()=>{
+    updateTopicSelect();
+  });
+
+  document.getElementById('modeSelect').addEventListener('change',()=>{
+    updateModeUI();
+  });
+
+  document.getElementById('topicSelect').addEventListener('change',event=>{
+    event.target.dataset.lastValue=event.target.value;
+    updateHomeStats();
+  });
+
+  document.getElementById('timePerQuestion').addEventListener('input',()=>{
+    const raw=parseInt(document.getElementById('timePerQuestion').value,10);
+    if(Number.isFinite(raw)){
+      const clean=clamp(raw,5,300);
+      safeStorageSet('quizDefaultTime', String(clean));
+      if(getSelectedMode()!=='cbt'){
+        document.getElementById('statPerQ').textContent=`${clean}s`;
+      }
+    }
+  });
+
+  document.getElementById('adminSubjectForTopic').addEventListener('change',()=>{
+    clearAdminMsg();
+  });
+
+  document.getElementById('questionSubject').addEventListener('change',event=>{
+    populateTopicSelect(document.getElementById('questionTopic'), event.target.value, null, false);
+  });
+
+  document.getElementById('importFile').addEventListener('change', handleImportFile);
+
+  document.getElementById('adminOverlay').addEventListener('click',event=>{
+    if(event.target.id==='adminOverlay'){
+      closeAdmin();
+    }
+  });
+
+  document.getElementById('adminPinOverlay').addEventListener('click',event=>{
+    if(event.target.id==='adminPinOverlay'){
+      closeAdminPin();
+    }
+  });
+
+  document.getElementById('adminPinInput').addEventListener('keydown',event=>{
+    if(event.key==='Enter') unlockAdmin();
+  });
+
+  initRemoteSync();
+  updateGlobalHomeButton();
+}
+
+document.addEventListener('DOMContentLoaded', initQuizApp);
+
+</script>
+</body>
+</html>

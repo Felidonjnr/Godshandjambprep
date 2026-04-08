@@ -231,6 +231,39 @@ body::before{content:'';position:fixed;inset:0;background:
 @media (max-width:520px){
   .global-home-btn{top:.8rem;right:.8rem;padding:.65rem .9rem;font-size:.82rem;}
 }
+
+.btn-row + .btn-row{margin-top:.8rem;}
+#historyScreen{padding:1.5rem 1rem;overflow-y:auto;justify-content:flex-start;}
+.history-shell{width:100%;max-width:980px;margin:0 auto;}
+.history-card{background:var(--card);border:1px solid rgba(245,166,35,0.18);border-radius:var(--radius);padding:1.3rem;box-shadow:var(--shadow);}
+.history-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem;}
+.history-head h2{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;color:var(--gold);line-height:1;}
+.history-head p{color:var(--muted);font-size:.9rem;line-height:1.55;margin-top:.4rem;}
+.history-filter-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;margin:1rem 0 1.2rem;}
+.history-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin-bottom:1rem;}
+.history-pill{background:var(--card2);border-radius:14px;padding:.95rem;border:1px solid rgba(255,255,255,0.06);}
+.history-pill strong{display:block;font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold);letter-spacing:1px;}
+.history-pill span{font-size:.78rem;color:var(--muted);}
+.history-section{margin-top:1.15rem;}
+.history-group-list,.history-attempt-list{display:flex;flex-direction:column;gap:.7rem;}
+.history-item{background:var(--card2);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:.95rem 1rem;}
+.history-item-top{display:flex;justify-content:space-between;gap:.8rem;align-items:flex-start;}
+.history-item h4{font-size:1rem;color:var(--text);margin-bottom:.25rem;}
+.history-item .muted{color:var(--muted);font-size:.8rem;line-height:1.45;}
+.history-tags{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.55rem;}
+.history-tag{display:inline-flex;align-items:center;padding:.22rem .6rem;border-radius:999px;background:rgba(245,166,35,0.10);border:1px solid rgba(245,166,35,0.25);font-size:.74rem;font-weight:700;color:var(--gold);}
+.history-score{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:1px;color:var(--gold);white-space:nowrap;}
+.history-empty{padding:1rem;border-radius:14px;background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.08);color:var(--muted);font-size:.9rem;line-height:1.6;}
+.history-mini-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:.55rem;margin-top:.75rem;}
+.history-mini-stat{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:.65rem .75rem;}
+.history-mini-stat strong{display:block;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--text);}
+.history-mini-stat span{font-size:.72rem;color:var(--muted);}
+@media (max-width:640px){
+  .history-card{padding:1rem;}
+  .history-item-top{flex-direction:column;}
+  .history-score{font-size:1.5rem;}
+}
+
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:rgba(245,166,35,0.3);border-radius:2px;}
 </style>
@@ -242,7 +275,7 @@ body::before{content:'';position:fixed;inset:0;background:
 <!-- HOME -->
 <div class="screen active" id="homeScreen">
   <div class="logo-wrap">
-    <div class="logo-icon">📝</div>
+    <div class="logo-icon">✝️</div>
     <div class="brand">Godshand Tutorials</div>
     <div class="tagline" id="homeTagline">JAMB Physics • Live Practice Mode</div>
   </div>
@@ -281,6 +314,7 @@ body::before{content:'';position:fixed;inset:0;background:
     </div>
     <div class="home-actions">
       <button class="btn-start" id="startMainBtn" onclick="startSelectedMode()">START QUIZ →</button>
+      <button class="btn-ghost" type="button" onclick="openPerformanceHistory()">📈 REVIEW PERFORMANCE</button>
       <button class="btn-ghost" type="button" onclick="openAdmin()">⚙️ MANAGE QUESTION BANK</button>
     </div>
     <div class="sync-strip">
@@ -517,9 +551,68 @@ body::before{content:'';position:fixed;inset:0;background:
       <button class="btn-outline" onclick="toggleReview()">📋 Review</button>
       <button class="btn-solid" onclick="goHome()">🔁 Try Again</button>
     </div>
+    <div class="btn-row">
+      <button class="btn-outline" type="button" onclick="openPerformanceHistory(true)">📈 Performance History</button>
+    </div>
     <div class="review-section" id="reviewSec" style="display:none;">
       <div class="review-title">Answer Review</div>
       <div id="reviewList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="screen" id="historyScreen">
+  <div class="history-shell">
+    <div class="history-card">
+      <div class="history-head">
+        <div>
+          <div class="greeting">Performance Review</div>
+          <h2>QUIZ HISTORY</h2>
+          <p>Track performance over time by subject, topic, mode, score, and date. This section updates automatically whenever a quiz is submitted.</p>
+        </div>
+        <button class="btn-outline" type="button" onclick="goHome()">← Back Home</button>
+      </div>
+
+      <div class="history-filter-grid">
+        <div class="form-group">
+          <label>Student Name Filter</label>
+          <input type="text" id="historyStudentFilter" placeholder="e.g. Blessing" autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <label>Subject</label>
+          <select id="historySubjectFilter"></select>
+        </div>
+        <div class="form-group">
+          <label>Topic</label>
+          <select id="historyTopicFilter"></select>
+        </div>
+        <div class="form-group">
+          <label>Mode</label>
+          <select id="historyModeFilter">
+            <option value="all">All Modes</option>
+            <option value="practice">Practice</option>
+            <option value="cbt">CBT</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="history-summary" id="historySummary"></div>
+
+      <div class="history-section">
+        <div class="review-title">Subject Performance</div>
+        <div class="history-group-list" id="historySubjectList"></div>
+      </div>
+
+      <div class="history-section">
+        <div class="review-title">Topic Performance</div>
+        <div class="history-group-list" id="historyTopicList"></div>
+      </div>
+
+      <div class="history-section">
+        <div class="review-title">Recent Quiz Attempts</div>
+        <div class="history-attempt-list" id="historyAttemptList"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -666,12 +759,15 @@ const REMOTE_SYNC_INLINE={
 
 // ─── STATE ───
 const STORAGE_KEY_BANK='godshandQuizQuestionBankV2';
+const STORAGE_KEY_HISTORY='godshandQuizAttemptHistoryV1';
 const ADMIN_PIN_KEY='godshandQuizAdminPinV1';
+const MAX_HISTORY_ITEMS=250;
 let ACTIVE_REMOTE_SYNC=null;
 let cloudFns=null;
 let cloudSaveTimer=null;
 const CLOUD_STATE={enabled:false,ready:false,mode:'local',note:'',error:'',docRef:null,unsubscribe:null,pinOverride:null,lastUpdatedAt:''};
 let SUBJECT_BANK=loadSubjectBank();
+let ATTEMPT_HISTORY=loadAttemptHistory();
 let pool=[],idx=0,correct=0,missed=[];
 let qTimer=null,sessTimer=null,timeLeft=30,elapsed=0;
 let name='Student';
@@ -681,6 +777,9 @@ let timePerQuestion=30;
 let adminUnlocked=false;
 let quizMode='practice';
 let userAnswers=[];
+let quizStartedAt='';
+let activeTopicContext='all';
+let quizFinalized=false;
 const CBT_TOTAL_SECONDS=40*60;
 const CBT_QUESTION_LIMIT=40;
 
@@ -726,6 +825,76 @@ function safeStorageSet(key,value){
 function safeStorageRemove(key){
   try{localStorage.removeItem(key);}catch(e){}
   removeCookieValue(key);
+}
+function safeStorageRemove(key){
+  try{localStorage.removeItem(key);}catch(e){}
+  removeCookieValue(key);
+}
+function localOnlyGet(key){
+  try{return localStorage.getItem(key);}catch(e){return null;}
+}
+function localOnlySet(key,value){
+  try{localStorage.setItem(key,value);}catch(e){}
+}
+function normalizeAttempt(raw){
+  if(!raw || typeof raw!=='object') return null;
+  const totalQuestions=Math.max(0, Number(raw.totalQuestions ?? 0));
+  const correctAnswers=Math.max(0, Number(raw.correct ?? 0));
+  const wrongAnswers=Math.max(0, Number(raw.wrong ?? Math.max(totalQuestions-correctAnswers,0)));
+  const scorePercent=Math.max(0, Math.min(100, Number(raw.scorePercent ?? 0)));
+  const topicsIncluded=Array.isArray(raw.topicsIncluded)
+    ? [...new Set(raw.topicsIncluded.map(x=>String(x??'').trim()).filter(Boolean))]
+    : [];
+  const submittedAt=String(raw.submittedAt || raw.createdAt || '').trim() || new Date().toISOString();
+  return {
+    attemptId:String(raw.attemptId || `${Date.now()}-${Math.random().toString(36).slice(2,8)}`),
+    studentName:String(raw.studentName || 'Student').trim() || 'Student',
+    mode:String(raw.mode || 'practice').trim() === 'cbt' ? 'cbt' : 'practice',
+    subjectKey:String(raw.subjectKey || 'subject').trim() || 'subject',
+    subjectLabel:String(raw.subjectLabel || raw.subjectKey || 'Subject').trim() || 'Subject',
+    topicLabel:String(raw.topicLabel || 'All Topics').trim() || 'All Topics',
+    topicsIncluded,
+    scorePercent:Math.round(scorePercent),
+    correct:correctAnswers,
+    wrong:wrongAnswers,
+    totalQuestions,
+    timeUsedSeconds:Math.max(0, Number(raw.timeUsedSeconds ?? 0)),
+    timePerQuestion:Math.max(0, Number(raw.timePerQuestion ?? 0)),
+    startedAt:String(raw.startedAt || submittedAt),
+    submittedAt,
+    status:String(raw.status || 'completed').trim() || 'completed'
+  };
+}
+function mergeAttemptHistory(primary=[],secondary=[]){
+  const merged=new Map();
+  [...(Array.isArray(secondary)?secondary:[]), ...(Array.isArray(primary)?primary:[])].forEach(item=>{
+    const normalized=normalizeAttempt(item);
+    if(normalized) merged.set(normalized.attemptId, normalized);
+  });
+  return Array.from(merged.values())
+    .sort((a,b)=>new Date(b.submittedAt||0)-new Date(a.submittedAt||0))
+    .slice(0, MAX_HISTORY_ITEMS);
+}
+function loadAttemptHistory(){
+  const raw=localOnlyGet(STORAGE_KEY_HISTORY) || safeStorageGet(STORAGE_KEY_HISTORY);
+  if(!raw) return [];
+  try{
+    const parsed=JSON.parse(raw);
+    return mergeAttemptHistory(parsed, []);
+  }catch(error){
+    return [];
+  }
+}
+function persistAttemptHistory(reason='attempt-history-updated'){
+  localOnlySet(STORAGE_KEY_HISTORY, JSON.stringify(ATTEMPT_HISTORY));
+  queueCloudSave(reason);
+}
+function getSavedStudentName(){
+  return String(safeStorageGet('quizLastStudentName') || '').trim();
+}
+function saveStudentName(value){
+  const clean=String(value || '').trim();
+  if(clean) safeStorageSet('quizLastStudentName', clean);
 }
 function getAdminPin(){return CLOUD_STATE.pinOverride || safeStorageGet(ADMIN_PIN_KEY) || '1234';}
 function showAdminPinMsg(message,type='err'){
@@ -925,10 +1094,12 @@ async function writeRemoteSnapshot(reason='bank-update'){
     applyCloudStatus('syncing');
     const payload={
       bank:{subjects:SUBJECT_BANK},
+      history:{attempts:ATTEMPT_HISTORY},
       adminPin:getAdminPin(),
       meta:{
         updatedAt:new Date().toISOString(),
-        reason
+        reason,
+        attemptCount:ATTEMPT_HISTORY.length
       }
     };
     await cloudFns.setDoc(CLOUD_STATE.docRef,payload,{merge:true});
@@ -970,6 +1141,13 @@ function applyRemotePayload(data,source='remote'){
     SUBJECT_BANK=normalizeBank(data.bank, SUBJECT_BANK);
     safeStorageSet(STORAGE_KEY_BANK, JSON.stringify(SUBJECT_BANK));
     refreshUiFromBank(currentSubjectKey);
+  }
+  if(Array.isArray(data?.history?.attempts)){
+    ATTEMPT_HISTORY=mergeAttemptHistory(ATTEMPT_HISTORY, data.history.attempts);
+    localOnlySet(STORAGE_KEY_HISTORY, JSON.stringify(ATTEMPT_HISTORY));
+    if(document.getElementById('historyScreen')?.classList.contains('active')){
+      renderHistoryScreen();
+    }
   }
   const stamp=data?.meta?.updatedAt;
   if(stamp) CLOUD_STATE.lastUpdatedAt=stamp;
@@ -1068,7 +1246,8 @@ function updateDiagnosticsPanel(){
     'Firestore ready: ' + (CLOUD_STATE.ready ? 'Yes ✓' : 'No ✗'),
     'Storage mode: ' + (CLOUD_STATE.mode || 'unknown').toUpperCase(),
     'Last sync: ' + (CLOUD_STATE.lastUpdatedAt ? localTimeLabel(CLOUD_STATE.lastUpdatedAt) : 'Never'),
-    'Error: ' + (CLOUD_STATE.error || 'None')
+    'Error: ' + (CLOUD_STATE.error || 'None'),
+    'Saved attempts: ' + ATTEMPT_HISTORY.length
   ];
   panel.textContent=lines.join('\n');
   panel.style.display='block';
@@ -1559,8 +1738,12 @@ function prepareQuizScreen(mode){
 
 function startQuiz(){
   name=document.getElementById('studentName').value.trim()||'Student';
+  saveStudentName(name);
+  quizStartedAt=new Date().toISOString();
+  quizFinalized=false;
   setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
   const topicValue=document.getElementById('topicSelect').value;
+  activeTopicContext=topicValue;
   document.getElementById('topicSelect').dataset.lastValue=topicValue;
 
   const rawTime=parseInt(document.getElementById('timePerQuestion').value,10);
@@ -1591,6 +1774,10 @@ function startQuiz(){
 
 function startCbtQuiz(){
   name=document.getElementById('studentName').value.trim()||'Student';
+  saveStudentName(name);
+  quizStartedAt=new Date().toISOString();
+  activeTopicContext='cbt';
+  quizFinalized=false;
   setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
   const sourceQuestions=[...currentSubject.questions];
 
@@ -1779,6 +1966,8 @@ function submitQuizEarly(){
 }
 
 function endQuiz(fromTimer=false){
+  if(quizFinalized) return;
+  quizFinalized=true;
   clearInterval(qTimer);
   clearInterval(sessTimer);
 
@@ -1812,6 +2001,7 @@ function endQuiz(fromTimer=false){
   pf.style.width='0%';
   pf.style.background=col(pct);
   setTimeout(()=>{pf.style.width=pct+'%';},300);
+  saveQuizAttempt({fromTimer,pct});
   show('resultsScreen');
 }
 
@@ -1841,6 +2031,227 @@ function toggleReview(){
   } else {
     sec.style.display='none';
   }
+}
+
+
+function saveQuizAttempt({fromTimer=false,pct=0}={}){
+  const uniqueTopics=[...new Set(pool.map(question=>currentSubject.topics[question.t] || 'Custom Topic'))];
+  const topicLabel=quizMode==='cbt'
+    ? 'Mixed Topics'
+    : (activeTopicContext==='all' ? 'All Topics' : (currentSubject.topics[Number(activeTopicContext)] || 'Custom Topic'));
+  const attempt={
+    attemptId:`${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
+    studentName:name || 'Student',
+    mode:quizMode,
+    subjectKey:currentSubjectKey,
+    subjectLabel:currentSubject.label || 'Subject',
+    topicLabel,
+    topicsIncluded:uniqueTopics,
+    scorePercent:pct,
+    correct,
+    wrong:Math.max(pool.length-correct,0),
+    totalQuestions:pool.length,
+    timeUsedSeconds:elapsed,
+    timePerQuestion:quizMode==='practice' ? timePerQuestion : 0,
+    startedAt:quizStartedAt || new Date().toISOString(),
+    submittedAt:new Date().toISOString(),
+    status:fromTimer ? 'time-up' : 'completed'
+  };
+  ATTEMPT_HISTORY=mergeAttemptHistory([attempt], ATTEMPT_HISTORY);
+  persistAttemptHistory('quiz-attempt-saved');
+  renderHistoryScreen();
+}
+
+function getHistoryFilterValues(){
+  return {
+    student:String(document.getElementById('historyStudentFilter')?.value || '').trim().toLowerCase(),
+    subject:String(document.getElementById('historySubjectFilter')?.value || 'all'),
+    topic:String(document.getElementById('historyTopicFilter')?.value || 'all'),
+    mode:String(document.getElementById('historyModeFilter')?.value || 'all')
+  };
+}
+
+function populateHistorySubjectFilter(selectedValue='all'){
+  const select=document.getElementById('historySubjectFilter');
+  if(!select) return;
+  const current=selectedValue || select.value || 'all';
+  const subjectMap=new Map();
+  ATTEMPT_HISTORY.forEach(item=>{
+    if(!subjectMap.has(item.subjectKey)){
+      subjectMap.set(item.subjectKey, item.subjectLabel);
+    }
+  });
+  select.innerHTML='<option value="all">All Subjects</option>' + Array.from(subjectMap.entries()).map(([key,label])=>`<option value="${escapeHtml(key)}">${escapeHtml(label)}</option>`).join('');
+  if([...select.options].some(option=>option.value===current)) select.value=current;
+}
+
+function populateHistoryTopicFilter(selectedValue='all'){
+  const select=document.getElementById('historyTopicFilter');
+  if(!select) return;
+  const subjectValue=String(document.getElementById('historySubjectFilter')?.value || 'all');
+  const current=selectedValue || select.value || 'all';
+  const topics=new Set();
+  ATTEMPT_HISTORY.forEach(item=>{
+    if(subjectValue==='all' || item.subjectKey===subjectValue){
+      topics.add(item.topicLabel || 'All Topics');
+    }
+  });
+  select.innerHTML='<option value="all">All Topics</option>' + Array.from(topics.values()).sort((a,b)=>a.localeCompare(b)).map(topic=>`<option value="${escapeHtml(topic)}">${escapeHtml(topic)}</option>`).join('');
+  if([...select.options].some(option=>option.value===current)) select.value=current;
+}
+
+function getFilteredAttempts(){
+  const filters=getHistoryFilterValues();
+  return ATTEMPT_HISTORY.filter(item=>{
+    const nameMatch=!filters.student || item.studentName.toLowerCase().includes(filters.student);
+    const subjectMatch=filters.subject==='all' || item.subjectKey===filters.subject;
+    const topicMatch=filters.topic==='all' || item.topicLabel===filters.topic;
+    const modeMatch=filters.mode==='all' || item.mode===filters.mode;
+    return nameMatch && subjectMatch && topicMatch && modeMatch;
+  });
+}
+
+function renderHistorySummary(attempts){
+  const el=document.getElementById('historySummary');
+  if(!el) return;
+  if(!attempts.length){
+    el.innerHTML='<div class="history-empty">No quiz history yet for this filter. Once quizzes are submitted, the score trend will appear here.</div>';
+    return;
+  }
+  const total=attempts.length;
+  const average=Math.round(attempts.reduce((sum,item)=>sum+item.scorePercent,0)/Math.max(total,1));
+  const best=Math.max(...attempts.map(item=>item.scorePercent));
+  const latest=attempts[0];
+  el.innerHTML=`
+    <div class="history-pill"><strong>${total}</strong><span>Total Attempts</span></div>
+    <div class="history-pill"><strong>${average}%</strong><span>Average Score</span></div>
+    <div class="history-pill"><strong>${best}%</strong><span>Best Score</span></div>
+    <div class="history-pill"><strong>${escapeHtml(fmt(latest.timeUsedSeconds))}</strong><span>Latest Time Used</span></div>
+  `;
+}
+
+function renderHistorySubjectGroups(attempts){
+  const wrap=document.getElementById('historySubjectList');
+  if(!wrap) return;
+  if(!attempts.length){
+    wrap.innerHTML='<div class="history-empty">Subject summaries will appear here after quiz attempts are saved.</div>';
+    return;
+  }
+  const groups=new Map();
+  attempts.forEach(item=>{
+    const key=item.subjectKey;
+    const row=groups.get(key) || {label:item.subjectLabel,attempts:0,totalScore:0,best:0,totalQuestions:0};
+    row.attempts++;
+    row.totalScore+=item.scorePercent;
+    row.best=Math.max(row.best,item.scorePercent);
+    row.totalQuestions+=item.totalQuestions;
+    groups.set(key,row);
+  });
+  wrap.innerHTML=Array.from(groups.values())
+    .sort((a,b)=>(b.totalScore/b.attempts)-(a.totalScore/a.attempts))
+    .map(group=>{
+      const avg=Math.round(group.totalScore/Math.max(group.attempts,1));
+      return `
+        <div class="history-item">
+          <div class="history-item-top">
+            <div>
+              <h4>${escapeHtml(group.label)}</h4>
+              <div class="muted">${group.attempts} attempt(s) • ${group.totalQuestions} question(s) answered</div>
+            </div>
+            <div class="history-score">${avg}%</div>
+          </div>
+          <div class="history-mini-grid">
+            <div class="history-mini-stat"><strong>${avg}%</strong><span>Average</span></div>
+            <div class="history-mini-stat"><strong>${group.best}%</strong><span>Best</span></div>
+            <div class="history-mini-stat"><strong>${group.attempts}</strong><span>Attempts</span></div>
+          </div>
+        </div>`;
+    }).join('');
+}
+
+function renderHistoryTopicGroups(attempts){
+  const wrap=document.getElementById('historyTopicList');
+  if(!wrap) return;
+  if(!attempts.length){
+    wrap.innerHTML='<div class="history-empty">Topic performance appears here once there is quiz history.</div>';
+    return;
+  }
+  const groups=new Map();
+  attempts.forEach(item=>{
+    const key=`${item.subjectKey}__${item.topicLabel}`;
+    const row=groups.get(key) || {label:item.topicLabel,subject:item.subjectLabel,attempts:0,totalScore:0,best:0};
+    row.attempts++;
+    row.totalScore+=item.scorePercent;
+    row.best=Math.max(row.best,item.scorePercent);
+    groups.set(key,row);
+  });
+  wrap.innerHTML=Array.from(groups.values())
+    .sort((a,b)=>(b.totalScore/b.attempts)-(a.totalScore/a.attempts))
+    .slice(0,24)
+    .map(group=>{
+      const avg=Math.round(group.totalScore/Math.max(group.attempts,1));
+      return `
+        <div class="history-item">
+          <div class="history-item-top">
+            <div>
+              <h4>${escapeHtml(group.label)}</h4>
+              <div class="muted">${escapeHtml(group.subject)} • ${group.attempts} attempt(s)</div>
+            </div>
+            <div class="history-score">${avg}%</div>
+          </div>
+          <div class="history-mini-grid">
+            <div class="history-mini-stat"><strong>${avg}%</strong><span>Average</span></div>
+            <div class="history-mini-stat"><strong>${group.best}%</strong><span>Best</span></div>
+          </div>
+        </div>`;
+    }).join('');
+}
+
+function renderAttemptHistoryList(attempts){
+  const wrap=document.getElementById('historyAttemptList');
+  if(!wrap) return;
+  if(!attempts.length){
+    wrap.innerHTML='<div class="history-empty">No attempts found for the current filter.</div>';
+    return;
+  }
+  wrap.innerHTML=attempts
+    .sort((a,b)=>new Date(b.submittedAt)-new Date(a.submittedAt))
+    .map(item=>`
+      <div class="history-item">
+        <div class="history-item-top">
+          <div>
+            <h4>${escapeHtml(item.studentName)} • ${escapeHtml(item.subjectLabel)}</h4>
+            <div class="muted">${escapeHtml(item.topicLabel)} • ${item.mode==='cbt' ? 'CBT Mode' : 'Practice Mode'} • ${escapeHtml(localTimeLabel(item.submittedAt))}</div>
+          </div>
+          <div class="history-score">${item.scorePercent}%</div>
+        </div>
+        <div class="history-tags">
+          <span class="history-tag">${item.correct}/${item.totalQuestions} correct</span>
+          <span class="history-tag">${escapeHtml(fmt(item.timeUsedSeconds))}</span>
+          <span class="history-tag">${escapeHtml(item.status==='time-up' ? 'Time Up' : 'Submitted')}</span>
+        </div>
+      </div>
+    `).join('');
+}
+
+function renderHistoryScreen(){
+  populateHistorySubjectFilter(document.getElementById('historySubjectFilter')?.value || 'all');
+  populateHistoryTopicFilter(document.getElementById('historyTopicFilter')?.value || 'all');
+  const attempts=getFilteredAttempts();
+  renderHistorySummary(attempts);
+  renderHistorySubjectGroups(attempts);
+  renderHistoryTopicGroups(attempts);
+  renderAttemptHistoryList(attempts);
+}
+
+function openPerformanceHistory(prefillCurrentStudent=false){
+  const studentInput=document.getElementById('historyStudentFilter');
+  const currentName=(document.getElementById('studentName')?.value || getSavedStudentName() || '').trim();
+  if(studentInput && prefillCurrentStudent && currentName){
+    studentInput.value=currentName;
+  }
+  renderHistoryScreen();
+  show('historyScreen');
 }
 
 function updateGlobalHomeButton(){
@@ -1877,6 +2288,7 @@ function initQuizApp(){
   setCurrentSubject(getInitialSubjectKey());
   timePerQuestion=getSavedTime();
   document.getElementById('timePerQuestion').value=timePerQuestion;
+  document.getElementById('studentName').value=getSavedStudentName();
   buildSubjectSelect();
   updateTopicSelect();
   syncAdminSelectors();
@@ -1935,6 +2347,25 @@ function initQuizApp(){
   document.getElementById('adminPinInput').addEventListener('keydown',event=>{
     if(event.key==='Enter') unlockAdmin();
   });
+
+  document.getElementById('historyStudentFilter').addEventListener('input',()=>{
+    renderHistoryScreen();
+  });
+
+  document.getElementById('historySubjectFilter').addEventListener('change',()=>{
+    populateHistoryTopicFilter('all');
+    renderHistoryScreen();
+  });
+
+  document.getElementById('historyTopicFilter').addEventListener('change',()=>{
+    renderHistoryScreen();
+  });
+
+  document.getElementById('historyModeFilter').addEventListener('change',()=>{
+    renderHistoryScreen();
+  });
+
+  renderHistoryScreen();
 
   initRemoteSync();
   updateGlobalHomeButton();

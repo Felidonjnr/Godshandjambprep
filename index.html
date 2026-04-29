@@ -113,6 +113,17 @@ body::before{content:'';position:fixed;inset:0;background:
   .admin-grid,.admin-row,.admin-row-4{grid-template-columns:1fr;}
   .admin-panel{padding:.95rem;}
 }
+
+.exam-entry-card{max-width:560px;}
+.exam-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.9rem;margin-top:1rem;}
+.exam-choice{background:var(--card2);border:1.5px solid rgba(245,166,35,0.2);border-radius:18px;padding:1.2rem 1rem;text-align:left;color:var(--text);cursor:pointer;transition:transform .15s,border-color .2s,background .2s;}
+.exam-choice:hover{transform:translateY(-2px);border-color:var(--gold);background:rgba(245,166,35,0.08);}
+.exam-choice strong{display:block;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:1px;color:var(--gold);margin-bottom:.3rem;}
+.exam-choice span{display:block;font-size:.86rem;line-height:1.45;color:var(--muted);}
+.exam-top-badge{display:inline-flex;align-items:center;gap:.45rem;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.22);border-radius:999px;padding:.38rem .9rem;font-size:.8rem;color:var(--gold);margin-top:.8rem;}
+.exam-top-badge::before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.9;}
+.home-card.is-empty .btn-start{opacity:.55;pointer-events:none;}
+@media (max-width:640px){.exam-grid{grid-template-columns:1fr;}}
 .btn-start{width:100%;padding:1rem;background:linear-gradient(135deg,var(--gold),var(--gold2));
   border:none;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:1.4rem;
   letter-spacing:2px;color:#000;cursor:pointer;transition:transform .15s,box-shadow .15s;
@@ -231,39 +242,6 @@ body::before{content:'';position:fixed;inset:0;background:
 @media (max-width:520px){
   .global-home-btn{top:.8rem;right:.8rem;padding:.65rem .9rem;font-size:.82rem;}
 }
-
-.btn-row + .btn-row{margin-top:.8rem;}
-#historyScreen{padding:1.5rem 1rem;overflow-y:auto;justify-content:flex-start;}
-.history-shell{width:100%;max-width:980px;margin:0 auto;}
-.history-card{background:var(--card);border:1px solid rgba(245,166,35,0.18);border-radius:var(--radius);padding:1.3rem;box-shadow:var(--shadow);}
-.history-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem;}
-.history-head h2{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;color:var(--gold);line-height:1;}
-.history-head p{color:var(--muted);font-size:.9rem;line-height:1.55;margin-top:.4rem;}
-.history-filter-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;margin:1rem 0 1.2rem;}
-.history-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin-bottom:1rem;}
-.history-pill{background:var(--card2);border-radius:14px;padding:.95rem;border:1px solid rgba(255,255,255,0.06);}
-.history-pill strong{display:block;font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold);letter-spacing:1px;}
-.history-pill span{font-size:.78rem;color:var(--muted);}
-.history-section{margin-top:1.15rem;}
-.history-group-list,.history-attempt-list{display:flex;flex-direction:column;gap:.7rem;}
-.history-item{background:var(--card2);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:.95rem 1rem;}
-.history-item-top{display:flex;justify-content:space-between;gap:.8rem;align-items:flex-start;}
-.history-item h4{font-size:1rem;color:var(--text);margin-bottom:.25rem;}
-.history-item .muted{color:var(--muted);font-size:.8rem;line-height:1.45;}
-.history-tags{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.55rem;}
-.history-tag{display:inline-flex;align-items:center;padding:.22rem .6rem;border-radius:999px;background:rgba(245,166,35,0.10);border:1px solid rgba(245,166,35,0.25);font-size:.74rem;font-weight:700;color:var(--gold);}
-.history-score{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:1px;color:var(--gold);white-space:nowrap;}
-.history-empty{padding:1rem;border-radius:14px;background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.08);color:var(--muted);font-size:.9rem;line-height:1.6;}
-.history-mini-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:.55rem;margin-top:.75rem;}
-.history-mini-stat{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:.65rem .75rem;}
-.history-mini-stat strong{display:block;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--text);}
-.history-mini-stat span{font-size:.72rem;color:var(--muted);}
-@media (max-width:640px){
-  .history-card{padding:1rem;}
-  .history-item-top{flex-direction:column;}
-  .history-score{font-size:1.5rem;}
-}
-
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:rgba(245,166,35,0.3);border-radius:2px;}
 </style>
@@ -272,12 +250,38 @@ body::before{content:'';position:fixed;inset:0;background:
 
 <button class="global-home-btn" id="globalHomeBtn" type="button" onclick="goHomeUniversal()">🏠 Home</button>
 
+<!-- EXAM ENTRY -->
+<div class="screen active" id="examEntryScreen">
+  <div class="logo-wrap">
+    <div class="logo-icon">✝️</div>
+    <div class="brand">Godshand Tutorials</div>
+    <div class="tagline">Choose your exam path first</div>
+    <div class="exam-top-badge">Separate JAMB and WAEC experience</div>
+  </div>
+  <div class="home-card exam-entry-card">
+    <h2>🎯 Select Exam Mode</h2>
+    <div class="form-help">Start by choosing the exam family. After that, the whole setup page will focus on only that exam to avoid confusion.</div>
+    <div class="exam-grid">
+      <button class="exam-choice" type="button" onclick="selectExamBoard('jamb')">
+        <strong>JAMB</strong>
+        <span>Use JAMB-only subjects, topics, timer settings, and CBT practice from your JAMB bank.</span>
+      </button>
+      <button class="exam-choice" type="button" onclick="selectExamBoard('waec')">
+        <strong>WAEC</strong>
+        <span>Use WAEC-only subjects and practice flow from your WAEC bank so the page stays focused.</span>
+      </button>
+    </div>
+    <div class="form-help" style="margin-top:1rem;">Tip: name your subjects clearly as <strong>JAMB Physics</strong>, <strong>WAEC Chemistry</strong>, <strong>WAEC Biology</strong>, and so on.</div>
+  </div>
+</div>
+
 <!-- HOME -->
-<div class="screen active" id="homeScreen">
+<div class="screen" id="homeScreen">
   <div class="logo-wrap">
     <div class="logo-icon">✝️</div>
     <div class="brand">Godshand Tutorials</div>
     <div class="tagline" id="homeTagline">JAMB Physics • Live Practice Mode</div>
+    <div class="exam-top-badge" id="examBoardBadge">JAMB Mode</div>
   </div>
   <div class="home-card">
     <div class="stats-row">
@@ -285,18 +289,18 @@ body::before{content:'';position:fixed;inset:0;background:
       <div class="stat-pill"><div class="stat-num" id="statTopics">7</div><div class="stat-lbl">Topics</div></div>
       <div class="stat-pill"><div class="stat-num" id="statPerQ">30s</div><div class="stat-lbl" id="statTimeLabel">Per Q</div></div>
     </div>
-    <h2>⚡ Start Practice Session</h2>
+    <h2 id="homeHeading">⚡ JAMB Practice Setup</h2>
     <div class="form-group">
       <label>Your Name</label>
       <input type="text" id="studentName" placeholder="Enter your name…" autocomplete="off"/>
     </div>
     <div class="form-group">
-      <label>Select Subject</label>
+      <label id="subjectLabelText">Select JAMB Subject</label>
       <select id="subjectSelect"></select>
-      <div class="form-help">Physics is already loaded. You can now add Chemistry, Biology, and more topics from the manager below.</div>
+      <div class="form-help" id="subjectHelp">Only JAMB subjects are showing here. Add more JAMB subjects from the manager below.</div>
     </div>
     <div class="form-group">
-      <label>Select Mode</label>
+      <label id="modeLabelText">Select Mode</label>
       <select id="modeSelect">
         <option value="practice">⚡ Live Practice Mode</option>
         <option value="cbt">🖥️ CBT Practice Mode (40 Minutes)</option>
@@ -314,8 +318,8 @@ body::before{content:'';position:fixed;inset:0;background:
     </div>
     <div class="home-actions">
       <button class="btn-start" id="startMainBtn" onclick="startSelectedMode()">START QUIZ →</button>
-      <button class="btn-ghost" type="button" onclick="openPerformanceHistory()">📈 REVIEW PERFORMANCE</button>
-      <button class="btn-ghost" type="button" onclick="openAdmin()">⚙️ MANAGE QUESTION BANK</button>
+      <button class="btn-ghost" type="button" id="manageBankBtn" onclick="openAdmin()">⚙️ MANAGE JAMB QUESTION BANK</button>
+      <button class="btn-ghost" type="button" id="changeExamBtn" onclick="openExamChooser()">🔀 CHANGE EXAM</button>
     </div>
     <div class="sync-strip">
       <div class="sync-pill local" id="cloudStatusPill">Device Only</div>
@@ -353,8 +357,8 @@ body::before{content:'';position:fixed;inset:0;background:
     <div class="admin-head">
       <div>
         <div class="admin-kicker">Admin Setup</div>
-        <h3>Question Bank Manager</h3>
-        <p>Add new subjects, add topics under each subject, enter questions manually, or import a JSON bank for Chemistry, Biology, and more.</p>
+        <h3 id="adminTitle">JAMB Question Bank Manager</h3>
+        <p id="adminDesc">Add new JAMB subjects, add topics under each subject, enter questions manually, or import a JSON bank without mixing it with WAEC.</p>
       </div>
       <button class="icon-btn" type="button" onclick="closeAdmin()">✕</button>
     </div>
@@ -551,68 +555,9 @@ body::before{content:'';position:fixed;inset:0;background:
       <button class="btn-outline" onclick="toggleReview()">📋 Review</button>
       <button class="btn-solid" onclick="goHome()">🔁 Try Again</button>
     </div>
-    <div class="btn-row">
-      <button class="btn-outline" type="button" onclick="openPerformanceHistory(true)">📈 Performance History</button>
-    </div>
     <div class="review-section" id="reviewSec" style="display:none;">
       <div class="review-title">Answer Review</div>
       <div id="reviewList"></div>
-    </div>
-  </div>
-</div>
-
-<!-- HISTORY -->
-<div class="screen" id="historyScreen">
-  <div class="history-shell">
-    <div class="history-card">
-      <div class="history-head">
-        <div>
-          <div class="greeting">Performance Review</div>
-          <h2>QUIZ HISTORY</h2>
-          <p>Track performance over time by subject, topic, mode, score, and date. This section updates automatically whenever a quiz is submitted.</p>
-        </div>
-        <button class="btn-outline" type="button" onclick="goHome()">← Back Home</button>
-      </div>
-
-      <div class="history-filter-grid">
-        <div class="form-group">
-          <label>Student Name Filter</label>
-          <input type="text" id="historyStudentFilter" placeholder="e.g. Blessing" autocomplete="off"/>
-        </div>
-        <div class="form-group">
-          <label>Subject</label>
-          <select id="historySubjectFilter"></select>
-        </div>
-        <div class="form-group">
-          <label>Topic</label>
-          <select id="historyTopicFilter"></select>
-        </div>
-        <div class="form-group">
-          <label>Mode</label>
-          <select id="historyModeFilter">
-            <option value="all">All Modes</option>
-            <option value="practice">Practice</option>
-            <option value="cbt">CBT</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="history-summary" id="historySummary"></div>
-
-      <div class="history-section">
-        <div class="review-title">Subject Performance</div>
-        <div class="history-group-list" id="historySubjectList"></div>
-      </div>
-
-      <div class="history-section">
-        <div class="review-title">Topic Performance</div>
-        <div class="history-group-list" id="historyTopicList"></div>
-      </div>
-
-      <div class="history-section">
-        <div class="review-title">Recent Quiz Attempts</div>
-        <div class="history-attempt-list" id="historyAttemptList"></div>
-      </div>
     </div>
   </div>
 </div>
@@ -731,12 +676,19 @@ const Q=[
 {t:6,yr:"JAMB Past Q",q:"Relative density of paraffin is 0.8. Bottle mass: 20 g empty, 70 g full of paraffin. Mass of water filling same bottle is",o:["40 g","62.5 g","50 g","80 g"],a:1,exp:"Mass of paraffin = 70−20 = 50 g. RD = 50/m_water = 0.8 → m_water = 62.5 g."}
 ];
 
-const BASE_SUBJECT_BANK={
-  physics:{
-    label:"JAMB Physics",
-    tagline:"JAMB Physics • Live Practice Mode",
-    topics:TOPICS,
-    questions:Q
+const BASE_EXAM_BANK={
+  jamb:{
+    subjects:{
+      physics:{
+        label:"JAMB Physics",
+        tagline:"JAMB Physics • Live Practice Mode",
+        topics:TOPICS,
+        questions:Q
+      }
+    }
+  },
+  waec:{
+    subjects:{}
   }
 };
 
@@ -758,16 +710,17 @@ const REMOTE_SYNC_INLINE={
 
 
 // ─── STATE ───
-const STORAGE_KEY_BANK='godshandQuizQuestionBankV2';
-const STORAGE_KEY_HISTORY='godshandQuizAttemptHistoryV1';
+const STORAGE_KEY_BANK='godshandQuizQuestionBankV3';
+const LEGACY_STORAGE_KEY_BANK='godshandQuizQuestionBankV2';
 const ADMIN_PIN_KEY='godshandQuizAdminPinV1';
-const MAX_HISTORY_ITEMS=250;
+const EXAM_BOARD_KEY='godshandQuizExamBoardV1';
 let ACTIVE_REMOTE_SYNC=null;
 let cloudFns=null;
 let cloudSaveTimer=null;
 const CLOUD_STATE={enabled:false,ready:false,mode:'local',note:'',error:'',docRef:null,unsubscribe:null,pinOverride:null,lastUpdatedAt:''};
-let SUBJECT_BANK=loadSubjectBank();
-let ATTEMPT_HISTORY=loadAttemptHistory();
+let activeExamBoard=getSavedExamBoard();
+let EXAM_BANK=loadExamBank();
+let SUBJECT_BANK=getActiveSubjectBank(activeExamBoard);
 let pool=[],idx=0,correct=0,missed=[];
 let qTimer=null,sessTimer=null,timeLeft=30,elapsed=0;
 let name='Student';
@@ -777,9 +730,6 @@ let timePerQuestion=30;
 let adminUnlocked=false;
 let quizMode='practice';
 let userAnswers=[];
-let quizStartedAt='';
-let activeTopicContext='all';
-let quizFinalized=false;
 const CBT_TOTAL_SECONDS=40*60;
 const CBT_QUESTION_LIMIT=40;
 
@@ -826,76 +776,6 @@ function safeStorageRemove(key){
   try{localStorage.removeItem(key);}catch(e){}
   removeCookieValue(key);
 }
-function safeStorageRemove(key){
-  try{localStorage.removeItem(key);}catch(e){}
-  removeCookieValue(key);
-}
-function localOnlyGet(key){
-  try{return localStorage.getItem(key);}catch(e){return null;}
-}
-function localOnlySet(key,value){
-  try{localStorage.setItem(key,value);}catch(e){}
-}
-function normalizeAttempt(raw){
-  if(!raw || typeof raw!=='object') return null;
-  const totalQuestions=Math.max(0, Number(raw.totalQuestions ?? 0));
-  const correctAnswers=Math.max(0, Number(raw.correct ?? 0));
-  const wrongAnswers=Math.max(0, Number(raw.wrong ?? Math.max(totalQuestions-correctAnswers,0)));
-  const scorePercent=Math.max(0, Math.min(100, Number(raw.scorePercent ?? 0)));
-  const topicsIncluded=Array.isArray(raw.topicsIncluded)
-    ? [...new Set(raw.topicsIncluded.map(x=>String(x??'').trim()).filter(Boolean))]
-    : [];
-  const submittedAt=String(raw.submittedAt || raw.createdAt || '').trim() || new Date().toISOString();
-  return {
-    attemptId:String(raw.attemptId || `${Date.now()}-${Math.random().toString(36).slice(2,8)}`),
-    studentName:String(raw.studentName || 'Student').trim() || 'Student',
-    mode:String(raw.mode || 'practice').trim() === 'cbt' ? 'cbt' : 'practice',
-    subjectKey:String(raw.subjectKey || 'subject').trim() || 'subject',
-    subjectLabel:String(raw.subjectLabel || raw.subjectKey || 'Subject').trim() || 'Subject',
-    topicLabel:String(raw.topicLabel || 'All Topics').trim() || 'All Topics',
-    topicsIncluded,
-    scorePercent:Math.round(scorePercent),
-    correct:correctAnswers,
-    wrong:wrongAnswers,
-    totalQuestions,
-    timeUsedSeconds:Math.max(0, Number(raw.timeUsedSeconds ?? 0)),
-    timePerQuestion:Math.max(0, Number(raw.timePerQuestion ?? 0)),
-    startedAt:String(raw.startedAt || submittedAt),
-    submittedAt,
-    status:String(raw.status || 'completed').trim() || 'completed'
-  };
-}
-function mergeAttemptHistory(primary=[],secondary=[]){
-  const merged=new Map();
-  [...(Array.isArray(secondary)?secondary:[]), ...(Array.isArray(primary)?primary:[])].forEach(item=>{
-    const normalized=normalizeAttempt(item);
-    if(normalized) merged.set(normalized.attemptId, normalized);
-  });
-  return Array.from(merged.values())
-    .sort((a,b)=>new Date(b.submittedAt||0)-new Date(a.submittedAt||0))
-    .slice(0, MAX_HISTORY_ITEMS);
-}
-function loadAttemptHistory(){
-  const raw=localOnlyGet(STORAGE_KEY_HISTORY) || safeStorageGet(STORAGE_KEY_HISTORY);
-  if(!raw) return [];
-  try{
-    const parsed=JSON.parse(raw);
-    return mergeAttemptHistory(parsed, []);
-  }catch(error){
-    return [];
-  }
-}
-function persistAttemptHistory(reason='attempt-history-updated'){
-  localOnlySet(STORAGE_KEY_HISTORY, JSON.stringify(ATTEMPT_HISTORY));
-  queueCloudSave(reason);
-}
-function getSavedStudentName(){
-  return String(safeStorageGet('quizLastStudentName') || '').trim();
-}
-function saveStudentName(value){
-  const clean=String(value || '').trim();
-  if(clean) safeStorageSet('quizLastStudentName', clean);
-}
 function getAdminPin(){return CLOUD_STATE.pinOverride || safeStorageGet(ADMIN_PIN_KEY) || '1234';}
 function showAdminPinMsg(message,type='err'){
   const el=document.getElementById('adminPinMsg');
@@ -915,7 +795,80 @@ function getSavedTime(){
   const raw=parseInt(safeStorageGet('quizDefaultTime')||'30',10);
   return Number.isFinite(raw)?clamp(raw,5,300):30;
 }
-function getBaseBank(){return deepClone(BASE_SUBJECT_BANK);}
+function getSavedExamBoard(){
+  const raw=String(safeStorageGet(EXAM_BOARD_KEY)||'jamb').toLowerCase();
+  return raw==='waec' ? 'waec' : 'jamb';
+}
+function getExamBoardLabel(board=activeExamBoard){
+  return board==='waec' ? 'WAEC' : 'JAMB';
+}
+function createEmptyExamBank(){
+  return {
+    jamb:{subjects:{}},
+    waec:{subjects:{}}
+  };
+}
+function getBaseExamBank(){
+  return deepClone(BASE_EXAM_BANK);
+}
+function ensureExamBucket(examBank,board){
+  const safeBoard=board==='waec' ? 'waec' : 'jamb';
+  if(!examBank[safeBoard] || typeof examBank[safeBoard]!=='object') examBank[safeBoard]={subjects:{}};
+  if(!examBank[safeBoard].subjects || typeof examBank[safeBoard].subjects!=='object') examBank[safeBoard].subjects={};
+  return examBank[safeBoard].subjects;
+}
+function getActiveSubjectBank(board=activeExamBoard){
+  return ensureExamBucket(EXAM_BANK, board);
+}
+function syncSubjectBankReference(){
+  SUBJECT_BANK=getActiveSubjectBank(activeExamBoard);
+  return SUBJECT_BANK;
+}
+function hasExplicitExamMarker(subjectKey,subject){
+  const probe=`${subjectKey||''} ${subject?.label||''} ${subject?.tagline||''}`.toLowerCase();
+  return /(jamb|waec)/.test(probe);
+}
+function inferExamBoard(subjectKey,subject,defaultBoard='jamb'){
+  const probe=`${subjectKey||''} ${subject?.label||''} ${subject?.tagline||''}`.toLowerCase();
+  if(/waec/.test(probe)) return 'waec';
+  if(/jamb/.test(probe)) return 'jamb';
+  return defaultBoard==='waec' ? 'waec' : 'jamb';
+}
+function getBoardSubjectEntries(board=activeExamBoard){
+  return Object.entries(ensureExamBucket(EXAM_BANK, board));
+}
+function getBoardSubjectKeys(board=activeExamBoard){
+  return getBoardSubjectEntries(board).map(([key])=>key);
+}
+function getBoardSubjectCount(board=activeExamBoard){
+  return getBoardSubjectEntries(board).length;
+}
+function getBoardTotalQuestions(board=activeExamBoard){
+  return getBoardSubjectEntries(board).reduce((sum,[,subject])=>sum + (subject.questions?.length||0),0);
+}
+function getBoardFallbackKey(board=activeExamBoard){
+  const preferred=Object.keys(ensureExamBucket(EXAM_BANK, board))[0];
+  if(preferred) return preferred;
+  const other=board==='waec' ? 'jamb' : 'waec';
+  return Object.keys(ensureExamBucket(EXAM_BANK, other))[0] || 'physics';
+}
+function openExamChooser(){
+  closeAdmin();
+  closeAdminPin();
+  show('examEntryScreen');
+}
+function selectExamBoard(board){
+  activeExamBoard=board==='waec' ? 'waec' : 'jamb';
+  safeStorageSet(EXAM_BOARD_KEY, activeExamBoard);
+  syncSubjectBankReference();
+  const preferred=getBoardFallbackKey(activeExamBoard);
+  refreshUiFromBank(preferred);
+  syncExamBoardUI();
+  show('homeScreen');
+}
+function getBaseBank(board=activeExamBoard){
+  return deepClone(BASE_EXAM_BANK?.[board]?.subjects || {});
+}
 
 function normalizeQuestion(raw){
   if(!raw || typeof raw!=='object') return null;
@@ -978,19 +931,53 @@ function normalizeBank(raw,fallbackBank=null){
   return fallbackBank ? deepClone(fallbackBank) : {};
 }
 
-function loadSubjectBank(){
-  const fallback=getBaseBank();
-  const saved=safeStorageGet(STORAGE_KEY_BANK);
+function normalizeExamBank(raw,fallbackExamBank=null,defaultBoard='jamb'){
+  const fallback=fallbackExamBank ? deepClone(fallbackExamBank) : getBaseExamBank();
+  const examBank=createEmptyExamBank();
+  const source=(raw && raw.exams && typeof raw.exams==='object') ? raw.exams : raw;
+  if(source && typeof source==='object'){
+    const nestedBoards=['jamb','waec'].filter(board=>source[board] && typeof source[board]==='object');
+    if(nestedBoards.length){
+      nestedBoards.forEach(board=>{
+        const boardSource=(source[board] && source[board].subjects && typeof source[board].subjects==='object') ? source[board].subjects : source[board];
+        examBank[board].subjects=normalizeBank(boardSource, {});
+      });
+      if(Object.keys(examBank.jamb.subjects).length || Object.keys(examBank.waec.subjects).length){
+        if(!Object.keys(examBank.jamb.subjects).length) examBank.jamb.subjects=deepClone(fallback?.jamb?.subjects || {});
+        if(!Object.keys(examBank.waec.subjects).length) examBank.waec.subjects=deepClone(fallback?.waec?.subjects || {});
+        return examBank;
+      }
+    }
+
+    const boardHint=String(source.examBoard || source.board || source.exam || raw?.examBoard || raw?.board || raw?.exam || '').toLowerCase();
+    const flatSource=(source.subjects && typeof source.subjects==='object') ? source.subjects : source;
+    const flatBank=normalizeBank(flatSource, {});
+    if(Object.keys(flatBank).length){
+      Object.entries(flatBank).forEach(([key,subject])=>{
+        const board=(boardHint==='jamb' || boardHint==='waec') ? boardHint : inferExamBoard(key, subject, defaultBoard);
+        ensureExamBucket(examBank, board)[key]=subject;
+      });
+      if(!Object.keys(examBank.jamb.subjects).length) examBank.jamb.subjects=deepClone(fallback?.jamb?.subjects || {});
+      if(!Object.keys(examBank.waec.subjects).length) examBank.waec.subjects=deepClone(fallback?.waec?.subjects || {});
+      return examBank;
+    }
+  }
+  return fallback;
+}
+
+function loadExamBank(){
+  const fallback=getBaseExamBank();
+  const saved=safeStorageGet(STORAGE_KEY_BANK) || safeStorageGet(LEGACY_STORAGE_KEY_BANK);
   if(!saved) return fallback;
   try{
-    return normalizeBank(JSON.parse(saved), fallback);
+    return normalizeExamBank(JSON.parse(saved), fallback, 'jamb');
   }catch(e){
     return fallback;
   }
 }
 
 function persistSubjectBank(){
-  safeStorageSet(STORAGE_KEY_BANK, JSON.stringify(SUBJECT_BANK));
+  safeStorageSet(STORAGE_KEY_BANK, JSON.stringify(EXAM_BANK));
   queueCloudSave('question-bank-updated');
 }
 
@@ -1093,13 +1080,11 @@ async function writeRemoteSnapshot(reason='bank-update'){
   try{
     applyCloudStatus('syncing');
     const payload={
-      bank:{subjects:SUBJECT_BANK},
-      history:{attempts:ATTEMPT_HISTORY},
+      bank:EXAM_BANK,
       adminPin:getAdminPin(),
       meta:{
         updatedAt:new Date().toISOString(),
-        reason,
-        attemptCount:ATTEMPT_HISTORY.length
+        reason
       }
     };
     await cloudFns.setDoc(CLOUD_STATE.docRef,payload,{merge:true});
@@ -1128,6 +1113,7 @@ function refreshUiFromBank(preferredSubjectKey=null){
   updateTopicSelect();
   syncAdminSelectors();
   renderAdminSummary();
+  syncExamBoardUI();
   updateHomeStats();
 }
 
@@ -1138,16 +1124,10 @@ function applyRemotePayload(data,source='remote'){
     safeStorageSet(ADMIN_PIN_KEY, CLOUD_STATE.pinOverride);
   }
   if(data.bank){
-    SUBJECT_BANK=normalizeBank(data.bank, SUBJECT_BANK);
-    safeStorageSet(STORAGE_KEY_BANK, JSON.stringify(SUBJECT_BANK));
+    EXAM_BANK=normalizeExamBank(data.bank, EXAM_BANK, activeExamBoard);
+    syncSubjectBankReference();
+    safeStorageSet(STORAGE_KEY_BANK, JSON.stringify(EXAM_BANK));
     refreshUiFromBank(currentSubjectKey);
-  }
-  if(Array.isArray(data?.history?.attempts)){
-    ATTEMPT_HISTORY=mergeAttemptHistory(ATTEMPT_HISTORY, data.history.attempts);
-    localOnlySet(STORAGE_KEY_HISTORY, JSON.stringify(ATTEMPT_HISTORY));
-    if(document.getElementById('historyScreen')?.classList.contains('active')){
-      renderHistoryScreen();
-    }
   }
   const stamp=data?.meta?.updatedAt;
   if(stamp) CLOUD_STATE.lastUpdatedAt=stamp;
@@ -1246,28 +1226,46 @@ function updateDiagnosticsPanel(){
     'Firestore ready: ' + (CLOUD_STATE.ready ? 'Yes ✓' : 'No ✗'),
     'Storage mode: ' + (CLOUD_STATE.mode || 'unknown').toUpperCase(),
     'Last sync: ' + (CLOUD_STATE.lastUpdatedAt ? localTimeLabel(CLOUD_STATE.lastUpdatedAt) : 'Never'),
-    'Error: ' + (CLOUD_STATE.error || 'None'),
-    'Saved attempts: ' + ATTEMPT_HISTORY.length
+    'Error: ' + (CLOUD_STATE.error || 'None')
   ];
   panel.textContent=lines.join('\n');
   panel.style.display='block';
 }
 
 function setCurrentSubject(key){
-  const keys=Object.keys(SUBJECT_BANK);
-  currentSubjectKey=SUBJECT_BANK[key]?key:(keys[0]||'physics');
-  currentSubject=SUBJECT_BANK[currentSubjectKey] || {label:'No Subject',tagline:'',topics:[],questions:[]};
+  const allowed=getBoardSubjectKeys(activeExamBoard);
+  const fallback=allowed[0] || Object.keys(SUBJECT_BANK)[0] || 'physics';
+  currentSubjectKey=(SUBJECT_BANK[key] && (!allowed.length || allowed.includes(key))) ? key : fallback;
+  currentSubject=SUBJECT_BANK[currentSubjectKey] || {
+    label:`No ${getExamBoardLabel(activeExamBoard)} Subject Yet`,
+    tagline:`${getExamBoardLabel(activeExamBoard)} Practice Mode`,
+    topics:[],
+    questions:[]
+  };
 }
 
-function countTotalQuestions(){
-  return Object.values(SUBJECT_BANK).reduce((sum,subject)=>sum + (subject.questions?.length||0),0);
+function countTotalQuestions(board=null){
+  const entries=board ? getBoardSubjectEntries(board) : Object.entries(SUBJECT_BANK);
+  return entries.reduce((sum,[,subject])=>sum + (subject.questions?.length||0),0);
 }
 
 function populateSubjectSelect(selectEl,selectedValue){
   if(!selectEl) return;
   const previous=selectedValue ?? selectEl.value;
+  const entries=getBoardSubjectEntries(activeExamBoard);
   selectEl.innerHTML='';
-  Object.entries(SUBJECT_BANK).forEach(([key,subject])=>{
+  if(!entries.length){
+    const opt=document.createElement('option');
+    opt.value='';
+    opt.textContent=`No ${getExamBoardLabel(activeExamBoard)} subjects yet`;
+    opt.disabled=true;
+    opt.selected=true;
+    selectEl.appendChild(opt);
+    selectEl.disabled=true;
+    return;
+  }
+  selectEl.disabled=false;
+  entries.forEach(([key,subject])=>{
     const opt=document.createElement('option');
     opt.value=key;
     opt.textContent=subject.label;
@@ -1284,7 +1282,17 @@ function populateTopicSelect(selectEl,subjectKey,selectedValue,includeAll=true){
   if(!selectEl) return;
   const subject=SUBJECT_BANK[subjectKey];
   selectEl.innerHTML='';
-  if(!subject) return;
+  if(!subject){
+    const opt=document.createElement('option');
+    opt.value='';
+    opt.textContent='No topics yet';
+    opt.disabled=true;
+    opt.selected=true;
+    selectEl.appendChild(opt);
+    selectEl.disabled=true;
+    return;
+  }
+  selectEl.disabled=false;
   if(includeAll){
     const allOpt=document.createElement('option');
     allOpt.value='all';
@@ -1313,6 +1321,48 @@ function buildSubjectSelect(){
   setCurrentSubject(select.value || currentSubjectKey);
 }
 
+function syncExamBoardUI(){
+  const boardLabel=getExamBoardLabel(activeExamBoard);
+  const hasSubjects=getBoardSubjectCount(activeExamBoard)>0;
+  const otherLabel=activeExamBoard==='waec' ? 'JAMB' : 'WAEC';
+  const homeCard=document.querySelector('#homeScreen .home-card');
+  if(homeCard) homeCard.classList.toggle('is-empty', !hasSubjects);
+  const badge=document.getElementById('examBoardBadge');
+  if(badge) badge.textContent=`${boardLabel} Mode`;
+  const heading=document.getElementById('homeHeading');
+  if(heading) heading.textContent=activeExamBoard==='waec' ? '📝 WAEC Practice Setup' : '⚡ JAMB Practice Setup';
+  const subjectLabel=document.getElementById('subjectLabelText');
+  if(subjectLabel) subjectLabel.textContent=`Select ${boardLabel} Subject`;
+  const subjectHelp=document.getElementById('subjectHelp');
+  if(subjectHelp){
+    subjectHelp.innerHTML=hasSubjects
+      ? `Only <strong>${boardLabel}</strong> subjects are showing here so the page stays focused. Add more ${boardLabel} subjects from the manager below.`
+      : `No <strong>${boardLabel}</strong> subjects are loaded yet. Open the manager and add subjects like <strong>${boardLabel} Physics</strong>, <strong>${boardLabel} Chemistry</strong>, or <strong>${boardLabel} Biology</strong>.`;
+  }
+  const manageBtn=document.getElementById('manageBankBtn');
+  if(manageBtn) manageBtn.textContent=`⚙️ MANAGE ${boardLabel} QUESTION BANK`;
+  const changeBtn=document.getElementById('changeExamBtn');
+  if(changeBtn) changeBtn.textContent=`🔀 SWITCH TO ${otherLabel}`;
+  const adminTitle=document.getElementById('adminTitle');
+  if(adminTitle) adminTitle.textContent=`${boardLabel} Question Bank Manager`;
+  const adminDesc=document.getElementById('adminDesc');
+  if(adminDesc) adminDesc.textContent=`Add new ${boardLabel} subjects, add topics under each subject, enter questions manually, or import a JSON bank without mixing it with ${otherLabel}.`;
+  const subjectInput=document.getElementById('newSubjectLabel');
+  if(subjectInput) subjectInput.placeholder=`e.g. ${boardLabel} Physics`;
+  const taglineInput=document.getElementById('newSubjectTagline');
+  if(taglineInput) taglineInput.placeholder=`e.g. ${boardLabel} Physics • Live Practice Mode`;
+  const modeOne=document.querySelector('#modeSelect option[value="practice"]');
+  const modeTwo=document.querySelector('#modeSelect option[value="cbt"]');
+  if(modeOne) modeOne.textContent=activeExamBoard==='waec' ? '📝 Objective Practice Mode' : '⚡ Live Practice Mode';
+  if(modeTwo) modeTwo.textContent=activeExamBoard==='waec' ? '🖥️ Objective CBT Mode (40 Minutes)' : '🖥️ CBT Practice Mode (40 Minutes)';
+  document.getElementById('homeTagline').textContent=hasSubjects ? currentSubject.tagline : `${boardLabel} Practice Mode`;
+  const startBtn=document.getElementById('startMainBtn');
+  if(startBtn){
+    startBtn.disabled=!hasSubjects;
+    startBtn.title=hasSubjects ? '' : `Add a ${boardLabel} subject first`;
+  }
+}
+
 function updateTopicSelect(){
   const subjectSelect=document.getElementById('subjectSelect');
   const topicSelect=document.getElementById('topicSelect');
@@ -1322,6 +1372,7 @@ function updateTopicSelect(){
   if(topicSelect) topicSelect.dataset.lastValue=topicSelect.value;
   document.getElementById('homeTagline').textContent=currentSubject.tagline;
   document.getElementById('quizBrand').textContent=currentSubject.label;
+  syncExamBoardUI();
   updateHomeStats();
 }
 
@@ -1352,15 +1403,19 @@ function updateModeUI(){
     timeGroup?.classList.add('is-disabled');
     if(topicSelect) topicSelect.disabled=true;
     if(timeInput) timeInput.disabled=true;
-    if(startBtn) startBtn.textContent='START CBT MODE →';
-    if(modeHelp) modeHelp.textContent='CBT mode uses the selected subject only, draws up to 40 random questions from all topics, and runs on one fixed 40-minute countdown.';
+    if(startBtn) startBtn.textContent=activeExamBoard==='waec' ? 'START WAEC CBT →' : 'START CBT MODE →';
+    if(modeHelp) modeHelp.textContent=activeExamBoard==='waec'
+      ? 'WAEC mode here stays objective-only for now, uses the selected WAEC subject only, draws up to 40 random questions from all topics, and runs on one fixed 40-minute countdown.'
+      : 'CBT mode uses the selected subject only, draws up to 40 random questions from all topics, and runs on one fixed 40-minute countdown.';
   }else{
     topicGroup?.classList.remove('is-disabled');
     timeGroup?.classList.remove('is-disabled');
     if(topicSelect) topicSelect.disabled=false;
     if(timeInput) timeInput.disabled=false;
-    if(startBtn) startBtn.textContent='START QUIZ →';
-    if(modeHelp) modeHelp.textContent='Practice mode uses the selected topic and your saved per-question timer.';
+    if(startBtn) startBtn.textContent=activeExamBoard==='waec' ? 'START WAEC QUIZ →' : 'START QUIZ →';
+    if(modeHelp) modeHelp.textContent=activeExamBoard==='waec'
+      ? 'WAEC practice mode here stays objective-only for now and uses the selected topic with your saved per-question timer.'
+      : 'Practice mode uses the selected topic and your saved per-question timer.';
   }
   updateHomeStats();
 }
@@ -1381,6 +1436,24 @@ function updateHomeStats(){
   if(timeLabel) timeLabel.textContent='Per Q';
 }
 
+function renderAdminSummary(){
+  const wrap=document.getElementById('adminSummary');
+  if(!wrap) return;
+  const entries=getBoardSubjectEntries(activeExamBoard);
+  const subjectCount=entries.length;
+  const totalQuestions=entries.reduce((sum,[,subject])=>sum + (subject.questions?.length||0),0);
+  const pieces=[
+    `<div class="admin-pill"><strong>${subjectCount}</strong><span>${escapeHtml(getExamBoardLabel(activeExamBoard))} Subjects</span></div>`,
+    `<div class="admin-pill"><strong>${totalQuestions}</strong><span>${escapeHtml(getExamBoardLabel(activeExamBoard))} Questions</span></div>`
+  ];
+  entries.forEach(([,subject])=>{
+    pieces.push(`<div class="admin-pill"><strong>${subject.questions.length}</strong><span>${escapeHtml(subject.label)} • ${subject.topics.length} topics</span></div>`);
+  });
+  if(!entries.length){
+    pieces.push(`<div class="admin-pill"><strong>0</strong><span>No ${escapeHtml(getExamBoardLabel(activeExamBoard))} subjects yet</span></div>`);
+  }
+  wrap.innerHTML=pieces.join('');
+}
 function renderAdminSummary(){
   const wrap=document.getElementById('adminSummary');
   if(!wrap) return;
@@ -1418,7 +1491,11 @@ function syncAdminSelectors(){
   populateSubjectSelect(document.getElementById('adminSubjectForTopic'), currentSubjectKey);
   populateSubjectSelect(document.getElementById('questionSubject'), currentSubjectKey);
   const questionSubject=document.getElementById('questionSubject');
-  populateTopicSelect(document.getElementById('questionTopic'), questionSubject?.value || currentSubjectKey, document.getElementById('questionTopic')?.value, false);
+  if(questionSubject && !questionSubject.disabled){
+    populateTopicSelect(document.getElementById('questionTopic'), questionSubject?.value || currentSubjectKey, document.getElementById('questionTopic')?.value, false);
+  }else{
+    populateTopicSelect(document.getElementById('questionTopic'), null, null, false);
+  }
 }
 
 function refreshAfterBankChange(preferredSubjectKey=null){
@@ -1494,13 +1571,15 @@ function saveAdminPin(){
 }
 
 function addSubject(){
-  const label=document.getElementById('newSubjectLabel').value.trim();
+  const rawLabel=document.getElementById('newSubjectLabel').value.trim();
   const manualKey=document.getElementById('newSubjectKey').value.trim();
   const tagline=document.getElementById('newSubjectTagline').value.trim();
-  if(!label){
+  if(!rawLabel){
     showAdminMsg('Enter a subject name first.', 'err');
     return;
   }
+  const boardLabel=getExamBoardLabel(activeExamBoard);
+  const label=/(jamb|waec)/i.test(rawLabel) ? rawLabel : `${boardLabel} ${rawLabel}`;
   let key=slugify(manualKey || label);
   if(SUBJECT_BANK[key]){
     let counter=2;
@@ -1596,42 +1675,51 @@ function addQuestion(){
 }
 
 function mergeSubjectBank(importedRaw){
-  const imported=normalizeBank(importedRaw, {});
-  const importedKeys=Object.keys(imported);
-  if(!importedKeys.length){
-    throw new Error('No valid subject data was found in the JSON. Check that each question has q, o, a, and exp fields.');
-  }
+  const importedExamBank=normalizeExamBank(importedRaw, createEmptyExamBank(), activeExamBoard);
+  const touchedBoards=[];
   let importedQuestionCount=0;
-  importedKeys.forEach(subjectKey=>{
-    const incoming=imported[subjectKey];
-    importedQuestionCount+=incoming.questions.length;
-    if(!SUBJECT_BANK[subjectKey]){
-      SUBJECT_BANK[subjectKey]=incoming;
-      return;
-    }
-    const target=SUBJECT_BANK[subjectKey];
-    if(incoming.label) target.label=incoming.label;
-    if(incoming.tagline) target.tagline=incoming.tagline;
-    const topicMap=new Map(target.topics.map((topic,index)=>[topic.toLowerCase(), index]));
-    const incomingIndexToTargetIndex={};
-    incoming.topics.forEach((topicName, incomingIndex)=>{
-      const matchKey=topicName.toLowerCase();
-      let targetIndex=topicMap.get(matchKey);
-      if(targetIndex===undefined){
-        target.topics.push(topicName);
-        targetIndex=target.topics.length-1;
-        topicMap.set(matchKey,targetIndex);
+  ['jamb','waec'].forEach(board=>{
+    const importedSubjects=importedExamBank?.[board]?.subjects || {};
+    const importedKeys=Object.keys(importedSubjects);
+    if(!importedKeys.length) return;
+    touchedBoards.push(board);
+    const targetBank=ensureExamBucket(EXAM_BANK, board);
+    importedKeys.forEach(subjectKey=>{
+      const incoming=importedSubjects[subjectKey];
+      importedQuestionCount+=incoming.questions.length;
+      if(!targetBank[subjectKey]){
+        targetBank[subjectKey]=incoming;
+        return;
       }
-      incomingIndexToTargetIndex[incomingIndex]=targetIndex;
-    });
-    incoming.questions.forEach(question=>{
-      const mappedIndex=Object.prototype.hasOwnProperty.call(incomingIndexToTargetIndex, question.t)
-        ? incomingIndexToTargetIndex[question.t]
-        : question.t;
-      target.questions.push({...question, t:mappedIndex});
+      const target=targetBank[subjectKey];
+      if(incoming.label) target.label=incoming.label;
+      if(incoming.tagline) target.tagline=incoming.tagline;
+      const topicMap=new Map(target.topics.map((topic,index)=>[topic.toLowerCase(), index]));
+      const incomingIndexToTargetIndex={};
+      incoming.topics.forEach((topicName, incomingIndex)=>{
+        const matchKey=topicName.toLowerCase();
+        let targetIndex=topicMap.get(matchKey);
+        if(targetIndex===undefined){
+          target.topics.push(topicName);
+          targetIndex=target.topics.length-1;
+          topicMap.set(matchKey,targetIndex);
+        }
+        incomingIndexToTargetIndex[incomingIndex]=targetIndex;
+      });
+      incoming.questions.forEach(question=>{
+        const mappedIndex=Object.prototype.hasOwnProperty.call(incomingIndexToTargetIndex, question.t)
+          ? incomingIndexToTargetIndex[question.t]
+          : question.t;
+        target.questions.push({...question, t:mappedIndex});
+      });
     });
   });
-  return { importedKeys, importedQuestionCount };
+  const importedKeys=Object.keys(ensureExamBucket(importedExamBank, activeExamBoard));
+  if(!touchedBoards.length || !importedQuestionCount){
+    throw new Error('No valid subject data was found in the JSON. Check that each question has q, o, a, and exp fields.');
+  }
+  syncSubjectBankReference();
+  return { importedKeys, importedQuestionCount, touchedBoards };
 }
 
 function importBank(){
@@ -1646,36 +1734,38 @@ function importBank(){
     const preferredKey=result.importedKeys[0] || currentSubjectKey;
     refreshAfterBankChange(preferredKey);
     const subjectLabel=SUBJECT_BANK[preferredKey]?.label || preferredKey;
-    showAdminMsg(`Imported ${result.importedQuestionCount} question(s). Active subject switched to ${subjectLabel}.`, 'ok');
+    showAdminMsg(`Imported ${result.importedQuestionCount} question(s) into ${result.touchedBoards.map(getExamBoardLabel).join(' / ')}. Active subject switched to ${subjectLabel}.`, 'ok');
   }catch(error){
     showAdminMsg(error.message || 'The JSON could not be imported.', 'err');
   }
 }
 
 function exportBank(){
-  const dataStr=JSON.stringify({subjects:SUBJECT_BANK}, null, 2);
+  const dataStr=JSON.stringify({examBoard:activeExamBoard, subjects:SUBJECT_BANK}, null, 2);
   const blob=new Blob([dataStr], {type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download='godshand-question-bank.json';
+  a.download=`godshand-${activeExamBoard}-question-bank.json`;
   document.body.appendChild(a);
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-  showAdminMsg('Current question bank exported.', 'ok');
+  showAdminMsg(`${getExamBoardLabel(activeExamBoard)} question bank exported.`, 'ok');
 }
 
 function resetBank(){
-  const confirmed=window.confirm('This will remove all custom subjects, topics and questions and return to the original Physics bank. Continue?');
+  const boardLabel=getExamBoardLabel(activeExamBoard);
+  const confirmed=window.confirm(`This will reset only the ${boardLabel} bank. ${boardLabel==='JAMB' ? 'JAMB will return to the original Physics-only bank.' : 'WAEC subjects and topics currently saved online will be removed from this board.'} Continue?`);
   if(!confirmed) return;
-  SUBJECT_BANK=getBaseBank();
-  safeStorageRemove(STORAGE_KEY_BANK);
-  setCurrentSubject(Object.keys(SUBJECT_BANK)[0]||'physics');
+  ensureExamBucket(EXAM_BANK, activeExamBoard);
+  EXAM_BANK[activeExamBoard].subjects=getBaseBank(activeExamBoard);
+  syncSubjectBankReference();
+  setCurrentSubject(getBoardFallbackKey(activeExamBoard));
   refreshAfterBankChange(currentSubjectKey);
   clearQuestionForm();
   document.getElementById('importText').value='';
-  showAdminMsg('Bank reset to the original Physics-only version.', 'ok');
+  showAdminMsg(`${boardLabel} bank reset successfully.`, 'ok');
 }
 
 function handleImportFile(event){
@@ -1692,9 +1782,10 @@ function handleImportFile(event){
 
 function setTemplatePreview(){
   const template={
+    examBoard:activeExamBoard,
     chemistry:{
-      label:'JAMB Chemistry',
-      tagline:'JAMB Chemistry • Live Practice Mode',
+      label:`${getExamBoardLabel(activeExamBoard)} Chemistry`,
+      tagline:`${getExamBoardLabel(activeExamBoard)} Chemistry • Live Practice Mode`,
       topics:['Atomic Structure','Chemical Combination'],
       questions:[
         {
@@ -1738,12 +1829,8 @@ function prepareQuizScreen(mode){
 
 function startQuiz(){
   name=document.getElementById('studentName').value.trim()||'Student';
-  saveStudentName(name);
-  quizStartedAt=new Date().toISOString();
-  quizFinalized=false;
   setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
   const topicValue=document.getElementById('topicSelect').value;
-  activeTopicContext=topicValue;
   document.getElementById('topicSelect').dataset.lastValue=topicValue;
 
   const rawTime=parseInt(document.getElementById('timePerQuestion').value,10);
@@ -1774,10 +1861,6 @@ function startQuiz(){
 
 function startCbtQuiz(){
   name=document.getElementById('studentName').value.trim()||'Student';
-  saveStudentName(name);
-  quizStartedAt=new Date().toISOString();
-  activeTopicContext='cbt';
-  quizFinalized=false;
   setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
   const sourceQuestions=[...currentSubject.questions];
 
@@ -1966,8 +2049,6 @@ function submitQuizEarly(){
 }
 
 function endQuiz(fromTimer=false){
-  if(quizFinalized) return;
-  quizFinalized=true;
   clearInterval(qTimer);
   clearInterval(sessTimer);
 
@@ -2001,7 +2082,6 @@ function endQuiz(fromTimer=false){
   pf.style.width='0%';
   pf.style.background=col(pct);
   setTimeout(()=>{pf.style.width=pct+'%';},300);
-  saveQuizAttempt({fromTimer,pct});
   show('resultsScreen');
 }
 
@@ -2031,227 +2111,6 @@ function toggleReview(){
   } else {
     sec.style.display='none';
   }
-}
-
-
-function saveQuizAttempt({fromTimer=false,pct=0}={}){
-  const uniqueTopics=[...new Set(pool.map(question=>currentSubject.topics[question.t] || 'Custom Topic'))];
-  const topicLabel=quizMode==='cbt'
-    ? 'Mixed Topics'
-    : (activeTopicContext==='all' ? 'All Topics' : (currentSubject.topics[Number(activeTopicContext)] || 'Custom Topic'));
-  const attempt={
-    attemptId:`${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
-    studentName:name || 'Student',
-    mode:quizMode,
-    subjectKey:currentSubjectKey,
-    subjectLabel:currentSubject.label || 'Subject',
-    topicLabel,
-    topicsIncluded:uniqueTopics,
-    scorePercent:pct,
-    correct,
-    wrong:Math.max(pool.length-correct,0),
-    totalQuestions:pool.length,
-    timeUsedSeconds:elapsed,
-    timePerQuestion:quizMode==='practice' ? timePerQuestion : 0,
-    startedAt:quizStartedAt || new Date().toISOString(),
-    submittedAt:new Date().toISOString(),
-    status:fromTimer ? 'time-up' : 'completed'
-  };
-  ATTEMPT_HISTORY=mergeAttemptHistory([attempt], ATTEMPT_HISTORY);
-  persistAttemptHistory('quiz-attempt-saved');
-  renderHistoryScreen();
-}
-
-function getHistoryFilterValues(){
-  return {
-    student:String(document.getElementById('historyStudentFilter')?.value || '').trim().toLowerCase(),
-    subject:String(document.getElementById('historySubjectFilter')?.value || 'all'),
-    topic:String(document.getElementById('historyTopicFilter')?.value || 'all'),
-    mode:String(document.getElementById('historyModeFilter')?.value || 'all')
-  };
-}
-
-function populateHistorySubjectFilter(selectedValue='all'){
-  const select=document.getElementById('historySubjectFilter');
-  if(!select) return;
-  const current=selectedValue || select.value || 'all';
-  const subjectMap=new Map();
-  ATTEMPT_HISTORY.forEach(item=>{
-    if(!subjectMap.has(item.subjectKey)){
-      subjectMap.set(item.subjectKey, item.subjectLabel);
-    }
-  });
-  select.innerHTML='<option value="all">All Subjects</option>' + Array.from(subjectMap.entries()).map(([key,label])=>`<option value="${escapeHtml(key)}">${escapeHtml(label)}</option>`).join('');
-  if([...select.options].some(option=>option.value===current)) select.value=current;
-}
-
-function populateHistoryTopicFilter(selectedValue='all'){
-  const select=document.getElementById('historyTopicFilter');
-  if(!select) return;
-  const subjectValue=String(document.getElementById('historySubjectFilter')?.value || 'all');
-  const current=selectedValue || select.value || 'all';
-  const topics=new Set();
-  ATTEMPT_HISTORY.forEach(item=>{
-    if(subjectValue==='all' || item.subjectKey===subjectValue){
-      topics.add(item.topicLabel || 'All Topics');
-    }
-  });
-  select.innerHTML='<option value="all">All Topics</option>' + Array.from(topics.values()).sort((a,b)=>a.localeCompare(b)).map(topic=>`<option value="${escapeHtml(topic)}">${escapeHtml(topic)}</option>`).join('');
-  if([...select.options].some(option=>option.value===current)) select.value=current;
-}
-
-function getFilteredAttempts(){
-  const filters=getHistoryFilterValues();
-  return ATTEMPT_HISTORY.filter(item=>{
-    const nameMatch=!filters.student || item.studentName.toLowerCase().includes(filters.student);
-    const subjectMatch=filters.subject==='all' || item.subjectKey===filters.subject;
-    const topicMatch=filters.topic==='all' || item.topicLabel===filters.topic;
-    const modeMatch=filters.mode==='all' || item.mode===filters.mode;
-    return nameMatch && subjectMatch && topicMatch && modeMatch;
-  });
-}
-
-function renderHistorySummary(attempts){
-  const el=document.getElementById('historySummary');
-  if(!el) return;
-  if(!attempts.length){
-    el.innerHTML='<div class="history-empty">No quiz history yet for this filter. Once quizzes are submitted, the score trend will appear here.</div>';
-    return;
-  }
-  const total=attempts.length;
-  const average=Math.round(attempts.reduce((sum,item)=>sum+item.scorePercent,0)/Math.max(total,1));
-  const best=Math.max(...attempts.map(item=>item.scorePercent));
-  const latest=attempts[0];
-  el.innerHTML=`
-    <div class="history-pill"><strong>${total}</strong><span>Total Attempts</span></div>
-    <div class="history-pill"><strong>${average}%</strong><span>Average Score</span></div>
-    <div class="history-pill"><strong>${best}%</strong><span>Best Score</span></div>
-    <div class="history-pill"><strong>${escapeHtml(fmt(latest.timeUsedSeconds))}</strong><span>Latest Time Used</span></div>
-  `;
-}
-
-function renderHistorySubjectGroups(attempts){
-  const wrap=document.getElementById('historySubjectList');
-  if(!wrap) return;
-  if(!attempts.length){
-    wrap.innerHTML='<div class="history-empty">Subject summaries will appear here after quiz attempts are saved.</div>';
-    return;
-  }
-  const groups=new Map();
-  attempts.forEach(item=>{
-    const key=item.subjectKey;
-    const row=groups.get(key) || {label:item.subjectLabel,attempts:0,totalScore:0,best:0,totalQuestions:0};
-    row.attempts++;
-    row.totalScore+=item.scorePercent;
-    row.best=Math.max(row.best,item.scorePercent);
-    row.totalQuestions+=item.totalQuestions;
-    groups.set(key,row);
-  });
-  wrap.innerHTML=Array.from(groups.values())
-    .sort((a,b)=>(b.totalScore/b.attempts)-(a.totalScore/a.attempts))
-    .map(group=>{
-      const avg=Math.round(group.totalScore/Math.max(group.attempts,1));
-      return `
-        <div class="history-item">
-          <div class="history-item-top">
-            <div>
-              <h4>${escapeHtml(group.label)}</h4>
-              <div class="muted">${group.attempts} attempt(s) • ${group.totalQuestions} question(s) answered</div>
-            </div>
-            <div class="history-score">${avg}%</div>
-          </div>
-          <div class="history-mini-grid">
-            <div class="history-mini-stat"><strong>${avg}%</strong><span>Average</span></div>
-            <div class="history-mini-stat"><strong>${group.best}%</strong><span>Best</span></div>
-            <div class="history-mini-stat"><strong>${group.attempts}</strong><span>Attempts</span></div>
-          </div>
-        </div>`;
-    }).join('');
-}
-
-function renderHistoryTopicGroups(attempts){
-  const wrap=document.getElementById('historyTopicList');
-  if(!wrap) return;
-  if(!attempts.length){
-    wrap.innerHTML='<div class="history-empty">Topic performance appears here once there is quiz history.</div>';
-    return;
-  }
-  const groups=new Map();
-  attempts.forEach(item=>{
-    const key=`${item.subjectKey}__${item.topicLabel}`;
-    const row=groups.get(key) || {label:item.topicLabel,subject:item.subjectLabel,attempts:0,totalScore:0,best:0};
-    row.attempts++;
-    row.totalScore+=item.scorePercent;
-    row.best=Math.max(row.best,item.scorePercent);
-    groups.set(key,row);
-  });
-  wrap.innerHTML=Array.from(groups.values())
-    .sort((a,b)=>(b.totalScore/b.attempts)-(a.totalScore/a.attempts))
-    .slice(0,24)
-    .map(group=>{
-      const avg=Math.round(group.totalScore/Math.max(group.attempts,1));
-      return `
-        <div class="history-item">
-          <div class="history-item-top">
-            <div>
-              <h4>${escapeHtml(group.label)}</h4>
-              <div class="muted">${escapeHtml(group.subject)} • ${group.attempts} attempt(s)</div>
-            </div>
-            <div class="history-score">${avg}%</div>
-          </div>
-          <div class="history-mini-grid">
-            <div class="history-mini-stat"><strong>${avg}%</strong><span>Average</span></div>
-            <div class="history-mini-stat"><strong>${group.best}%</strong><span>Best</span></div>
-          </div>
-        </div>`;
-    }).join('');
-}
-
-function renderAttemptHistoryList(attempts){
-  const wrap=document.getElementById('historyAttemptList');
-  if(!wrap) return;
-  if(!attempts.length){
-    wrap.innerHTML='<div class="history-empty">No attempts found for the current filter.</div>';
-    return;
-  }
-  wrap.innerHTML=attempts
-    .sort((a,b)=>new Date(b.submittedAt)-new Date(a.submittedAt))
-    .map(item=>`
-      <div class="history-item">
-        <div class="history-item-top">
-          <div>
-            <h4>${escapeHtml(item.studentName)} • ${escapeHtml(item.subjectLabel)}</h4>
-            <div class="muted">${escapeHtml(item.topicLabel)} • ${item.mode==='cbt' ? 'CBT Mode' : 'Practice Mode'} • ${escapeHtml(localTimeLabel(item.submittedAt))}</div>
-          </div>
-          <div class="history-score">${item.scorePercent}%</div>
-        </div>
-        <div class="history-tags">
-          <span class="history-tag">${item.correct}/${item.totalQuestions} correct</span>
-          <span class="history-tag">${escapeHtml(fmt(item.timeUsedSeconds))}</span>
-          <span class="history-tag">${escapeHtml(item.status==='time-up' ? 'Time Up' : 'Submitted')}</span>
-        </div>
-      </div>
-    `).join('');
-}
-
-function renderHistoryScreen(){
-  populateHistorySubjectFilter(document.getElementById('historySubjectFilter')?.value || 'all');
-  populateHistoryTopicFilter(document.getElementById('historyTopicFilter')?.value || 'all');
-  const attempts=getFilteredAttempts();
-  renderHistorySummary(attempts);
-  renderHistorySubjectGroups(attempts);
-  renderHistoryTopicGroups(attempts);
-  renderAttemptHistoryList(attempts);
-}
-
-function openPerformanceHistory(prefillCurrentStudent=false){
-  const studentInput=document.getElementById('historyStudentFilter');
-  const currentName=(document.getElementById('studentName')?.value || getSavedStudentName() || '').trim();
-  if(studentInput && prefillCurrentStudent && currentName){
-    studentInput.value=currentName;
-  }
-  renderHistoryScreen();
-  show('historyScreen');
 }
 
 function updateGlobalHomeButton(){
@@ -2285,10 +2144,11 @@ function show(id){
 }
 
 function initQuizApp(){
-  setCurrentSubject(getInitialSubjectKey());
+  activeExamBoard=getSavedExamBoard();
+  syncSubjectBankReference();
+  setCurrentSubject(getBoardFallbackKey(activeExamBoard));
   timePerQuestion=getSavedTime();
   document.getElementById('timePerQuestion').value=timePerQuestion;
-  document.getElementById('studentName').value=getSavedStudentName();
   buildSubjectSelect();
   updateTopicSelect();
   syncAdminSelectors();
@@ -2296,6 +2156,7 @@ function initQuizApp(){
   setTemplatePreview();
   renderCloudConfigTemplate();
   applyCloudStatus('local');
+  syncExamBoardUI();
   updateModeUI();
 
   document.getElementById('subjectSelect').addEventListener('change',()=>{
@@ -2347,25 +2208,6 @@ function initQuizApp(){
   document.getElementById('adminPinInput').addEventListener('keydown',event=>{
     if(event.key==='Enter') unlockAdmin();
   });
-
-  document.getElementById('historyStudentFilter').addEventListener('input',()=>{
-    renderHistoryScreen();
-  });
-
-  document.getElementById('historySubjectFilter').addEventListener('change',()=>{
-    populateHistoryTopicFilter('all');
-    renderHistoryScreen();
-  });
-
-  document.getElementById('historyTopicFilter').addEventListener('change',()=>{
-    renderHistoryScreen();
-  });
-
-  document.getElementById('historyModeFilter').addEventListener('change',()=>{
-    renderHistoryScreen();
-  });
-
-  renderHistoryScreen();
 
   initRemoteSync();
   updateGlobalHomeButton();

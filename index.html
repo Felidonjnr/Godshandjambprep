@@ -244,6 +244,24 @@ body::before{content:'';position:fixed;inset:0;background:
 }
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:rgba(245,166,35,0.3);border-radius:2px;}
+
+.theory-wrap{display:none;margin-bottom:1rem;}
+.theory-wrap.show{display:block;}
+.theory-answer-box{width:100%;min-height:180px;background:var(--card2);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.95rem;line-height:1.55;resize:vertical;outline:none;}
+.theory-answer-box:focus{border-color:var(--gold);}
+.theory-review-card{background:var(--card2);border-radius:14px;padding:1rem;margin-bottom:.9rem;border-left:4px solid var(--gold);}
+.theory-review-meta{font-size:.74rem;color:var(--muted);margin-bottom:.45rem;letter-spacing:.4px;text-transform:uppercase;}
+.theory-block{margin-top:.75rem;}
+.theory-block strong{display:block;font-size:.78rem;color:var(--gold);letter-spacing:.6px;text-transform:uppercase;margin-bottom:.3rem;}
+.theory-answer-text,.theory-model-text{font-size:.86rem;line-height:1.6;color:var(--text);white-space:pre-wrap;}
+.theory-guide-list{padding-left:1rem;color:var(--text);font-size:.84rem;line-height:1.6;}
+.theory-score-row{display:flex;flex-wrap:wrap;align-items:center;gap:.7rem;margin-top:.9rem;}
+.theory-score-row select{max-width:170px;background:#0D1220;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:.65rem .8rem;color:var(--text);}
+.theory-score-note{font-size:.78rem;color:var(--muted);line-height:1.5;}
+.mode-section-tag{display:inline-flex;align-items:center;gap:.45rem;padding:.32rem .75rem;border-radius:999px;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.22);font-size:.74rem;color:var(--gold);margin-top:.4rem;}
+.mode-section-tag::before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.9;}
+.hidden{display:none !important;}
+
 </style>
 </head>
 <body>
@@ -445,10 +463,23 @@ body::before{content:'';position:fixed;inset:0;background:
         </div>
         <div class="admin-row">
           <div class="form-group">
-            <label>Year / Source</label>
-            <input type="text" id="questionYear" placeholder="e.g. JAMB 2021"/>
+            <label>Question Type</label>
+            <select id="questionType">
+              <option value="objective">Objective / Multiple Choice</option>
+              <option value="theory">Theory / Self Review</option>
+            </select>
           </div>
           <div class="form-group">
+            <label>Paper / Section (Optional)</label>
+            <input type="text" id="questionPaper" placeholder="e.g. Paper 1, Paper 2, Section B"/>
+          </div>
+        </div>
+        <div class="admin-row">
+          <div class="form-group">
+            <label>Year / Source</label>
+            <input type="text" id="questionYear" placeholder="e.g. JAMB 2021 or WAEC 2022"/>
+          </div>
+          <div class="form-group" id="objectiveCorrectGroup">
             <label>Correct Option</label>
             <select id="questionCorrect">
               <option value="0">A</option>
@@ -462,15 +493,40 @@ body::before{content:'';position:fixed;inset:0;background:
           <label>Question</label>
           <textarea id="questionText" placeholder="Type the full question here"></textarea>
         </div>
-        <div class="admin-row-4">
-          <div class="form-group"><label>Option A</label><input type="text" id="optionA" placeholder="Option A"/></div>
-          <div class="form-group"><label>Option B</label><input type="text" id="optionB" placeholder="Option B"/></div>
-          <div class="form-group"><label>Option C</label><input type="text" id="optionC" placeholder="Option C"/></div>
-          <div class="form-group"><label>Option D</label><input type="text" id="optionD" placeholder="Option D"/></div>
+        <div id="objectiveOnlyFields">
+          <div class="admin-row-4">
+            <div class="form-group"><label>Option A</label><input type="text" id="optionA" placeholder="Option A"/></div>
+            <div class="form-group"><label>Option B</label><input type="text" id="optionB" placeholder="Option B"/></div>
+            <div class="form-group"><label>Option C</label><input type="text" id="optionC" placeholder="Option C"/></div>
+            <div class="form-group"><label>Option D</label><input type="text" id="optionD" placeholder="Option D"/></div>
+          </div>
+        </div>
+        <div id="theoryOnlyFields" style="display:none;">
+          <div class="admin-row">
+            <div class="form-group">
+              <label>Score Points</label>
+              <input type="number" id="questionScorePoints" min="1" max="50" step="1" value="5"/>
+            </div>
+            <div class="form-group">
+              <label>Quick Note</label>
+              <input type="text" id="questionTheoryNote" placeholder="Optional short note for the student"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Model Answer</label>
+            <textarea id="theoryModelAnswer" placeholder="Type the model answer for self review"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Marking Guide</label>
+            <textarea id="theoryMarkingGuide" placeholder="One point per line, for example:
+Defines the concept correctly
+Gives one correct example
+Mentions the key formula"></textarea>
+          </div>
         </div>
         <div class="form-group">
-          <label>Explanation (Optional)</label>
-          <textarea id="questionExplanation" placeholder="Add a short explanation for the answer"></textarea>
+          <label id="questionExplanationLabel">Explanation / Note (Optional)</label>
+          <textarea id="questionExplanation" placeholder="Add a short explanation or teacher note"></textarea>
         </div>
         <div class="admin-actions">
           <button class="btn-mini" type="button" onclick="addQuestion()">Save Question</button>
@@ -486,7 +542,7 @@ body::before{content:'';position:fixed;inset:0;background:
         </div>
         <div class="form-group">
           <label>Paste JSON</label>
-          <textarea id="importText" placeholder='Paste a full bank here. Example: {"chemistry":{"label":"JAMB Chemistry","topics":["Atomic Structure"],"questions":[{"t":0,"yr":"JAMB 2022","q":"...","o":["A","B","C","D"],"a":1,"exp":"..."}]}}'></textarea>
+          <textarea id="importText" placeholder='Paste a full bank here. For WAEC theory include type, modelAnswer, markingGuide, and scorePoints.'></textarea>
         </div>
         <div class="admin-actions">
           <button class="btn-mini" type="button" onclick="importBank()">Import / Merge</button>
@@ -519,6 +575,16 @@ body::before{content:'';position:fixed;inset:0;background:
       <div class="question-text" id="qText"></div>
     </div>
     <div class="options-grid" id="optionsGrid"></div>
+    <div class="theory-wrap" id="theoryWrap">
+      <div class="question-card" style="margin-bottom:1rem;">
+        <div class="mode-section-tag">Theory Self Review</div>
+        <div class="form-group" style="margin-top:1rem;margin-bottom:0;">
+          <label>Your Answer</label>
+          <textarea id="theoryAnswerInput" class="theory-answer-box" placeholder="Write your answer here. You will review yourself with the model answer after submission."></textarea>
+          <div class="form-help" id="theoryModeHelp">Write your answer fully, then move to the next question. You will score yourself after submission.</div>
+        </div>
+      </div>
+    </div>
     <div class="feedback-box" id="feedbackBox">
       <span class="fb-icon" id="fbIcon"></span>
       <div class="fb-main"><div id="fbMain"></div><div id="fbExp" class="fb-exp"></div></div>
@@ -546,9 +612,9 @@ body::before{content:'';position:fixed;inset:0;background:
       </div>
     </div>
     <div class="results-grid">
-      <div class="res-stat"><div class="res-num g" id="rC">0</div><div class="res-lbl">Correct</div></div>
-      <div class="res-stat"><div class="res-num r" id="rW">0</div><div class="res-lbl">Wrong</div></div>
-      <div class="res-stat"><div class="res-num o" id="rT">0s</div><div class="res-lbl">Time</div></div>
+      <div class="res-stat"><div class="res-num g" id="rC">0</div><div class="res-lbl" id="rCLbl">Correct</div></div>
+      <div class="res-stat"><div class="res-num r" id="rW">0</div><div class="res-lbl" id="rWLbl">Wrong</div></div>
+      <div class="res-stat"><div class="res-num o" id="rT">0s</div><div class="res-lbl" id="rTLbl">Time</div></div>
     </div>
     <div class="perf-bar"><div class="perf-fill" id="pFill" style="width:0%"></div></div>
     <div class="btn-row">
@@ -730,6 +796,7 @@ let timePerQuestion=30;
 let adminUnlocked=false;
 let quizMode='practice';
 let userAnswers=[];
+let theorySelfScores=[];
 const CBT_TOTAL_SECONDS=40*60;
 const CBT_QUESTION_LIMIT=40;
 
@@ -872,32 +939,57 @@ function getBaseBank(board=activeExamBoard){
 
 function normalizeQuestion(raw){
   if(!raw || typeof raw!=='object') return null;
-  const optionsSource=Array.isArray(raw.o) ? raw.o : (Array.isArray(raw.options) ? raw.options : []);
-  const options=optionsSource.map(x=>String(x??'').trim()).filter(Boolean);
   const prompt=String(raw.q || raw.question || '').trim();
-  let answerRaw=(raw.a ?? raw.answer ?? raw.correct ?? raw.correctOption ?? raw.correct_answer);
-  let answer=Number(answerRaw);
-  if(!Number.isFinite(answer)){
-    const answerText=String(answerRaw ?? '').trim();
-    const letterIndex='ABCD'.indexOf(answerText.toUpperCase());
-    if(letterIndex>-1){
-      answer=letterIndex;
-    }else if(answerText){
-      const optionMatch=options.findIndex(opt=>opt.toLowerCase()===answerText.toLowerCase());
-      answer=optionMatch;
-    }
-  }
-  if(!prompt || options.length<2 || !Number.isFinite(answer) || answer<0 || answer>=options.length) return null;
   const topicIndexRaw=Number(raw.t ?? raw.topicIndex ?? raw.topic_index ?? 0);
   const topicIndex=Number.isFinite(topicIndexRaw) && topicIndexRaw>=0 ? Math.floor(topicIndexRaw) : 0;
-  return {
-    t:topicIndex,
-    yr:String(raw.yr || raw.year || raw.source || 'Custom').trim() || 'Custom',
-    q:prompt,
-    o:options,
-    a:answer,
-    exp:String(raw.exp || raw.explanation || raw.reason || '').trim()
-  };
+  const yearLabel=String(raw.yr || raw.year || raw.source || 'Custom').trim() || 'Custom';
+  const paper=String(raw.paper || raw.section || raw.paperSection || '').trim();
+  const note=String(raw.exp || raw.explanation || raw.note || '').trim();
+  const explicitType=String(raw.type || raw.questionType || '').trim().toLowerCase();
+  const hasTheoryShape = explicitType==='theory' || raw.modelAnswer || raw.model_answer || raw.markingGuide || raw.marking_guide || raw.scorePoints || raw.maxScore;
+  if(!prompt) return null;
+  if(hasTheoryShape){
+    let markingGuide=[];
+    if(Array.isArray(raw.markingGuide)){
+      markingGuide = raw.markingGuide.map(item=>String(item ?? '').trim()).filter(Boolean);
+    }else if(Array.isArray(raw.marking_guide)){
+      markingGuide = raw.marking_guide.map(item=>String(item ?? '').trim()).filter(Boolean);
+    }else{
+      const guideText=String(raw.markingGuide || raw.marking_guide || raw.markingGuideText || '').trim();
+      if(guideText){
+        markingGuide = guideText.split(/\r?\n|;/).map(item=>item.replace(/^[-*•\s]+/,'').trim()).filter(Boolean);
+      }
+    }
+    const scoreRaw=parseInt(raw.scorePoints ?? raw.maxScore ?? raw.points ?? 5,10);
+    return {
+      type:'theory',
+      t:topicIndex,
+      yr:yearLabel,
+      q:prompt,
+      paper,
+      modelAnswer:String(raw.modelAnswer || raw.model_answer || raw.answer || '').trim(),
+      markingGuide,
+      scorePoints:Number.isFinite(scoreRaw) ? clamp(scoreRaw,1,50) : 5,
+      exp:note
+    };
+  }
+
+  const optionsSource=Array.isArray(raw.o) ? raw.o : (Array.isArray(raw.options) ? raw.options : []);
+  const options=optionsSource.map(x=>String(x??'').trim()).filter(Boolean);
+  if(options.length<2) return null;
+  let answerIndex=Number(raw.a);
+  if(!Number.isInteger(answerIndex) || answerIndex<0 || answerIndex>=options.length){
+    const answerRaw=raw.answer ?? raw.correct ?? raw.correctAnswer ?? raw.correct_option ?? raw.correctOption;
+    const answerText=String(answerRaw ?? '').trim();
+    const letterIndex='ABCD'.indexOf(answerText.toUpperCase());
+    if(letterIndex>=0 && letterIndex<options.length){
+      answerIndex=letterIndex;
+    }else{
+      const optionMatch=options.findIndex(opt=>opt.toLowerCase()===answerText.toLowerCase());
+      answerIndex=optionMatch>=0 ? optionMatch : 0;
+    }
+  }
+  return {type:'objective',t:topicIndex,yr:yearLabel,q:prompt,paper,o:options,a:answerIndex,exp:note};
 }
 
 function normalizeSubject(key,subject){
@@ -1232,6 +1324,127 @@ function updateDiagnosticsPanel(){
   panel.style.display='block';
 }
 
+function getQuestionTypeLabel(type){
+  return String(type||'objective').toLowerCase()==='theory' ? 'Theory' : 'Objective';
+}
+function getAllowedQuestionTypesForMode(mode=getSelectedMode()){
+  if(mode==='waec-theory') return ['theory'];
+  return ['objective'];
+}
+function filterQuestionsForMode(questions, mode=getSelectedMode()){
+  const allowed=new Set(getAllowedQuestionTypesForMode(mode));
+  return (questions||[]).filter(q=>allowed.has(String(q.type||'objective').toLowerCase()));
+}
+function getAnsweredTheoryCount(){
+  return userAnswers.filter(value=>typeof value==='string' && value.trim()).length;
+}
+function renderModeOptions(){
+  const select=document.getElementById('modeSelect');
+  if(!select) return;
+  const previous=select.value;
+  const options=activeExamBoard==='waec'
+    ? [
+        {value:'waec-objective', text:'📝 WAEC Objective Practice'},
+        {value:'waec-theory', text:'✍️ WAEC Theory Self Review'}
+      ]
+    : [
+        {value:'practice', text:'⚡ Live Practice Mode'},
+        {value:'cbt', text:'🖥️ CBT Practice Mode (40 Minutes)'}
+      ];
+  select.innerHTML='';
+  options.forEach(item=>{
+    const opt=document.createElement('option');
+    opt.value=item.value;
+    opt.textContent=item.text;
+    select.appendChild(opt);
+  });
+  select.value=options.some(item=>item.value===previous) ? previous : options[0].value;
+}
+function updateQuestionTypeForm(){
+  const type=(document.getElementById('questionType')?.value || 'objective').toLowerCase();
+  const isTheory=type==='theory';
+  const objectiveFields=document.getElementById('objectiveOnlyFields');
+  const theoryFields=document.getElementById('theoryOnlyFields');
+  const correctGroup=document.getElementById('objectiveCorrectGroup');
+  if(objectiveFields) objectiveFields.style.display=isTheory ? 'none' : '';
+  if(theoryFields) theoryFields.style.display=isTheory ? '' : 'none';
+  if(correctGroup) correctGroup.style.display=isTheory ? 'none' : '';
+  const explanationLabel=document.getElementById('questionExplanationLabel');
+  if(explanationLabel) explanationLabel.textContent=isTheory ? 'Explanation / Teacher Note (Optional)' : 'Explanation (Optional)';
+}
+function saveCurrentTheoryAnswer(){
+  if(quizMode!=='waec-theory') return;
+  const input=document.getElementById('theoryAnswerInput');
+  if(!input || idx<0 || idx>=userAnswers.length) return;
+  userAnswers[idx]=input.value || '';
+}
+function setResultVisual(percent){
+  const safe=clamp(Math.round(percent||0),0,100);
+  document.getElementById('sPct').textContent=safe+'%';
+  const c=document.getElementById('fgCircle');
+  const off=314-(safe/100*314);
+  c.style.strokeDashoffset='314';
+  setTimeout(()=>{c.style.strokeDashoffset=off;c.style.stroke=col(safe);},200);
+  const pf=document.getElementById('pFill');
+  pf.style.width='0%';
+  pf.style.background=col(safe);
+  setTimeout(()=>{pf.style.width=safe+'%';},300);
+}
+function updateTheoryResultsSummary(){
+  const maxTotal=pool.reduce((sum,q)=>sum + (q.scorePoints || 0),0);
+  const awarded=theorySelfScores.reduce((sum,value)=>sum + (Number.isFinite(value) ? value : 0),0);
+  const pending=theorySelfScores.filter(value=>!Number.isFinite(value)).length;
+  const pct=maxTotal ? Math.round((awarded/maxTotal)*100) : 0;
+  document.getElementById('rCLbl').textContent='Awarded';
+  document.getElementById('rWLbl').textContent='Pending';
+  document.getElementById('rTLbl').textContent='Time';
+  document.getElementById('rC').textContent=`${awarded}/${maxTotal}`;
+  document.getElementById('rW').textContent=String(pending);
+  document.getElementById('rT').textContent=fmt(elapsed);
+  setResultVisual(pct);
+}
+function renderTheoryReview(){
+  const sec=document.getElementById('reviewSec');
+  const title=document.querySelector('#reviewSec .review-title');
+  const list=document.getElementById('reviewList');
+  if(title) title.textContent='Theory Self Review';
+  if(!list || !sec) return;
+  sec.style.display='block';
+  list.innerHTML='';
+  pool.forEach((q,i)=>{
+    const card=document.createElement('div');
+    card.className='theory-review-card';
+    const guideItems=(q.markingGuide || []).map(item=>`<li>${escapeHtml(item)}</li>`).join('') || '<li>No detailed guide added yet.</li>';
+    const currentValue=Number.isFinite(theorySelfScores[i]) ? theorySelfScores[i] : '';
+    const scoreOptions=['<option value="">Choose score</option>'];
+    for(let score=0; score<=Number(q.scorePoints||0); score++){
+      scoreOptions.push(`<option value="${score}" ${String(currentValue)===String(score) ? 'selected' : ''}>${score} / ${q.scorePoints}</option>`);
+    }
+    const answerText=String(userAnswers[i] || '').trim() || 'No answer was entered.';
+    card.innerHTML=`
+      <div class="theory-review-meta">Question ${i+1}${q.paper ? ' • ' + escapeHtml(q.paper) : ''}${q.yr ? ' • ' + escapeHtml(q.yr) : ''}${currentSubject.topics[q.t] ? ' • ' + escapeHtml(currentSubject.topics[q.t]) : ''}</div>
+      <div class="rev-q">${i+1}. ${escapeHtml(q.q)}</div>
+      <div class="theory-block"><strong>Your Answer</strong><div class="theory-answer-text">${escapeHtml(answerText)}</div></div>
+      <div class="theory-block"><strong>Model Answer</strong><div class="theory-model-text">${escapeHtml(q.modelAnswer || 'No model answer added yet.')}</div></div>
+      <div class="theory-block"><strong>Marking Guide</strong><ul class="theory-guide-list">${guideItems}</ul></div>
+      ${q.exp ? `<div class="theory-block"><strong>Note</strong><div class="theory-model-text">${escapeHtml(q.exp)}</div></div>` : ''}
+      <div class="theory-score-row">
+        <select data-theory-score="${i}">${scoreOptions.join('')}</select>
+        <div class="theory-score-note">Score yourself based on the guide above. This updates the final score immediately.</div>
+      </div>`;
+    list.appendChild(card);
+  });
+  list.querySelectorAll('[data-theory-score]').forEach(select=>{
+    select.addEventListener('change',event=>{
+      const qIndex=Number(event.target.getAttribute('data-theory-score'));
+      const value=event.target.value;
+      theorySelfScores[qIndex]=value==='' ? null : clamp(parseInt(value,10),0,pool[qIndex]?.scorePoints || 0);
+      updateTheoryResultsSummary();
+    });
+  });
+  updateTheoryResultsSummary();
+}
+
 function setCurrentSubject(key){
   const allowed=getBoardSubjectKeys(activeExamBoard);
   const fallback=allowed[0] || Object.keys(SUBJECT_BANK)[0] || 'physics';
@@ -1326,6 +1539,7 @@ function syncExamBoardUI(){
   const hasSubjects=getBoardSubjectCount(activeExamBoard)>0;
   const otherLabel=activeExamBoard==='waec' ? 'JAMB' : 'WAEC';
   const homeCard=document.querySelector('#homeScreen .home-card');
+  const modeLabel=document.getElementById('modeLabelText');
   if(homeCard) homeCard.classList.toggle('is-empty', !hasSubjects);
   const badge=document.getElementById('examBoardBadge');
   if(badge) badge.textContent=`${boardLabel} Mode`;
@@ -1381,12 +1595,11 @@ function getSelectedMode(){
 }
 
 function getSelectedQuestionCount(){
-  if(getSelectedMode()==='cbt'){
-    return Math.min(CBT_QUESTION_LIMIT, currentSubject.questions.length);
-  }
+  const subject=currentSubject || SUBJECT_BANK[document.getElementById('subjectSelect')?.value];
+  if(!subject) return 0;
   const topicValue=document.getElementById('topicSelect')?.value || 'all';
-  if(topicValue==='all') return currentSubject.questions.length;
-  return currentSubject.questions.filter(q=>q.t===Number(topicValue)).length;
+  const scoped=topicValue==='all' ? subject.questions : subject.questions.filter(q=>q.t===Number(topicValue));
+  return filterQuestionsForMode(scoped, getSelectedMode()).length;
 }
 
 function updateModeUI(){
@@ -1398,33 +1611,38 @@ function updateModeUI(){
   const modeHelp=document.getElementById('modeHelp');
   const startBtn=document.getElementById('startMainBtn');
 
-  if(mode==='cbt'){
-    topicGroup?.classList.add('is-disabled');
-    timeGroup?.classList.add('is-disabled');
-    if(topicSelect) topicSelect.disabled=true;
-    if(timeInput) timeInput.disabled=true;
-    if(startBtn) startBtn.textContent=activeExamBoard==='waec' ? 'START WAEC CBT →' : 'START CBT MODE →';
-    if(modeHelp) modeHelp.textContent=activeExamBoard==='waec'
-      ? 'WAEC mode here stays objective-only for now, uses the selected WAEC subject only, draws up to 40 random questions from all topics, and runs on one fixed 40-minute countdown.'
-      : 'CBT mode uses the selected subject only, draws up to 40 random questions from all topics, and runs on one fixed 40-minute countdown.';
+  topicGroup.classList.remove('is-disabled');
+  timeGroup.classList.remove('is-disabled');
+  if(activeExamBoard==='waec' && mode==='waec-theory'){
+    if(modeHelp) modeHelp.textContent='Theory mode shows only WAEC theory questions. Students type their answers first, then score themselves with the model answer and marking guide.';
+    if(startBtn) startBtn.textContent='START THEORY REVIEW →';
+    timeGroup.classList.add('is-disabled');
+    if(timeInput) timeInput.value=getSavedTime();
+  }else if(activeExamBoard==='waec'){
+    if(modeHelp) modeHelp.textContent='Objective mode shows only WAEC multiple-choice questions for the selected topic.';
+    if(startBtn) startBtn.textContent='START WAEC QUIZ →';
+  }else if(mode==='cbt'){
+    if(modeHelp) modeHelp.textContent='CBT mode uses the full subject bank, picks up to 40 objective questions, and runs on one fixed 40-minute timer.';
+    if(startBtn) startBtn.textContent='START CBT →';
+    topicGroup.classList.add('is-disabled');
+    if(topicSelect) topicSelect.value='all';
   }else{
-    topicGroup?.classList.remove('is-disabled');
-    timeGroup?.classList.remove('is-disabled');
-    if(topicSelect) topicSelect.disabled=false;
-    if(timeInput) timeInput.disabled=false;
-    if(startBtn) startBtn.textContent=activeExamBoard==='waec' ? 'START WAEC QUIZ →' : 'START QUIZ →';
-    if(modeHelp) modeHelp.textContent=activeExamBoard==='waec'
-      ? 'WAEC practice mode here stays objective-only for now and uses the selected topic with your saved per-question timer.'
-      : 'Practice mode uses the selected topic and your saved per-question timer.';
+    if(modeHelp) modeHelp.textContent='Practice mode uses the selected topic and your saved per-question timer.';
+    if(startBtn) startBtn.textContent='START QUIZ →';
   }
   updateHomeStats();
 }
 
 function updateHomeStats(){
-  document.getElementById('statQuestions').textContent=String(getSelectedQuestionCount());
-  document.getElementById('statTopics').textContent=String(currentSubject.topics.length || 0);
+  document.getElementById('statQuestions').textContent=getSelectedQuestionCount();
+  document.getElementById('statTopics').textContent=currentSubject?.topics?.length || 0;
   const mode=getSelectedMode();
   const timeLabel=document.getElementById('statTimeLabel');
+  if(activeExamBoard==='waec' && mode==='waec-theory'){
+    document.getElementById('statPerQ').textContent='Essay';
+    if(timeLabel) timeLabel.textContent='Mode';
+    return;
+  }
   if(mode==='cbt'){
     document.getElementById('statPerQ').textContent='40m';
     if(timeLabel) timeLabel.textContent='Fixed Time';
@@ -1457,15 +1675,21 @@ function renderAdminSummary(){
 function renderAdminSummary(){
   const wrap=document.getElementById('adminSummary');
   if(!wrap) return;
-  const subjectCount=Object.keys(SUBJECT_BANK).length;
-  const totalQuestions=countTotalQuestions();
+  const entries=getBoardSubjectEntries(activeExamBoard);
+  const subjectCount=entries.length;
+  const totalQuestions=entries.reduce((sum,[,subject])=>sum + (subject.questions?.length||0),0);
+  const theoryCount=entries.reduce((sum,[,subject])=>sum + (subject.questions||[]).filter(q=>String(q.type||'objective').toLowerCase()==='theory').length,0);
   const pieces=[
-    `<div class="admin-pill"><strong>${subjectCount}</strong><span>Subjects</span></div>`,
-    `<div class="admin-pill"><strong>${totalQuestions}</strong><span>Total Questions</span></div>`
+    `<div class="admin-pill"><strong>${subjectCount}</strong><span>${escapeHtml(getExamBoardLabel(activeExamBoard))} Subjects</span></div>`,
+    `<div class="admin-pill"><strong>${totalQuestions}</strong><span>${escapeHtml(getExamBoardLabel(activeExamBoard))} Questions</span></div>`,
+    `<div class="admin-pill"><strong>${theoryCount}</strong><span>Theory Questions</span></div>`
   ];
-  Object.values(SUBJECT_BANK).forEach(subject=>{
+  entries.forEach(([,subject])=>{
     pieces.push(`<div class="admin-pill"><strong>${subject.questions.length}</strong><span>${escapeHtml(subject.label)} • ${subject.topics.length} topics</span></div>`);
   });
+  if(!entries.length){
+    pieces.push(`<div class="admin-pill"><strong>0</strong><span>No ${escapeHtml(getExamBoardLabel(activeExamBoard))} subjects yet</span></div>`);
+  }
   wrap.innerHTML=pieces.join('');
 }
 
@@ -1627,12 +1851,19 @@ function addTopic(){
 function clearQuestionForm(){
   document.getElementById('questionYear').value='';
   document.getElementById('questionText').value='';
+  document.getElementById('questionPaper').value='';
   document.getElementById('optionA').value='';
   document.getElementById('optionB').value='';
   document.getElementById('optionC').value='';
   document.getElementById('optionD').value='';
   document.getElementById('questionExplanation').value='';
   document.getElementById('questionCorrect').value='0';
+  document.getElementById('questionType').value='objective';
+  document.getElementById('questionScorePoints').value='5';
+  document.getElementById('questionTheoryNote').value='';
+  document.getElementById('theoryModelAnswer').value='';
+  document.getElementById('theoryMarkingGuide').value='';
+  updateQuestionTypeForm();
 }
 
 function addQuestion(){
@@ -1647,31 +1878,71 @@ function addQuestion(){
     showAdminMsg('Add at least one topic before adding questions.', 'err');
     return;
   }
+  const type=(document.getElementById('questionType').value || 'objective').toLowerCase();
   const questionText=document.getElementById('questionText').value.trim();
+  const yearValue=document.getElementById('questionYear').value.trim() || 'Custom';
+  const paperValue=document.getElementById('questionPaper').value.trim();
+  const explanationValue=document.getElementById('questionExplanation').value.trim();
+  if(!questionText){
+    showAdminMsg('Enter the question text first.', 'err');
+    return;
+  }
+  if(type==='theory'){
+    const modelAnswer=document.getElementById('theoryModelAnswer').value.trim();
+    const guideText=document.getElementById('theoryMarkingGuide').value.trim();
+    const scorePoints=clamp(parseInt(document.getElementById('questionScorePoints').value,10) || 5, 1, 50);
+    const note=document.getElementById('questionTheoryNote').value.trim();
+    if(!modelAnswer){
+      showAdminMsg('Add the model answer for this theory question.', 'err');
+      return;
+    }
+    const markingGuide=guideText
+      ? guideText.split(/\r?\n/).map(item=>item.replace(/^[-*•\s]+/,'').trim()).filter(Boolean)
+      : [];
+    subject.questions.push({
+      type:'theory',
+      t:Number(topicValue),
+      yr:yearValue,
+      paper:paperValue,
+      q:questionText,
+      modelAnswer,
+      markingGuide,
+      scorePoints,
+      exp:explanationValue || note
+    });
+    refreshAfterBankChange(subjectKey);
+    clearQuestionForm();
+    document.getElementById('questionSubject').value=subjectKey;
+    populateTopicSelect(document.getElementById('questionTopic'), subjectKey, String(topicValue), false);
+    showAdminMsg('Theory question saved successfully.', 'ok');
+    return;
+  }
   const options=[
     document.getElementById('optionA').value.trim(),
     document.getElementById('optionB').value.trim(),
     document.getElementById('optionC').value.trim(),
     document.getElementById('optionD').value.trim()
   ];
-  if(!questionText || options.some(opt=>!opt)){
+  if(options.some(opt=>!opt)){
     showAdminMsg('Fill the question text and all four options.', 'err');
     return;
   }
   const correctIndex=parseInt(document.getElementById('questionCorrect').value,10);
   subject.questions.push({
+    type:'objective',
     t:Number(topicValue),
-    yr:document.getElementById('questionYear').value.trim() || 'Custom',
+    yr:yearValue,
+    paper:paperValue,
     q:questionText,
     o:options,
     a:Number.isFinite(correctIndex)?correctIndex:0,
-    exp:document.getElementById('questionExplanation').value.trim()
+    exp:explanationValue
   });
   refreshAfterBankChange(subjectKey);
   clearQuestionForm();
   document.getElementById('questionSubject').value=subjectKey;
   populateTopicSelect(document.getElementById('questionTopic'), subjectKey, String(topicValue), false);
-  showAdminMsg('Question saved successfully.', 'ok');
+  showAdminMsg('Objective question saved successfully.', 'ok');
 }
 
 function mergeSubjectBank(importedRaw){
@@ -1781,37 +2052,83 @@ function handleImportFile(event){
 }
 
 function setTemplatePreview(){
-  const template={
-    examBoard:activeExamBoard,
-    chemistry:{
-      label:`${getExamBoardLabel(activeExamBoard)} Chemistry`,
-      tagline:`${getExamBoardLabel(activeExamBoard)} Chemistry • Live Practice Mode`,
-      topics:['Atomic Structure','Chemical Combination'],
-      questions:[
-        {
-          t:0,
-          yr:'JAMB 2022',
-          q:'Sample question here',
-          o:['Option A','Option B','Option C','Option D'],
-          a:1,
-          exp:'Short explanation here'
+  const template=activeExamBoard==='waec'
+    ? {
+        examBoard:'waec',
+        subjects:{
+          physics:{
+            label:'WAEC Physics',
+            tagline:'WAEC Physics • Live Practice Mode',
+            topics:['Motion','Heat Energy'],
+            questions:[
+              {
+                type:'objective',
+                t:0,
+                yr:'WAEC 2021',
+                paper:'Paper 1',
+                q:'Sample objective question here',
+                o:['Option A','Option B','Option C','Option D'],
+                a:1,
+                exp:'Short explanation here'
+              },
+              {
+                type:'theory',
+                t:1,
+                yr:'WAEC 2021',
+                paper:'Paper 2',
+                q:'Explain the difference between conduction and convection.',
+                modelAnswer:'Conduction is heat transfer through a material without bulk movement of the material, while convection is heat transfer in fluids by the actual movement of the fluid.',
+                markingGuide:['Defines conduction correctly','Defines convection correctly','Mentions movement of fluid for convection'],
+                scorePoints:3,
+                exp:'Use the model answer and guide for self-review.'
+              }
+            ]
+          }
         }
-      ]
-    }
-  };
-  document.getElementById('jsonTemplate').textContent='JSON format example:\n' + JSON.stringify(template, null, 2);
+      }
+    : {
+        examBoard:'jamb',
+        subjects:{
+          chemistry:{
+            label:'JAMB Chemistry',
+            tagline:'JAMB Chemistry • Live Practice Mode',
+            topics:['Atomic Structure','Chemical Combination'],
+            questions:[
+              {
+                type:'objective',
+                t:0,
+                yr:'JAMB 2022',
+                q:'Sample question here',
+                o:['Option A','Option B','Option C','Option D'],
+                a:1,
+                exp:'Short explanation here'
+              }
+            ]
+          }
+        }
+      };
+  document.getElementById('jsonTemplate').textContent='JSON format example\n' + JSON.stringify(template, null, 2);
 }
 
 function prepareQuestion(q){
+  const type=String(q.type||'objective').toLowerCase();
+  if(type==='theory'){
+    return {...q, type:'theory', scorePoints:clamp(parseInt(q.scorePoints||5,10),1,50)};
+  }
   const options=q.o.map((text,index)=>({text,originalIndex:index}));
   shuffle(options);
   const correctIndex=options.findIndex(opt=>opt.originalIndex===q.a);
-  return {...q, options, correctIndex};
+  return {...q, type:'objective', options, correctIndex};
 }
 
 function startSelectedMode(){
-  if(getSelectedMode()==='cbt'){
+  const mode=getSelectedMode();
+  if(mode==='cbt'){
     startCbtQuiz();
+    return;
+  }
+  if(mode==='waec-theory'){
+    startTheoryQuiz();
     return;
   }
   startQuiz();
@@ -1825,6 +2142,10 @@ function prepareQuizScreen(mode){
   document.getElementById('btnPrev').className='btn-outline btn-nav';
   document.getElementById('btnSubmitQuiz').className='btn-submit-quiz';
   document.getElementById('btnSubmitQuiz').style.display='none';
+  const theoryWrap=document.getElementById('theoryWrap');
+  const optionsGrid=document.getElementById('optionsGrid');
+  if(theoryWrap) theoryWrap.classList.remove('show');
+  if(optionsGrid) optionsGrid.style.display='flex';
 }
 
 function startQuiz(){
@@ -1839,18 +2160,20 @@ function startQuiz(){
   safeStorageSet('quizDefaultTime', String(timePerQuestion));
   updateHomeStats();
 
-  const sourceQuestions=topicValue==='all'
+  const scopedQuestions=topicValue==='all'
     ? [...currentSubject.questions]
     : currentSubject.questions.filter(q=>q.t===Number(topicValue));
+  const sourceQuestions=filterQuestionsForMode(scopedQuestions, getSelectedMode());
 
   if(!sourceQuestions.length){
-    alert('There are no questions in this subject/topic yet. Add some from Manage Question Bank.');
+    alert('There are no questions in this subject/topic for the selected mode yet. Add some from Manage Question Bank.');
     return;
   }
 
   pool=shuffle(sourceQuestions.map(prepareQuestion));
   idx=0;correct=0;missed=[];elapsed=0;
   userAnswers=Array(pool.length).fill(null);
+  theorySelfScores=[];
   clearInterval(qTimer);
   clearInterval(sessTimer);
   prepareQuizScreen('practice');
@@ -1859,13 +2182,42 @@ function startQuiz(){
   loadQ();
 }
 
+function startTheoryQuiz(){
+  name=document.getElementById('studentName').value.trim()||'Student';
+  setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
+  const topicValue=document.getElementById('topicSelect').value;
+  document.getElementById('topicSelect').dataset.lastValue=topicValue;
+
+  const scopedQuestions=topicValue==='all'
+    ? [...currentSubject.questions]
+    : currentSubject.questions.filter(q=>q.t===Number(topicValue));
+  const sourceQuestions=filterQuestionsForMode(scopedQuestions, 'waec-theory');
+  if(!sourceQuestions.length){
+    alert('There are no WAEC theory questions in this subject/topic yet. Add some from Manage Question Bank.');
+    return;
+  }
+
+  pool=sourceQuestions.map(prepareQuestion);
+  idx=0;correct=0;missed=[];elapsed=0;
+  userAnswers=Array(pool.length).fill('');
+  theorySelfScores=Array(pool.length).fill(null);
+  clearInterval(qTimer);
+  clearInterval(sessTimer);
+  prepareQuizScreen('waec-theory');
+  show('quizScreen');
+  document.getElementById('timerVal').textContent=formatCountdown(0);
+  document.getElementById('timerVal').className='timer-val';
+  sessTimer=setInterval(()=>{ elapsed++; document.getElementById('timerVal').textContent=formatCountdown(elapsed); },1000);
+  loadQ();
+}
+
 function startCbtQuiz(){
   name=document.getElementById('studentName').value.trim()||'Student';
   setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
-  const sourceQuestions=[...currentSubject.questions];
+  const sourceQuestions=filterQuestionsForMode([...currentSubject.questions], 'cbt');
 
   if(!sourceQuestions.length){
-    alert('There are no questions in this subject yet. Add some from Manage Question Bank.');
+    alert('There are no objective questions in this subject yet. Add some from Manage Question Bank.');
     return;
   }
 
@@ -1895,19 +2247,49 @@ function loadQ(){
   const q=pool[idx];
   const pct=Math.round(((idx)/Math.max(pool.length,1))*100);
   document.getElementById('progressFill').style.width=pct+'%';
-  const answeredCount=userAnswers.filter(value=>value!==null && value!==-1).length;
+  const answeredCount=quizMode==='waec-theory'
+    ? getAnsweredTheoryCount()
+    : userAnswers.filter(value=>value!==null && value!==-1).length;
   document.getElementById('qCount').textContent=quizMode==='cbt'
     ? `${idx+1} / ${pool.length} • ${answeredCount} answered`
-    : `${idx+1} / ${pool.length}`;
+    : quizMode==='waec-theory'
+      ? `${idx+1} / ${pool.length} • ${answeredCount} answered`
+      : `${idx+1} / ${pool.length}`;
+  const topicName=currentSubject.topics[q.t] || 'Custom Topic';
   document.getElementById('topicBadge').textContent=quizMode==='cbt'
-    ? `${currentSubject.label} • CBT Mode • ${currentSubject.topics[q.t] || 'Custom Topic'}`
-    : (currentSubject.topics[q.t] || 'Custom Topic');
-  document.getElementById('qYear').textContent=q.yr;
+    ? `${currentSubject.label} • CBT Mode • ${topicName}`
+    : quizMode==='waec-theory'
+      ? `${currentSubject.label} • Theory Self Review • ${topicName}`
+      : (q.paper ? `${topicName} • ${q.paper}` : topicName);
+  document.getElementById('qYear').textContent=q.paper ? `${q.yr} • ${q.paper}` : q.yr;
   document.getElementById('qText').textContent=q.q;
   const grid=document.getElementById('optionsGrid');
+  const theoryWrap=document.getElementById('theoryWrap');
   grid.innerHTML='';
-  const letters=optionLetters(q.options.length);
+  grid.style.display='flex';
+  theoryWrap.classList.remove('show');
 
+  if(quizMode==='waec-theory'){
+    grid.style.display='none';
+    theoryWrap.classList.add('show');
+    const input=document.getElementById('theoryAnswerInput');
+    input.value=typeof userAnswers[idx]==='string' ? userAnswers[idx] : '';
+    input.focus();
+    document.getElementById('feedbackBox').className='feedback-box';
+    const prevBtn=document.getElementById('btnPrev');
+    const nextBtn=document.getElementById('btnNext');
+    const submitBtn=document.getElementById('btnSubmitQuiz');
+    prevBtn.className='btn-outline btn-nav show';
+    prevBtn.disabled=idx===0;
+    nextBtn.className='btn-next show';
+    nextBtn.textContent=idx===pool.length-1 ? 'REVIEW THEORY →' : 'NEXT QUESTION →';
+    submitBtn.className='btn-submit-quiz show';
+    submitBtn.style.display='block';
+    submitBtn.textContent='✅ Submit Theory Answers';
+    return;
+  }
+
+  const letters=optionLetters(q.options.length);
   q.options.forEach((option,optionIndex)=>{
     const b=document.createElement('button');
     const selectedAnswer=userAnswers[idx];
@@ -1931,6 +2313,7 @@ function loadQ(){
     nextBtn.textContent=idx===pool.length-1 ? 'FINISH →' : 'NEXT QUESTION →';
     submitBtn.className='btn-submit-quiz show';
     submitBtn.style.display='block';
+    submitBtn.textContent='✅ Submit Test';
     return;
   }
 
@@ -1957,6 +2340,11 @@ function tick(){
   if(quizMode==='cbt'){
     el.textContent=formatCountdown(timeLeft);
     el.className='timer-val'+(timeLeft<=300?' urgent':'');
+    return;
+  }
+  if(quizMode==='waec-theory'){
+    el.textContent=formatCountdown(elapsed);
+    el.className='timer-val';
     return;
   }
   el.textContent=timeLeft;
@@ -2013,6 +2401,11 @@ function fb(ok,main,exp){
 }
 
 function prevQuestion(){
+  if(quizMode==='waec-theory'){
+    saveCurrentTheoryAnswer();
+    if(idx>0){ idx--; loadQ(); }
+    return;
+  }
   if(quizMode!=='cbt') return;
   if(idx>0){
     idx--;
@@ -2021,6 +2414,16 @@ function prevQuestion(){
 }
 
 function nextQuestion(){
+  if(quizMode==='waec-theory'){
+    saveCurrentTheoryAnswer();
+    if(idx>=pool.length-1){
+      submitQuizEarly();
+      return;
+    }
+    idx++;
+    loadQ();
+    return;
+  }
   if(quizMode==='cbt'){
     if(idx>=pool.length-1){
       submitQuizEarly();
@@ -2035,6 +2438,17 @@ function nextQuestion(){
 }
 
 function submitQuizEarly(){
+  if(quizMode==='waec-theory'){
+    saveCurrentTheoryAnswer();
+    const unanswered=userAnswers.filter(value=>!String(value||'').trim()).length;
+    const prompt=unanswered
+      ? `You still have ${unanswered} theory answer(s) empty. Submit anyway?`
+      : 'Submit these theory answers and open self review?';
+    if(window.confirm(prompt)){
+      endQuiz();
+    }
+    return;
+  }
   if(quizMode!=='cbt'){
     endQuiz();
     return;
@@ -2066,27 +2480,36 @@ function endQuiz(fromTimer=false){
     elapsed=CBT_TOTAL_SECONDS-timeLeft;
   }
 
+  if(quizMode==='waec-theory'){
+    document.getElementById('greetEl').textContent=`Self-review time, ${name}!`;
+    document.getElementById('reviewSec').style.display='block';
+    show('resultsScreen');
+    renderTheoryReview();
+    return;
+  }
+
   const total=Math.max(pool.length,1),pct=Math.round(correct/total*100);
   document.getElementById('greetEl').textContent=fromTimer
     ? `Time up, ${name}!`
     : `Well done, ${name}! 🎉`;
-  document.getElementById('sPct').textContent=pct+'%';
+  document.getElementById('rCLbl').textContent='Correct';
+  document.getElementById('rWLbl').textContent='Wrong';
+  document.getElementById('rTLbl').textContent='Time';
   document.getElementById('rC').textContent=correct;
   document.getElementById('rW').textContent=pool.length-correct;
   document.getElementById('rT').textContent=fmt(elapsed);
-  const c=document.getElementById('fgCircle');
-  const off=314-(pct/100*314);
-  c.style.strokeDashoffset='314';
-  setTimeout(()=>{c.style.strokeDashoffset=off;c.style.stroke=col(pct);},200);
-  const pf=document.getElementById('pFill');
-  pf.style.width='0%';
-  pf.style.background=col(pct);
-  setTimeout(()=>{pf.style.width=pct+'%';},300);
+  setResultVisual(pct);
   show('resultsScreen');
 }
 
 function toggleReview(){
   const sec=document.getElementById('reviewSec');
+  if(quizMode==='waec-theory'){
+    sec.style.display='block';
+    renderTheoryReview();
+    sec.scrollIntoView({behavior:'smooth', block:'start'});
+    return;
+  }
   if(sec.style.display==='none'){
     sec.style.display='block';
     const list=document.getElementById('reviewList');
@@ -2125,6 +2548,7 @@ function updateGlobalHomeButton(){
 function goHome(){
   clearInterval(qTimer);
   clearInterval(sessTimer);
+  theorySelfScores=[];
   show('homeScreen');
   updateModeUI();
   updateHomeStats();
@@ -2150,6 +2574,7 @@ function initQuizApp(){
   timePerQuestion=getSavedTime();
   document.getElementById('timePerQuestion').value=timePerQuestion;
   buildSubjectSelect();
+  renderModeOptions();
   updateTopicSelect();
   syncAdminSelectors();
   renderAdminSummary();
@@ -2157,6 +2582,7 @@ function initQuizApp(){
   renderCloudConfigTemplate();
   applyCloudStatus('local');
   syncExamBoardUI();
+  updateQuestionTypeForm();
   updateModeUI();
 
   document.getElementById('subjectSelect').addEventListener('change',()=>{
@@ -2165,6 +2591,10 @@ function initQuizApp(){
 
   document.getElementById('modeSelect').addEventListener('change',()=>{
     updateModeUI();
+  });
+
+  document.getElementById('questionType').addEventListener('change',()=>{
+    updateQuestionTypeForm();
   });
 
   document.getElementById('topicSelect').addEventListener('change',event=>{

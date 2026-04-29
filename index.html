@@ -1484,7 +1484,7 @@ function updateTheoryResultsSummary(){
   document.getElementById('rTLbl').textContent='Time';
   document.getElementById('rC').textContent=`${awarded}/${maxTotal}`;
   document.getElementById('rW').textContent=String(pending);
-  document.getElementById('rT').textContent=quizMode==='waec-untimed' ? 'Off' : fmt(elapsed);
+  document.getElementById('rT').textContent=(quizMode==='waec-untimed' || quizMode==='waec-theory') ? 'Off' : fmt(elapsed);
   setResultVisual(pct);
 }
 function renderTheoryReview(){
@@ -1703,12 +1703,12 @@ function updateModeUI(){
     timeGroup.classList.add('is-disabled');
     if(timeInput) timeInput.value=getSavedTime();
   }else if(activeExamBoard==='waec' && mode==='waec-objective-untimed'){
-    if(modeHelp) modeHelp.textContent='Untimed objective mode lets students answer WAEC multiple-choice questions at their own pace with no countdown.';
+    if(modeHelp) modeHelp.textContent='Untimed objective mode marks each answer immediately after it is clicked, so students get instant correction with no countdown.';
     if(startBtn) startBtn.textContent='START WAEC UNTIMED →';
     timeGroup.classList.add('is-disabled');
     if(timeInput) timeInput.value=getSavedTime();
   }else if(activeExamBoard==='waec'){
-    if(modeHelp) modeHelp.textContent='Timed objective mode shows only WAEC multiple-choice questions for the selected topic using your saved per-question timer.';
+    if(modeHelp) modeHelp.textContent='Timed objective mode uses your saved per-question timer, but correct answers are shown only after the test is submitted or completed.';
     if(startBtn) startBtn.textContent='START WAEC QUIZ →';
   }else if(mode==='cbt'){
     if(modeHelp) modeHelp.textContent='CBT mode uses the full subject bank, picks up to 40 objective questions, and runs on one fixed 40-minute timer.';
@@ -2221,6 +2221,10 @@ function startSelectedMode(){
     startCbtQuiz();
     return;
   }
+  if(mode==='waec-objective'){
+    startWaecTimedQuiz();
+    return;
+  }
   if(mode==='waec-objective-untimed'){
     startWaecUntimedQuiz();
     return;
@@ -2308,6 +2312,40 @@ function startTheoryQuiz(){
   loadQ();
 }
 
+function startWaecTimedQuiz(){
+  name=document.getElementById('studentName').value.trim()||'Student';
+  setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
+  const topicValue=document.getElementById('topicSelect').value;
+  document.getElementById('topicSelect').dataset.lastValue=topicValue;
+
+  const rawTime=parseInt(document.getElementById('timePerQuestion').value,10);
+  timePerQuestion=Number.isFinite(rawTime)?clamp(rawTime,5,300):30;
+  document.getElementById('timePerQuestion').value=timePerQuestion;
+  safeStorageSet('quizDefaultTime', String(timePerQuestion));
+  updateHomeStats();
+
+  const scopedQuestions=topicValue==='all'
+    ? [...currentSubject.questions]
+    : currentSubject.questions.filter(q=>q.t===Number(topicValue));
+  const sourceQuestions=filterQuestionsForMode(scopedQuestions, 'waec-objective');
+
+  if(!sourceQuestions.length){
+    alert('There are no WAEC objective questions in this subject/topic yet. Add some from Manage Question Bank.');
+    return;
+  }
+
+  pool=shuffle(sourceQuestions.map(prepareQuestion));
+  idx=0;correct=0;missed=[];elapsed=0;
+  userAnswers=Array(pool.length).fill(null);
+  theorySelfScores=[];
+  clearInterval(qTimer);
+  clearInterval(sessTimer);
+  prepareQuizScreen('waec-timed');
+  show('quizScreen');
+  sessTimer=setInterval(()=>elapsed++,1000);
+  loadQ();
+}
+
 function startWaecUntimedQuiz(){
   name=document.getElementById('studentName').value.trim()||'Student';
   setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
@@ -2380,7 +2418,7 @@ function loadQ(){
     ? `${idx+1} / ${pool.length} • ${answeredCount} answered`
     : quizMode==='waec-theory'
       ? `${idx+1} / ${pool.length} • ${answeredCount} answered`
-      : quizMode==='waec-untimed'
+      : quizMode==='waec-untimed' || quizMode==='waec-timed'
         ? `${idx+1} / ${pool.length} • ${answeredCount} answered`
         : `${idx+1} / ${pool.length}`;
   const topicName=currentSubject.topics[q.t] || 'Custom Topic';
@@ -2389,8 +2427,10 @@ function loadQ(){
     : quizMode==='waec-theory'
       ? `${currentSubject.label} • Theory Self Review • ${topicName}`
       : quizMode==='waec-untimed'
-        ? `${currentSubject.label} • Untimed Objective • ${topicName}`
-        : (q.paper ? `${topicName} • ${q.paper}` : topicName);
+        ? `${currentSubject.label} • Instant Review • ${topicName}`
+        : quizMode==='waec-timed'
+          ? `${currentSubject.label} • Timed Objective • ${topicName}`
+          : (q.paper ? `${topicName} • ${q.paper}` : topicName);
   document.getElementById('qYear').textContent=q.paper ? `${q.yr} • ${q.paper}` : q.yr;
   document.getElementById('qText').textContent=q.q;
   const grid=document.getElementById('optionsGrid');
@@ -2409,8 +2449,13 @@ function loadQ(){
     const prevBtn=document.getElementById('btnPrev');
     const nextBtn=document.getElementById('btnNext');
     const submitBtn=document.getElementById('btnSubmitQuiz');
-    prevBtn.className='btn-outline btn-nav show';
-    prevBtn.disabled=idx===0;
+    if(quizMode==='waec-timed'){
+      prevBtn.className='btn-outline btn-nav';
+      prevBtn.disabled=true;
+    }else{
+      prevBtn.className='btn-outline btn-nav show';
+      prevBtn.disabled=idx===0;
+    }
     nextBtn.className='btn-next show';
     nextBtn.textContent=idx===pool.length-1 ? 'REVIEW THEORY →' : 'NEXT QUESTION →';
     submitBtn.className='btn-submit-quiz show';
@@ -2432,20 +2477,50 @@ function loadQ(){
     grid.appendChild(b);
   });
 
-  if(quizMode==='cbt' || quizMode==='waec-untimed'){
+  if(quizMode==='cbt' || quizMode==='waec-timed'){
     document.getElementById('feedbackBox').className='feedback-box';
     const prevBtn=document.getElementById('btnPrev');
     const nextBtn=document.getElementById('btnNext');
     const submitBtn=document.getElementById('btnSubmitQuiz');
-    prevBtn.className='btn-outline btn-nav show';
-    prevBtn.disabled=idx===0;
+    if(quizMode==='waec-timed'){
+      prevBtn.className='btn-outline btn-nav';
+      prevBtn.disabled=true;
+    }else{
+      prevBtn.className='btn-outline btn-nav show';
+      prevBtn.disabled=idx===0;
+    }
     nextBtn.className='btn-next show';
     nextBtn.textContent=idx===pool.length-1 ? 'FINISH →' : 'NEXT QUESTION →';
     submitBtn.className='btn-submit-quiz show';
     submitBtn.style.display='block';
     submitBtn.textContent='✅ Submit Test';
-    document.getElementById('timerVal').textContent=quizMode==='waec-untimed' ? 'No Timer' : formatCountdown(timeLeft);
-    document.getElementById('timerVal').className=quizMode==='waec-untimed' ? 'timer-val no-timer' : ('timer-val'+(timeLeft<=300?' urgent':''));
+    if(quizMode==='waec-timed'){
+      clearInterval(qTimer);
+      timeLeft=timePerQuestion;
+      tick();
+      qTimer=setInterval(()=>{
+        timeLeft--;
+        tick();
+        if(timeLeft<=0){
+          clearInterval(qTimer);
+          timeout();
+        }
+      },1000);
+    }else{
+      document.getElementById('timerVal').textContent=formatCountdown(timeLeft);
+      document.getElementById('timerVal').className='timer-val'+(timeLeft<=300?' urgent':'');
+    }
+    return;
+  }
+
+  if(quizMode==='waec-untimed'){
+    document.getElementById('feedbackBox').className='feedback-box';
+    document.getElementById('btnPrev').className='btn-outline btn-nav';
+    document.getElementById('btnSubmitQuiz').className='btn-submit-quiz';
+    document.getElementById('btnSubmitQuiz').style.display='none';
+    document.getElementById('btnNext').className='btn-next';
+    document.getElementById('timerVal').textContent='No Timer';
+    document.getElementById('timerVal').className='timer-val no-timer';
     return;
   }
 
@@ -2479,6 +2554,11 @@ function tick(){
     el.className='timer-val no-timer';
     return;
   }
+  if(quizMode==='waec-timed'){
+    el.textContent=timeLeft;
+    el.className='timer-val'+(timeLeft<=Math.min(10,timePerQuestion)?' urgent':'');
+    return;
+  }
   el.textContent=timeLeft;
   el.className='timer-val'+(timeLeft<=Math.min(10,timePerQuestion)?' urgent':'');
 }
@@ -2486,6 +2566,17 @@ function tick(){
 function timeout(){
   const q=pool[idx];
   const btns=document.querySelectorAll('.option-btn');
+  if(quizMode==='waec-timed'){
+    btns.forEach(b=>b.disabled=true);
+    if(userAnswers[idx]===null) userAnswers[idx]=-1;
+    if(idx>=pool.length-1){
+      endQuiz(true);
+    }else{
+      idx++;
+      loadQ();
+    }
+    return;
+  }
   const letters=optionLetters(q.options.length);
   btns.forEach(b=>b.disabled=true);
   if(btns[q.correctIndex]) btns[q.correctIndex].classList.add('reveal');
@@ -2496,12 +2587,33 @@ function timeout(){
 }
 
 function pick(i){
-  if(quizMode==='cbt' || quizMode==='waec-untimed'){
+  if(quizMode==='cbt' || quizMode==='waec-timed'){
     userAnswers[idx]=i;
     document.querySelectorAll('.option-btn').forEach((btn,buttonIndex)=>{
       btn.classList.toggle('selected', buttonIndex===i);
     });
     document.getElementById('qCount').textContent=`${idx+1} / ${pool.length} • ${userAnswers.filter(value=>value!==null && value!==-1).length} answered`;
+    return;
+  }
+  if(quizMode==='waec-untimed'){
+    const q=pool[idx];
+    const btns=document.querySelectorAll('.option-btn');
+    const letters=optionLetters(q.options.length);
+    btns.forEach(b=>b.disabled=true);
+    userAnswers[idx]=i;
+    if(i===q.correctIndex){
+      correct++;
+      btns[i].classList.add('correct');
+      fb(true,'✅ Correct!',q.exp);
+    } else {
+      btns[i].classList.add('wrong');
+      if(btns[q.correctIndex]) btns[q.correctIndex].classList.add('reveal');
+      fb(false,'❌ Wrong! Correct: '+letters[q.correctIndex]+'.',q.exp);
+      missed.push({q,chosen:i});
+    }
+    document.getElementById('qCount').textContent=`${idx+1} / ${pool.length} • ${userAnswers.filter(value=>value!==null && value!==-1).length} answered`;
+    document.getElementById('btnNext').className='btn-next show';
+    document.getElementById('btnNext').textContent=idx===pool.length-1 ? 'FINISH →' : 'NEXT QUESTION →';
     return;
   }
 
@@ -2538,7 +2650,7 @@ function prevQuestion(){
     if(idx>0){ idx--; loadQ(); }
     return;
   }
-  if(quizMode!=='cbt' && quizMode!=='waec-untimed') return;
+  if(quizMode!=='cbt' && quizMode!=='waec-untimed' && quizMode!=='waec-timed') return;
   if(idx>0){
     idx--;
     loadQ();
@@ -2556,9 +2668,18 @@ function nextQuestion(){
     loadQ();
     return;
   }
-  if(quizMode==='cbt' || quizMode==='waec-untimed'){
+  if(quizMode==='cbt' || quizMode==='waec-timed'){
     if(idx>=pool.length-1){
       submitQuizEarly();
+      return;
+    }
+    idx++;
+    loadQ();
+    return;
+  }
+  if(quizMode==='waec-untimed'){
+    if(idx>=pool.length-1){
+      endQuiz();
       return;
     }
     idx++;
@@ -2581,14 +2702,14 @@ function submitQuizEarly(){
     }
     return;
   }
-  if(quizMode!=='cbt' && quizMode!=='waec-untimed'){
+  if(quizMode!=='cbt' && quizMode!=='waec-timed'){
     endQuiz();
     return;
   }
   const unanswered=userAnswers.filter(value=>value===null).length;
   const prompt=unanswered
     ? `You still have ${unanswered} unanswered question(s). Submit anyway?`
-    : 'Submit this CBT now?';
+: (quizMode==='waec-timed' ? 'Submit this timed WAEC test now?' : 'Submit this CBT now?');
   if(window.confirm(prompt)){
     endQuiz();
   }
@@ -2598,7 +2719,7 @@ function endQuiz(fromTimer=false){
   clearInterval(qTimer);
   clearInterval(sessTimer);
 
-  if(quizMode==='cbt' || quizMode==='waec-untimed'){
+  if(quizMode==='cbt' || quizMode==='waec-timed'){
     correct=0;
     missed=[];
     pool.forEach((q,questionIndex)=>{
@@ -2609,7 +2730,7 @@ function endQuiz(fromTimer=false){
         missed.push({q,chosen:chosen===null ? -1 : chosen});
       }
     });
-    elapsed=quizMode==='cbt' ? (CBT_TOTAL_SECONDS-timeLeft) : 0;
+    elapsed=quizMode==='cbt' ? (CBT_TOTAL_SECONDS-timeLeft) : elapsed;
   }
 
   if(quizMode==='waec-theory'){
@@ -2631,7 +2752,7 @@ function endQuiz(fromTimer=false){
   document.getElementById('rTLbl').textContent='Time';
   document.getElementById('rC').textContent=correct;
   document.getElementById('rW').textContent=pool.length-correct;
-  document.getElementById('rT').textContent=quizMode==='waec-untimed' ? 'Off' : fmt(elapsed);
+  document.getElementById('rT').textContent=(quizMode==='waec-untimed' || quizMode==='waec-theory') ? 'Off' : fmt(elapsed);
   setResultVisual(pct);
   show('resultsScreen');
 }

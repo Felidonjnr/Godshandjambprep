@@ -52,6 +52,22 @@ body::before{content:'';position:fixed;inset:0;background:
 .overlay{position:fixed;inset:0;background:rgba(5,8,15,0.82);backdrop-filter:blur(6px);display:none;
   align-items:flex-start;justify-content:center;padding:1rem;z-index:20;overflow-y:auto;}
 .overlay.show{display:flex;}
+.calc-panel{width:100%;max-width:420px;background:var(--card);border:1px solid rgba(245,166,35,0.18);
+  border-radius:22px;box-shadow:var(--shadow);padding:1.1rem;}
+.calc-display{width:100%;min-height:72px;background:#0D1220;border:1px solid rgba(255,255,255,0.08);border-radius:16px;
+  padding:1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:1.05rem;line-height:1.45;word-break:break-word;margin-bottom:.9rem;}
+.calc-sub{font-size:.76rem;color:var(--muted);margin-top:.35rem;word-break:break-all;}
+.calc-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.6rem;}
+.calc-btn{padding:.8rem .55rem;border:none;border-radius:12px;background:var(--card2);color:var(--text);
+  font-family:'DM Sans',sans-serif;font-weight:700;cursor:pointer;transition:transform .12s,background .15s,border-color .15s;
+  border:1px solid rgba(255,255,255,0.06);}
+.calc-btn:hover{transform:translateY(-1px);border-color:var(--gold);}
+.calc-btn.fn{color:var(--gold);}
+.calc-btn.eq{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;border:none;}
+.calc-btn.wide{grid-column:span 2;}
+@media (max-width:520px){
+  .calc-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+}
 .pin-panel{width:100%;max-width:420px;background:var(--card);border:1px solid rgba(245,166,35,0.18);
   border-radius:22px;box-shadow:var(--shadow);padding:1.15rem;}
 .pin-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem;}
@@ -140,7 +156,13 @@ body::before{content:'';position:fixed;inset:0;background:
 .q-count{font-size:.8rem;color:var(--muted);margin-top:.3rem;text-align:right;}
 .timer-box{display:flex;align-items:center;gap:.5rem;background:var(--card2);
   border-radius:10px;padding:.4rem .8rem;border:1px solid rgba(245,166,35,0.2);}
+.quiz-tools{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:flex-end;}
+.btn-tool{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;padding:.55rem .85rem;
+  background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.28);border-radius:10px;color:var(--gold);
+  font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:700;cursor:pointer;transition:transform .15s,background .15s,border-color .15s;}
+.btn-tool:hover{background:rgba(245,166,35,0.16);border-color:var(--gold);transform:translateY(-1px);}
 .timer-val{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;min-width:28px;text-align:center;}
+.timer-val.no-timer{font-size:1.1rem;letter-spacing:.5px;min-width:72px;}
 .timer-val.urgent{color:var(--red);animation:pulse .6s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 .topic-badge{display:inline-block;background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.3);
@@ -558,6 +580,61 @@ Mentions the key formula"></textarea>
   </div>
 </div>
 
+<div class="overlay" id="calculatorOverlay">
+  <div class="calc-panel">
+    <div class="pin-head">
+      <div>
+        <div class="admin-kicker">Exam Tool</div>
+        <h3>Scientific Calculator</h3>
+        <p>Use this during the test without leaving the quiz page.</p>
+      </div>
+      <button class="icon-btn" type="button" onclick="closeCalculator()">✕</button>
+    </div>
+    <div class="calc-display" id="calcDisplay">0<div class="calc-sub" id="calcSubDisplay">Ready</div></div>
+    <div class="calc-grid">
+      <button class="calc-btn fn" type="button" onclick="calcClearAll()">AC</button>
+      <button class="calc-btn fn" type="button" onclick="calcBackspace()">⌫</button>
+      <button class="calc-btn fn" type="button" onclick="calcAppend('(')">(</button>
+      <button class="calc-btn fn" type="button" onclick="calcAppend(')')">)</button>
+      <button class="calc-btn fn" type="button" onclick="calcAppend('/')">÷</button>
+
+      <button class="calc-btn fn" type="button" onclick="calcAppend('sin(')">sin</button>
+      <button class="calc-btn fn" type="button" onclick="calcAppend('cos(')">cos</button>
+      <button class="calc-btn fn" type="button" onclick="calcAppend('tan(')">tan</button>
+      <button class="calc-btn fn" type="button" onclick="calcAppend('log(')">log</button>
+      <button class="calc-btn fn" type="button" onclick="calcAppend('ln(')">ln</button>
+
+      <button class="calc-btn fn" type="button" onclick="calcAppend('sqrt(')">√</button>
+      <button class="calc-btn fn" type="button" onclick="calcAppend('^')">xʸ</button>
+      <button class="calc-btn fn" type="button" onclick="calcAppend('pi')">π</button>
+      <button class="calc-btn fn" type="button" onclick="calcAppend('e')">e</button>
+      <button class="calc-btn fn" type="button" onclick="calcAppend('%')">%</button>
+
+      <button class="calc-btn" type="button" onclick="calcAppend('7')">7</button>
+      <button class="calc-btn" type="button" onclick="calcAppend('8')">8</button>
+      <button class="calc-btn" type="button" onclick="calcAppend('9')">9</button>
+      <button class="calc-btn fn" type="button" onclick="calcAppend('*')">×</button>
+      <button class="calc-btn fn" type="button" onclick="calcAppend('!')">n!</button>
+
+      <button class="calc-btn" type="button" onclick="calcAppend('4')">4</button>
+      <button class="calc-btn" type="button" onclick="calcAppend('5')">5</button>
+      <button class="calc-btn" type="button" onclick="calcAppend('6')">6</button>
+      <button class="calc-btn fn" type="button" onclick="calcAppend('-')">−</button>
+      <button class="calc-btn fn" type="button" onclick="calcSquare()">x²</button>
+
+      <button class="calc-btn" type="button" onclick="calcAppend('1')">1</button>
+      <button class="calc-btn" type="button" onclick="calcAppend('2')">2</button>
+      <button class="calc-btn" type="button" onclick="calcAppend('3')">3</button>
+      <button class="calc-btn fn" type="button" onclick="calcAppend('+')">+</button>
+      <button class="calc-btn fn" type="button" onclick="calcToggleSign()">±</button>
+
+      <button class="calc-btn wide" type="button" onclick="calcAppend('0')">0</button>
+      <button class="calc-btn" type="button" onclick="calcAppend('.')">.</button>
+      <button class="calc-btn eq wide" type="button" onclick="calcEvaluate()">=</button>
+    </div>
+  </div>
+</div>
+
 <!-- QUIZ -->
 <div class="screen" id="quizScreen">
   <div class="quiz-inner">
@@ -567,7 +644,10 @@ Mentions the key formula"></textarea>
         <div class="q-progress-bar"><div class="q-progress-fill" id="progressFill" style="width:0%"></div></div>
         <div class="q-count" id="qCount"></div>
       </div>
-      <div class="timer-box">⏱ <span class="timer-val" id="timerVal">30</span></div>
+      <div class="quiz-tools">
+        <div class="timer-box">⏱ <span class="timer-val" id="timerVal">30</span></div>
+        <button class="btn-tool" id="calcOpenBtn" type="button" onclick="openCalculator()">🧮 Calculator</button>
+      </div>
     </div>
     <div class="topic-badge" id="topicBadge"></div>
     <div class="question-card">
@@ -1338,14 +1418,18 @@ function filterQuestionsForMode(questions, mode=getSelectedMode()){
 function getAnsweredTheoryCount(){
   return userAnswers.filter(value=>typeof value==='string' && value.trim()).length;
 }
+function isUntimedMode(mode=getSelectedMode()){
+  return mode==='waec-objective-untimed' || mode==='waec-theory';
+}
 function renderModeOptions(){
   const select=document.getElementById('modeSelect');
   if(!select) return;
   const previous=select.value;
   const options=activeExamBoard==='waec'
     ? [
-        {value:'waec-objective', text:'📝 WAEC Objective Practice'},
-        {value:'waec-theory', text:'✍️ WAEC Theory Self Review'}
+        {value:'waec-objective', text:'📝 WAEC Objective Practice (Timed)'},
+        {value:'waec-objective-untimed', text:'📘 WAEC Objective Practice (No Timer)'},
+        {value:'waec-theory', text:'✍️ WAEC Theory Self Review (No Timer)'}
       ]
     : [
         {value:'practice', text:'⚡ Live Practice Mode'},
@@ -1400,7 +1484,7 @@ function updateTheoryResultsSummary(){
   document.getElementById('rTLbl').textContent='Time';
   document.getElementById('rC').textContent=`${awarded}/${maxTotal}`;
   document.getElementById('rW').textContent=String(pending);
-  document.getElementById('rT').textContent=fmt(elapsed);
+  document.getElementById('rT').textContent=quizMode==='waec-untimed' ? 'Off' : fmt(elapsed);
   setResultVisual(pct);
 }
 function renderTheoryReview(){
@@ -1614,12 +1698,17 @@ function updateModeUI(){
   topicGroup.classList.remove('is-disabled');
   timeGroup.classList.remove('is-disabled');
   if(activeExamBoard==='waec' && mode==='waec-theory'){
-    if(modeHelp) modeHelp.textContent='Theory mode shows only WAEC theory questions. Students type their answers first, then score themselves with the model answer and marking guide.';
+    if(modeHelp) modeHelp.textContent='Theory mode shows only WAEC theory questions. Students type their answers first, then score themselves with the model answer and marking guide. No timer is used.';
     if(startBtn) startBtn.textContent='START THEORY REVIEW →';
     timeGroup.classList.add('is-disabled');
     if(timeInput) timeInput.value=getSavedTime();
+  }else if(activeExamBoard==='waec' && mode==='waec-objective-untimed'){
+    if(modeHelp) modeHelp.textContent='Untimed objective mode lets students answer WAEC multiple-choice questions at their own pace with no countdown.';
+    if(startBtn) startBtn.textContent='START WAEC UNTIMED →';
+    timeGroup.classList.add('is-disabled');
+    if(timeInput) timeInput.value=getSavedTime();
   }else if(activeExamBoard==='waec'){
-    if(modeHelp) modeHelp.textContent='Objective mode shows only WAEC multiple-choice questions for the selected topic.';
+    if(modeHelp) modeHelp.textContent='Timed objective mode shows only WAEC multiple-choice questions for the selected topic using your saved per-question timer.';
     if(startBtn) startBtn.textContent='START WAEC QUIZ →';
   }else if(mode==='cbt'){
     if(modeHelp) modeHelp.textContent='CBT mode uses the full subject bank, picks up to 40 objective questions, and runs on one fixed 40-minute timer.';
@@ -1639,8 +1728,13 @@ function updateHomeStats(){
   const mode=getSelectedMode();
   const timeLabel=document.getElementById('statTimeLabel');
   if(activeExamBoard==='waec' && mode==='waec-theory'){
-    document.getElementById('statPerQ').textContent='Essay';
-    if(timeLabel) timeLabel.textContent='Mode';
+    document.getElementById('statPerQ').textContent='Off';
+    if(timeLabel) timeLabel.textContent='Timer';
+    return;
+  }
+  if(activeExamBoard==='waec' && mode==='waec-objective-untimed'){
+    document.getElementById('statPerQ').textContent='Off';
+    if(timeLabel) timeLabel.textContent='Timer';
     return;
   }
   if(mode==='cbt'){
@@ -2127,6 +2221,10 @@ function startSelectedMode(){
     startCbtQuiz();
     return;
   }
+  if(mode==='waec-objective-untimed'){
+    startWaecUntimedQuiz();
+    return;
+  }
   if(mode==='waec-theory'){
     startTheoryQuiz();
     return;
@@ -2205,9 +2303,37 @@ function startTheoryQuiz(){
   clearInterval(sessTimer);
   prepareQuizScreen('waec-theory');
   show('quizScreen');
-  document.getElementById('timerVal').textContent=formatCountdown(0);
-  document.getElementById('timerVal').className='timer-val';
-  sessTimer=setInterval(()=>{ elapsed++; document.getElementById('timerVal').textContent=formatCountdown(elapsed); },1000);
+  document.getElementById('timerVal').textContent='No Timer';
+  document.getElementById('timerVal').className='timer-val no-timer';
+  loadQ();
+}
+
+function startWaecUntimedQuiz(){
+  name=document.getElementById('studentName').value.trim()||'Student';
+  setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
+  const topicValue=document.getElementById('topicSelect').value;
+  document.getElementById('topicSelect').dataset.lastValue=topicValue;
+
+  const scopedQuestions=topicValue==='all'
+    ? [...currentSubject.questions]
+    : currentSubject.questions.filter(q=>q.t===Number(topicValue));
+  const sourceQuestions=filterQuestionsForMode(scopedQuestions, 'waec-objective-untimed');
+
+  if(!sourceQuestions.length){
+    alert('There are no WAEC objective questions in this subject/topic yet. Add some from Manage Question Bank.');
+    return;
+  }
+
+  pool=shuffle(sourceQuestions.map(prepareQuestion));
+  idx=0;correct=0;missed=[];elapsed=0;
+  userAnswers=Array(pool.length).fill(null);
+  theorySelfScores=[];
+  clearInterval(qTimer);
+  clearInterval(sessTimer);
+  prepareQuizScreen('waec-untimed');
+  show('quizScreen');
+  document.getElementById('timerVal').textContent='No Timer';
+  document.getElementById('timerVal').className='timer-val no-timer';
   loadQ();
 }
 
@@ -2254,13 +2380,17 @@ function loadQ(){
     ? `${idx+1} / ${pool.length} • ${answeredCount} answered`
     : quizMode==='waec-theory'
       ? `${idx+1} / ${pool.length} • ${answeredCount} answered`
-      : `${idx+1} / ${pool.length}`;
+      : quizMode==='waec-untimed'
+        ? `${idx+1} / ${pool.length} • ${answeredCount} answered`
+        : `${idx+1} / ${pool.length}`;
   const topicName=currentSubject.topics[q.t] || 'Custom Topic';
   document.getElementById('topicBadge').textContent=quizMode==='cbt'
     ? `${currentSubject.label} • CBT Mode • ${topicName}`
     : quizMode==='waec-theory'
       ? `${currentSubject.label} • Theory Self Review • ${topicName}`
-      : (q.paper ? `${topicName} • ${q.paper}` : topicName);
+      : quizMode==='waec-untimed'
+        ? `${currentSubject.label} • Untimed Objective • ${topicName}`
+        : (q.paper ? `${topicName} • ${q.paper}` : topicName);
   document.getElementById('qYear').textContent=q.paper ? `${q.yr} • ${q.paper}` : q.yr;
   document.getElementById('qText').textContent=q.q;
   const grid=document.getElementById('optionsGrid');
@@ -2302,7 +2432,7 @@ function loadQ(){
     grid.appendChild(b);
   });
 
-  if(quizMode==='cbt'){
+  if(quizMode==='cbt' || quizMode==='waec-untimed'){
     document.getElementById('feedbackBox').className='feedback-box';
     const prevBtn=document.getElementById('btnPrev');
     const nextBtn=document.getElementById('btnNext');
@@ -2314,6 +2444,8 @@ function loadQ(){
     submitBtn.className='btn-submit-quiz show';
     submitBtn.style.display='block';
     submitBtn.textContent='✅ Submit Test';
+    document.getElementById('timerVal').textContent=quizMode==='waec-untimed' ? 'No Timer' : formatCountdown(timeLeft);
+    document.getElementById('timerVal').className=quizMode==='waec-untimed' ? 'timer-val no-timer' : ('timer-val'+(timeLeft<=300?' urgent':''));
     return;
   }
 
@@ -2342,9 +2474,9 @@ function tick(){
     el.className='timer-val'+(timeLeft<=300?' urgent':'');
     return;
   }
-  if(quizMode==='waec-theory'){
-    el.textContent=formatCountdown(elapsed);
-    el.className='timer-val';
+  if(quizMode==='waec-theory' || quizMode==='waec-untimed'){
+    el.textContent='No Timer';
+    el.className='timer-val no-timer';
     return;
   }
   el.textContent=timeLeft;
@@ -2364,7 +2496,7 @@ function timeout(){
 }
 
 function pick(i){
-  if(quizMode==='cbt'){
+  if(quizMode==='cbt' || quizMode==='waec-untimed'){
     userAnswers[idx]=i;
     document.querySelectorAll('.option-btn').forEach((btn,buttonIndex)=>{
       btn.classList.toggle('selected', buttonIndex===i);
@@ -2406,7 +2538,7 @@ function prevQuestion(){
     if(idx>0){ idx--; loadQ(); }
     return;
   }
-  if(quizMode!=='cbt') return;
+  if(quizMode!=='cbt' && quizMode!=='waec-untimed') return;
   if(idx>0){
     idx--;
     loadQ();
@@ -2424,7 +2556,7 @@ function nextQuestion(){
     loadQ();
     return;
   }
-  if(quizMode==='cbt'){
+  if(quizMode==='cbt' || quizMode==='waec-untimed'){
     if(idx>=pool.length-1){
       submitQuizEarly();
       return;
@@ -2449,7 +2581,7 @@ function submitQuizEarly(){
     }
     return;
   }
-  if(quizMode!=='cbt'){
+  if(quizMode!=='cbt' && quizMode!=='waec-untimed'){
     endQuiz();
     return;
   }
@@ -2466,7 +2598,7 @@ function endQuiz(fromTimer=false){
   clearInterval(qTimer);
   clearInterval(sessTimer);
 
-  if(quizMode==='cbt'){
+  if(quizMode==='cbt' || quizMode==='waec-untimed'){
     correct=0;
     missed=[];
     pool.forEach((q,questionIndex)=>{
@@ -2477,11 +2609,13 @@ function endQuiz(fromTimer=false){
         missed.push({q,chosen:chosen===null ? -1 : chosen});
       }
     });
-    elapsed=CBT_TOTAL_SECONDS-timeLeft;
+    elapsed=quizMode==='cbt' ? (CBT_TOTAL_SECONDS-timeLeft) : 0;
   }
 
   if(quizMode==='waec-theory'){
     document.getElementById('greetEl').textContent=`Self-review time, ${name}!`;
+    document.getElementById('rTLbl').textContent='Timer';
+    document.getElementById('rT').textContent='Off';
     document.getElementById('reviewSec').style.display='block';
     show('resultsScreen');
     renderTheoryReview();
@@ -2497,7 +2631,7 @@ function endQuiz(fromTimer=false){
   document.getElementById('rTLbl').textContent='Time';
   document.getElementById('rC').textContent=correct;
   document.getElementById('rW').textContent=pool.length-correct;
-  document.getElementById('rT').textContent=fmt(elapsed);
+  document.getElementById('rT').textContent=quizMode==='waec-untimed' ? 'Off' : fmt(elapsed);
   setResultVisual(pct);
   show('resultsScreen');
 }
@@ -2567,6 +2701,93 @@ function show(id){
   updateGlobalHomeButton();
 }
 
+let calcExpr='';
+
+function updateCalcDisplay(status='Ready'){
+  const main=document.getElementById('calcDisplay');
+  const sub=document.getElementById('calcSubDisplay');
+  if(main) main.childNodes[0] ? main.childNodes[0].textContent=(calcExpr || '0') : (main.textContent=(calcExpr || '0'));
+  if(sub) sub.textContent=status;
+}
+function openCalculator(){
+  const overlay=document.getElementById('calculatorOverlay');
+  if(overlay) overlay.classList.add('show');
+  updateCalcDisplay('Ready');
+  updateGlobalHomeButton();
+}
+function closeCalculator(){
+  const overlay=document.getElementById('calculatorOverlay');
+  if(overlay) overlay.classList.remove('show');
+  updateGlobalHomeButton();
+}
+function calcAppend(value){
+  calcExpr += value;
+  updateCalcDisplay('Editing');
+}
+function calcClearAll(){
+  calcExpr='';
+  updateCalcDisplay('Cleared');
+}
+function calcBackspace(){
+  calcExpr=calcExpr.slice(0,-1);
+  updateCalcDisplay('Editing');
+}
+function calcToggleSign(){
+  if(!calcExpr){
+    calcExpr='-';
+  }else{
+    calcExpr='(-1)*(' + calcExpr + ')';
+  }
+  updateCalcDisplay('Sign changed');
+}
+function calcSquare(){
+  if(!calcExpr) return;
+  calcExpr='(' + calcExpr + ')^2';
+  updateCalcDisplay('Squared');
+}
+function factorial(n){
+  const safe=Math.floor(Number(n));
+  if(!Number.isFinite(safe) || safe<0 || safe>170) throw new Error('Invalid factorial');
+  let out=1;
+  for(let i=2;i<=safe;i++) out*=i;
+  return out;
+}
+function replaceFactorials(expr){
+  let previous;
+  let current=expr;
+  const pattern=/(\([^()]+\)|\b\d+(?:\.\d+)?|pi|e)!/g;
+  do{
+    previous=current;
+    current=current.replace(pattern, (match, inner)=>`factorial(${inner})`);
+  }while(current!==previous);
+  return current;
+}
+function calcEvaluate(){
+  try{
+    let expr=(calcExpr || '').trim();
+    if(!expr) return;
+    expr=expr.replace(/×/g,'*').replace(/÷/g,'/').replace(/π/g,'pi').replace(/√/g,'sqrt');
+    expr=replaceFactorials(expr);
+    expr=expr.replace(/\^/g,'**');
+    const sin=(x)=>Math.sin(Number(x)*Math.PI/180);
+    const cos=(x)=>Math.cos(Number(x)*Math.PI/180);
+    const tan=(x)=>Math.tan(Number(x)*Math.PI/180);
+    const log=(x)=>Math.log10(Number(x));
+    const ln=(x)=>Math.log(Number(x));
+    const sqrt=(x)=>Math.sqrt(Number(x));
+    const pi=Math.PI;
+    const e=Math.E;
+    const result=Function('sin','cos','tan','log','ln','sqrt','factorial','pi','e', `return (${expr});`)(sin,cos,tan,log,ln,sqrt,factorial,pi,e);
+    if(!Number.isFinite(Number(result))) throw new Error('Invalid result');
+    calcExpr=String(result);
+    updateCalcDisplay('Result');
+  }catch(error){
+    updateCalcDisplay('Error');
+    const sub=document.getElementById('calcSubDisplay');
+    if(sub) sub.textContent='Error: check the expression';
+  }
+}
+
 function initQuizApp(){
   activeExamBoard=getSavedExamBoard();
   syncSubjectBankReference();
@@ -2607,7 +2828,7 @@ function initQuizApp(){
     if(Number.isFinite(raw)){
       const clean=clamp(raw,5,300);
       safeStorageSet('quizDefaultTime', String(clean));
-      if(getSelectedMode()!=='cbt'){
+      if(getSelectedMode()!=='cbt' && !isUntimedMode()){
         document.getElementById('statPerQ').textContent=`${clean}s`;
       }
     }
@@ -2632,6 +2853,12 @@ function initQuizApp(){
   document.getElementById('adminPinOverlay').addEventListener('click',event=>{
     if(event.target.id==='adminPinOverlay'){
       closeAdminPin();
+    }
+  });
+
+  document.getElementById('calculatorOverlay').addEventListener('click',event=>{
+    if(event.target.id==='calculatorOverlay'){
+      closeCalculator();
     }
   });
 

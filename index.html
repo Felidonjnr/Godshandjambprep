@@ -2125,8 +2125,16 @@ function startMistakePractice(){
   document.getElementById('timerVal').className='timer-val no-timer';
   loadQ();
 }
+function detectQuestionType(question){
+  const explicit=String(question?.type || question?.paperType || question?.questionType || '').trim().toLowerCase();
+  if(explicit==='theory' || explicit==='paper 2') return 'theory';
+  if(question && (question.modelAnswer || question.model_answer || Array.isArray(question.markingGuide) || Array.isArray(question.marking_guide) || question.scorePoints || question.maxScore)){
+    return 'theory';
+  }
+  return 'objective';
+}
 function getQuestionTypeLabel(type){
-  return String(type||'objective').toLowerCase()==='theory' ? 'Theory' : 'Objective';
+  return detectQuestionType({type})==='theory' ? 'Theory' : 'Objective';
 }
 function getAllowedQuestionTypesForMode(mode=getSelectedMode()){
   if(mode==='waec-theory') return ['theory'];
@@ -2134,7 +2142,7 @@ function getAllowedQuestionTypesForMode(mode=getSelectedMode()){
 }
 function filterQuestionsForMode(questions, mode=getSelectedMode()){
   const allowed=new Set(getAllowedQuestionTypesForMode(mode));
-  return (questions||[]).filter(q=>allowed.has(String(q.type||'objective').toLowerCase()));
+  return (questions||[]).filter(q=>allowed.has(detectQuestionType(q)));
 }
 function getAnsweredTheoryCount(){
   return userAnswers.filter(value=>typeof value==='string' && value.trim()).length;
@@ -2300,9 +2308,17 @@ function populateSubjectSelect(selectEl,selectedValue){
   }
 }
 
+function getModeScopedQuestionsForSubject(subject, mode=getSelectedMode()){
+  return filterQuestionsForMode(subject?.questions || [], mode);
+}
+function countTopicQuestionsForMode(subject, topicIndex, mode=getSelectedMode()){
+  return getModeScopedQuestionsForSubject(subject, mode).filter(q=>q.t===topicIndex).length;
+}
 function populateTopicSelect(selectEl,subjectKey,selectedValue,includeAll=true){
   if(!selectEl) return;
   const subject=SUBJECT_BANK[subjectKey];
+  const modeHint=selectEl.id==='topicSelect' ? getSelectedMode() : 'all';
+  const scopedQuestions=modeHint==='all' ? (subject?.questions || []) : getModeScopedQuestionsForSubject(subject, modeHint);
   selectEl.innerHTML='';
   if(!subject){
     const opt=document.createElement('option');
@@ -2318,11 +2334,13 @@ function populateTopicSelect(selectEl,subjectKey,selectedValue,includeAll=true){
   if(includeAll){
     const allOpt=document.createElement('option');
     allOpt.value='all';
-    allOpt.textContent=`🎯 All Topics (${subject.questions.length} Questions)`;
+    allOpt.textContent=`🎯 All Topics (${scopedQuestions.length} Questions)`;
     selectEl.appendChild(allOpt);
   }
   subject.topics.forEach((topic,topicIndex)=>{
-    const count=subject.questions.filter(q=>q.t===topicIndex).length;
+    const count=modeHint==='all'
+      ? subject.questions.filter(q=>q.t===topicIndex).length
+      : countTopicQuestionsForMode(subject, topicIndex, modeHint);
     const opt=document.createElement('option');
     opt.value=String(topicIndex);
     opt.textContent=`${topic} (${count} Qs)`;
@@ -2938,14 +2956,15 @@ function setTemplatePreview(){
 }
 
 function prepareQuestion(q){
-  const type=String(q.type||'objective').toLowerCase();
+  const type=detectQuestionType(q);
   if(type==='theory'){
     return {...q, type:'theory', scorePoints:clamp(parseInt(q.scorePoints||5,10),1,50)};
   }
-  const options=q.o.map((text,index)=>({text,originalIndex:index}));
+  const optionSource=Array.isArray(q.o) ? q.o : (Array.isArray(q.options) ? q.options : []);
+  const options=optionSource.map((text,index)=>({text,originalIndex:index}));
   shuffle(options);
   const correctIndex=options.findIndex(opt=>opt.originalIndex===q.a);
-  return {...q, type:'objective', options, correctIndex};
+  return {...q, type:'objective', o:optionSource, options, correctIndex};
 }
 
 function startSelectedMode(){
@@ -3022,17 +3041,28 @@ function startQuiz(){
 function startTheoryQuiz(){
   name=document.getElementById('studentName').value.trim()||'Student';
   setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
-  const topicValue=document.getElementById('topicSelect').value;
-  document.getElementById('topicSelect').dataset.lastValue=topicValue;
+  const topicSelect=document.getElementById('topicSelect');
+  let topicValue=topicSelect.value;
+  if(topicSelect) topicSelect.dataset.lastValue=topicValue;
   activeRunTopicValue=topicValue;
   currentAttemptId='att-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
 
+  const allTheoryQuestions=filterQuestionsForMode(currentSubject.questions || [], 'waec-theory');
   const scopedQuestions=topicValue==='all'
-    ? [...currentSubject.questions]
-    : currentSubject.questions.filter(q=>q.t===Number(topicValue));
-  const sourceQuestions=filterQuestionsForMode(scopedQuestions, 'waec-theory');
+    ? [...allTheoryQuestions]
+    : allTheoryQuestions.filter(q=>q.t===Number(topicValue));
+  let sourceQuestions=scopedQuestions;
+  if(!sourceQuestions.length && topicValue!=='all' && allTheoryQuestions.length){
+    topicValue='all';
+    activeRunTopicValue='all';
+    if(topicSelect){
+      topicSelect.value='all';
+      topicSelect.dataset.lastValue='all';
+    }
+    sourceQuestions=[...allTheoryQuestions];
+  }
   if(!sourceQuestions.length){
-    alert('There are no WAEC theory questions in this subject/topic yet. Add some from Manage Question Bank.');
+    alert('There are no WAEC theory questions in this subject yet. Add or re-import Paper 2 / theory questions from Manage Question Bank.');
     return;
   }
 

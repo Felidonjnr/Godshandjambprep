@@ -264,6 +264,33 @@ body::before{content:'';position:fixed;inset:0;background:
 @media (max-width:520px){
   .global-home-btn{top:.8rem;right:.8rem;padding:.65rem .9rem;font-size:.82rem;}
 }
+
+.student-mini-card{background:var(--card2);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:.85rem 1rem;margin-top:-.2rem;margin-bottom:1rem;}
+.student-mini-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;font-size:.84rem;padding:.2rem 0;}
+.student-mini-row span{color:var(--muted);}
+.student-mini-row strong{color:var(--gold);font-weight:700;}
+.insight-card{background:var(--card2);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:1rem;margin-bottom:1rem;}
+.insight-main{font-size:.9rem;line-height:1.6;color:var(--text);margin-bottom:.8rem;}
+.topic-insight-list{display:flex;flex-wrap:wrap;gap:.5rem;}
+.topic-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.35rem .65rem;border-radius:999px;font-size:.76rem;font-weight:700;}
+.topic-chip.weak{background:rgba(192,57,43,0.12);color:#ffb4ad;border:1px solid rgba(192,57,43,0.28);}
+.topic-chip.strong{background:rgba(39,174,96,0.12);color:#82e6a8;border:1px solid rgba(39,174,96,0.25);}
+.topic-chip.fair{background:rgba(245,166,35,0.12);color:#ffd88a;border:1px solid rgba(245,166,35,0.28);}
+.list-screen-card{background:var(--card);border:1px solid rgba(245,166,35,0.2);border-radius:var(--radius);padding:1.3rem;width:100%;max-width:860px;box-shadow:var(--shadow);}
+.list-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem;}
+.list-head h2{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;color:var(--gold);}
+.list-head p{font-size:.86rem;color:var(--muted);line-height:1.55;margin-top:.35rem;}
+.simple-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem;margin-bottom:1rem;}
+.simple-pill{background:var(--card2);border-radius:12px;padding:.85rem;text-align:center;border:1px solid rgba(255,255,255,0.06);}
+.simple-pill strong{display:block;font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold);}
+.simple-pill span{font-size:.75rem;color:var(--muted);}
+.history-list,.mistake-list{display:flex;flex-direction:column;gap:.75rem;}
+.history-item,.mistake-item{background:var(--card2);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:.95rem 1rem;}
+.history-meta,.mistake-meta{font-size:.74rem;color:var(--muted);margin-bottom:.35rem;line-height:1.5;}
+.history-title,.mistake-title{font-size:.92rem;font-weight:700;line-height:1.5;color:var(--text);margin-bottom:.35rem;}
+.history-sub,.mistake-sub{font-size:.82rem;line-height:1.55;color:var(--muted);}
+.empty-state{background:var(--card2);border:1px dashed rgba(255,255,255,0.12);border-radius:14px;padding:1rem;font-size:.9rem;color:var(--muted);text-align:center;}
+
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:rgba(245,166,35,0.3);border-radius:2px;}
 
@@ -334,6 +361,11 @@ body::before{content:'';position:fixed;inset:0;background:
       <label>Your Name</label>
       <input type="text" id="studentName" placeholder="Enter your name…" autocomplete="off"/>
     </div>
+    <div class="student-mini-card" id="studentMiniCard">
+      <div class="student-mini-row"><span>Last Score</span><strong id="studentLastScore">—</strong></div>
+      <div class="student-mini-row"><span>Best Score</span><strong id="studentBestScore">—</strong></div>
+      <div class="student-mini-row"><span>Saved Attempts</span><strong id="studentAttemptCount">0</strong></div>
+    </div>
     <div class="form-group">
       <label id="subjectLabelText">Select JAMB Subject</label>
       <select id="subjectSelect"></select>
@@ -356,8 +388,19 @@ body::before{content:'';position:fixed;inset:0;background:
       <input type="number" id="timePerQuestion" min="5" max="300" step="5" value="30"/>
       <div class="form-help">This saves on this device and is used whenever you start a quiz.</div>
     </div>
+    <div class="form-group" id="testTimerGroup" style="display:none;">
+      <label>Test Mode Timer</label>
+      <select id="testTimerSelect">
+        <option value="on">Use Timer</option>
+        <option value="off">No Timer</option>
+      </select>
+      <div class="form-help">For WAEC Test Mode, you can run the paper with a timer or without a timer.</div>
+    </div>
     <div class="home-actions">
       <button class="btn-start" id="startMainBtn" onclick="startSelectedMode()">START QUIZ →</button>
+      <button class="btn-ghost" type="button" onclick="openProgressScreen()">📈 REVIEW PROGRESS</button>
+      <button class="btn-ghost" type="button" onclick="openMistakesScreen()">❌ REVIEW MY MISTAKES</button>
+      <button class="btn-ghost" type="button" onclick="startMistakePractice()">🔁 PRACTICE MY MISTAKES AGAIN</button>
       <button class="btn-ghost" type="button" id="manageBankBtn" onclick="openAdmin()">⚙️ MANAGE JAMB QUESTION BANK</button>
       <button class="btn-ghost" type="button" id="changeExamBtn" onclick="openExamChooser()">🔀 CHANGE EXAM</button>
     </div>
@@ -697,6 +740,11 @@ Mentions the key formula"></textarea>
       <div class="res-stat"><div class="res-num o" id="rT">0s</div><div class="res-lbl" id="rTLbl">Time</div></div>
     </div>
     <div class="perf-bar"><div class="perf-fill" id="pFill" style="width:0%"></div></div>
+    <div class="insight-card" id="revisionInsightCard" style="display:none;">
+      <div class="review-title" style="margin-bottom:.55rem;">Weak Topic Review</div>
+      <div class="insight-main" id="revisionInsightText">Keep practicing to see weak-topic guidance here.</div>
+      <div class="topic-insight-list" id="topicStrengthList"></div>
+    </div>
     <div class="btn-row">
       <button class="btn-outline" onclick="toggleReview()">📋 Review</button>
       <button class="btn-solid" onclick="goHome()">🔁 Try Again</button>
@@ -707,6 +755,42 @@ Mentions the key formula"></textarea>
     </div>
   </div>
 </div>
+
+
+<div class="screen" id="progressScreen">
+  <div class="list-screen-card">
+    <div class="list-head">
+      <div>
+        <h2>Progress Review</h2>
+        <p>Track score history, strong topics, weak topics, and recent attempts for the current student.</p>
+      </div>
+      <button class="btn-outline" type="button" onclick="goHome()">← Back</button>
+    </div>
+    <div class="simple-grid" id="progressSummaryGrid"></div>
+    <div class="insight-card">
+      <div class="review-title" style="margin-bottom:.55rem;">Revision Advice</div>
+      <div class="insight-main" id="progressAdviceText">Start a quiz to build personalised revision advice.</div>
+      <div class="topic-insight-list" id="progressTopicList"></div>
+    </div>
+    <div class="review-title">Recent Attempts</div>
+    <div class="history-list" id="progressHistoryList"></div>
+  </div>
+</div>
+
+<div class="screen" id="mistakesScreen">
+  <div class="list-screen-card">
+    <div class="list-head">
+      <div>
+        <h2>Mistake Bank</h2>
+        <p>Every wrong answer is saved here so the student can review and practice those mistakes again later.</p>
+      </div>
+      <button class="btn-outline" type="button" onclick="goHome()">← Back</button>
+    </div>
+    <div class="simple-grid" id="mistakeSummaryGrid"></div>
+    <div class="mistake-list" id="mistakeList"></div>
+  </div>
+</div>
+
 
 <script>
 const TOPICS=["Units & Measurements","Motion","Work, Energy & Power","Heat Energy","Electric Charges","Elastic Properties","Fluids at Rest & in Motion"];
@@ -860,6 +944,13 @@ const STORAGE_KEY_BANK='godshandQuizQuestionBankV3';
 const LEGACY_STORAGE_KEY_BANK='godshandQuizQuestionBankV2';
 const ADMIN_PIN_KEY='godshandQuizAdminPinV1';
 const EXAM_BOARD_KEY='godshandQuizExamBoardV1';
+const LOCAL_BANK_META_KEY='godshandQuizBankMetaV1';
+const ATTEMPTS_KEY='godshandQuizAttemptsV1';
+const MISTAKES_KEY='godshandQuizMistakesV1';
+const THEORY_ANSWERS_KEY='godshandQuizTheoryAnswersV1';
+const CLOUD_PENDING_KEY='godshandQuizCloudPendingV1';
+const BIG_DB_NAME='godshandQuizPersistentStoreV1';
+const BIG_DB_STORE='kv';
 let ACTIVE_REMOTE_SYNC=null;
 let cloudFns=null;
 let cloudSaveTimer=null;
@@ -877,6 +968,14 @@ let adminUnlocked=false;
 let quizMode='practice';
 let userAnswers=[];
 let theorySelfScores=[];
+let activeRunTopicValue='all';
+let testTimerEnabled=true;
+let currentAttemptId='';
+let ATTEMPTS_MAP=loadJsonStore(ATTEMPTS_KEY,{});
+let MISTAKES_MAP=loadJsonStore(MISTAKES_KEY,{});
+let THEORY_ANSWERS_MAP=loadJsonStore(THEORY_ANSWERS_KEY,{});
+let CLOUD_PENDING_STATE=loadJsonStore(CLOUD_PENDING_KEY,{dirty:false,reasons:[],updatedAt:''});
+let LOCAL_BANK_META=loadJsonStore(LOCAL_BANK_META_KEY,{updatedAt:''});
 const CBT_TOTAL_SECONDS=40*60;
 const CBT_QUESTION_LIMIT=40;
 
@@ -923,6 +1022,119 @@ function safeStorageRemove(key){
   try{localStorage.removeItem(key);}catch(e){}
   removeCookieValue(key);
 }
+
+function loadJsonStore(key,fallback){
+  const raw=safeStorageGet(key);
+  if(!raw) return deepClone(fallback);
+  try{
+    const parsed=JSON.parse(raw);
+    if(parsed && typeof parsed==='object' && !Array.isArray(parsed)){
+      return parsed;
+    }
+    return deepClone(fallback);
+  }catch(error){
+    return deepClone(fallback);
+  }
+}
+function loadJsonStoreFromRaw(raw,fallback){
+  if(!raw) return deepClone(fallback);
+  try{
+    const parsed=JSON.parse(raw);
+    return (parsed && typeof parsed==='object') ? parsed : deepClone(fallback);
+  }catch(error){
+    return deepClone(fallback);
+  }
+}
+let bigStorePromise=null;
+function openBigStore(){
+  if(bigStorePromise) return bigStorePromise;
+  bigStorePromise=new Promise((resolve)=>{
+    if(!('indexedDB' in window)){ resolve(null); return; }
+    try{
+      const request=indexedDB.open(BIG_DB_NAME,1);
+      request.onupgradeneeded=()=>{ request.result.createObjectStore(BIG_DB_STORE); };
+      request.onsuccess=()=>resolve(request.result);
+      request.onerror=()=>resolve(null);
+    }catch(error){ resolve(null); }
+  });
+  return bigStorePromise;
+}
+async function bigStoreGet(key){
+  const db=await openBigStore();
+  if(!db) return null;
+  return new Promise((resolve)=>{
+    try{
+      const tx=db.transaction(BIG_DB_STORE,'readonly');
+      const req=tx.objectStore(BIG_DB_STORE).get(key);
+      req.onsuccess=()=>resolve(req.result ?? null);
+      req.onerror=()=>resolve(null);
+    }catch(error){ resolve(null); }
+  });
+}
+async function bigStoreSet(key,value){
+  const db=await openBigStore();
+  if(!db) return false;
+  return new Promise((resolve)=>{
+    try{
+      const tx=db.transaction(BIG_DB_STORE,'readwrite');
+      tx.objectStore(BIG_DB_STORE).put(value,key);
+      tx.oncomplete=()=>resolve(true);
+      tx.onerror=()=>resolve(false);
+    }catch(error){ resolve(false); }
+  });
+}
+function persistJsonStore(key,obj){
+  safeStorageSet(key, JSON.stringify(obj));
+  bigStoreSet(key, JSON.stringify(obj));
+}
+function persistLargeValue(key,value){
+  try{ localStorage.setItem(key,value); }catch(error){}
+  bigStoreSet(key, value);
+}
+function readBankCacheSync(){
+  try{
+    const direct=localStorage.getItem(STORAGE_KEY_BANK);
+    if(direct) return direct;
+    const legacy=localStorage.getItem(LEGACY_STORAGE_KEY_BANK);
+    if(legacy) return legacy;
+  }catch(error){}
+  return null;
+}
+async function hydratePersistentStores(){
+  try{
+    const bankRaw=await bigStoreGet(STORAGE_KEY_BANK);
+    if(bankRaw){
+      EXAM_BANK=normalizeExamBank(JSON.parse(bankRaw), EXAM_BANK, activeExamBoard);
+      syncSubjectBankReference();
+      refreshUiFromBank(currentSubjectKey);
+    }
+  }catch(error){}
+  try{
+    const attemptsRaw=await bigStoreGet(ATTEMPTS_KEY);
+    if(attemptsRaw) ATTEMPTS_MAP=loadJsonStoreFromRaw(attemptsRaw,{});
+  }catch(error){}
+  try{
+    const mistakesRaw=await bigStoreGet(MISTAKES_KEY);
+    if(mistakesRaw) MISTAKES_MAP=loadJsonStoreFromRaw(mistakesRaw,{});
+  }catch(error){}
+  try{
+    const theoryRaw=await bigStoreGet(THEORY_ANSWERS_KEY);
+    if(theoryRaw) THEORY_ANSWERS_MAP=loadJsonStoreFromRaw(theoryRaw,{});
+  }catch(error){}
+  try{
+    const metaRaw=await bigStoreGet(LOCAL_BANK_META_KEY);
+    if(metaRaw) LOCAL_BANK_META=loadJsonStoreFromRaw(metaRaw,{updatedAt:''});
+  }catch(error){}
+  updateStudentSummary();
+}
+function saveLocalBankMeta(stamp){
+  LOCAL_BANK_META.updatedAt=stamp;
+  persistJsonStore(LOCAL_BANK_META_KEY, LOCAL_BANK_META);
+}
+function getLocalBankStamp(){
+  return String(LOCAL_BANK_META.updatedAt || '').trim();
+}
+
 function getAdminPin(){return CLOUD_STATE.pinOverride || safeStorageGet(ADMIN_PIN_KEY) || '1234';}
 function showAdminPinMsg(message,type='err'){
   const el=document.getElementById('adminPinMsg');
@@ -943,8 +1155,8 @@ function getSavedTime(){
   return Number.isFinite(raw)?clamp(raw,5,300):30;
 }
 function getSavedExamBoard(){
-  const raw=String(safeStorageGet(EXAM_BOARD_KEY)||'jamb').toLowerCase();
-  return raw==='waec' ? 'waec' : 'jamb';
+  const raw=String(safeStorageGet(EXAM_BOARD_KEY)||'waec').toLowerCase();
+  return raw==='jamb' ? 'jamb' : 'waec';
 }
 function getExamBoardLabel(board=activeExamBoard){
   return board==='waec' ? 'WAEC' : 'JAMB';
@@ -1043,6 +1255,10 @@ function normalizeQuestion(raw){
     const scoreRaw=parseInt(raw.scorePoints ?? raw.maxScore ?? raw.points ?? 5,10);
     return {
       type:'theory',
+      paperType:'theory',
+      exam:String(raw.exam || 'WAEC').trim(),
+      subject:String(raw.subject || '').trim(),
+      difficulty:String(raw.difficulty || '').trim(),
       t:topicIndex,
       yr:yearLabel,
       q:prompt,
@@ -1069,7 +1285,7 @@ function normalizeQuestion(raw){
       answerIndex=optionMatch>=0 ? optionMatch : 0;
     }
   }
-  return {type:'objective',t:topicIndex,yr:yearLabel,q:prompt,paper,o:options,a:answerIndex,exp:note};
+  return {type:'objective',paperType:'objective',exam:String(raw.exam || '').trim(),subject:String(raw.subject || '').trim(),difficulty:String(raw.difficulty || '').trim(),t:topicIndex,yr:yearLabel,q:prompt,paper,o:options,a:answerIndex,exp:note};
 }
 
 function normalizeSubject(key,subject){
@@ -1139,7 +1355,7 @@ function normalizeExamBank(raw,fallbackExamBank=null,defaultBoard='jamb'){
 
 function loadExamBank(){
   const fallback=getBaseExamBank();
-  const saved=safeStorageGet(STORAGE_KEY_BANK) || safeStorageGet(LEGACY_STORAGE_KEY_BANK);
+  const saved=readBankCacheSync() || safeStorageGet(LEGACY_STORAGE_KEY_BANK);
   if(!saved) return fallback;
   try{
     return normalizeExamBank(JSON.parse(saved), fallback, 'jamb');
@@ -1148,9 +1364,11 @@ function loadExamBank(){
   }
 }
 
-function persistSubjectBank(){
-  safeStorageSet(STORAGE_KEY_BANK, JSON.stringify(EXAM_BANK));
-  queueCloudSave('question-bank-updated');
+function persistSubjectBank(reason='question-bank-updated'){
+  const stamp=new Date().toISOString();
+  saveLocalBankMeta(stamp);
+  persistLargeValue(STORAGE_KEY_BANK, JSON.stringify(EXAM_BANK));
+  queueCloudSave(reason);
 }
 
 function localTimeLabel(isoString){
@@ -1214,11 +1432,12 @@ function applyCloudStatus(mode,note){
   CLOUD_STATE.mode=mode || CLOUD_STATE.mode || 'local';
   if(typeof note==='string') CLOUD_STATE.note=note;
   const defs={
-    local:{label:'Device Only',note:'This deployed file is currently using browser storage only. Add firebase-sync-config.json to make the same question bank appear on every phone.'},
-    connecting:{label:'Connecting',note:'Trying to connect to the shared online question bank...'},
-    syncing:{label:'Syncing',note:'Saving the latest changes to the shared online bank...'},
-    cloud:{label:'Shared Online',note:'This app is connected to a shared online bank. Changes made by the admin will be available to everyone using this link.'},
-    error:{label:'Cloud Error',note:'Cloud sync could not start. The app has fallen back to device storage only.'}
+    local:{label:'Device Only',note:'Cloud sync is not active. Data is staying on this device only until Firebase is connected.'},
+    connecting:{label:'Connecting',note:'Trying to connect to the shared online workspace...'},
+    syncing:{label:'Syncing',note:'Uploading the latest bank, scores, mistakes, and theory answers to the cloud...'},
+    cloud:{label:'Shared Online',note:'Question bank, scores, mistakes, and theory answers are syncing online for review across devices.'},
+    pending:{label:'Pending Upload',note:'Your latest changes are safe on this device and will upload automatically when internet returns.'},
+    error:{label:'Cloud Error',note:'Cloud sync could not complete right now. Local backup is still available on this device.'}
   };
   const def=defs[CLOUD_STATE.mode] || defs.local;
   const noteText=(typeof note==='string' && note) ? note : (CLOUD_STATE.error ? `${def.note} ${CLOUD_STATE.error}` : def.note);
@@ -1240,28 +1459,49 @@ function applyCloudStatus(mode,note){
 }
 
 function queueCloudSave(reason='bank-update'){
-  if(!CLOUD_STATE.ready) return;
+  markPendingCloudSync(reason);
   clearTimeout(cloudSaveTimer);
+  if(!CLOUD_STATE.ready || navigator.onLine===false){
+    applyCloudStatus('pending', 'Changes are saved locally and will upload automatically when internet returns.');
+    updateDiagnosticsPanel();
+    return;
+  }
   cloudSaveTimer=setTimeout(()=>{
-    writeRemoteSnapshot(reason);
+    flushPendingCloudSync(reason);
   },500);
+}
+
+async function flushPendingCloudSync(reason='queued-upload'){
+  if(!hasPendingCloudSync()) return true;
+  if(!CLOUD_STATE.ready || !cloudFns || !CLOUD_STATE.docRef){
+    applyCloudStatus('pending', 'Cloud connection is not ready yet. Saved changes will upload automatically once the app reconnects.');
+    updateDiagnosticsPanel();
+    return false;
+  }
+  if(navigator.onLine===false){
+    applyCloudStatus('pending', 'You are offline. Saved changes will upload automatically when internet returns.');
+    updateDiagnosticsPanel();
+    return false;
+  }
+  return writeRemoteSnapshot(reason);
 }
 
 async function writeRemoteSnapshot(reason='bank-update'){
   if(!CLOUD_STATE.ready || !cloudFns || !CLOUD_STATE.docRef) return false;
   try{
     applyCloudStatus('syncing');
-    const payload={
-      bank:EXAM_BANK,
-      adminPin:getAdminPin(),
-      meta:{
-        updatedAt:new Date().toISOString(),
-        reason
-      }
-    };
+    let remoteBase=null;
+    try{
+      const latestSnap=await cloudFns.getDoc(CLOUD_STATE.docRef);
+      remoteBase=latestSnap.exists() ? latestSnap.data() : null;
+    }catch(fetchError){
+      console.warn('[CloudSync] Could not fetch latest remote snapshot before write:', fetchError?.message || fetchError);
+    }
+    const payload=buildRemotePayload(reason, remoteBase);
     await cloudFns.setDoc(CLOUD_STATE.docRef,payload,{merge:true});
     CLOUD_STATE.lastUpdatedAt=payload.meta.updatedAt;
     CLOUD_STATE.error='';
+    clearPendingCloudSync();
     console.log('[CloudSync] Write succeeded. Reason:', reason);
     applyCloudStatus('cloud');
     updateDiagnosticsPanel();
@@ -1269,7 +1509,11 @@ async function writeRemoteSnapshot(reason='bank-update'){
   }catch(error){
     CLOUD_STATE.error=error?.message || 'Unable to save to Firebase.';
     console.error('[CloudSync] Write failed:', CLOUD_STATE.error);
-    applyCloudStatus('error', 'Firestore write failed: ' + CLOUD_STATE.error);
+    if(/network|offline|timeout|fetch|unavailable/i.test(CLOUD_STATE.error) || navigator.onLine===false){
+      applyCloudStatus('pending', 'You are offline or the network is unstable. Saved changes will upload automatically when internet returns.');
+    }else{
+      applyCloudStatus('error', 'Firestore write failed: ' + CLOUD_STATE.error);
+    }
     updateDiagnosticsPanel();
     return false;
   }
@@ -1291,19 +1535,47 @@ function refreshUiFromBank(preferredSubjectKey=null){
 
 function applyRemotePayload(data,source='remote'){
   if(!data || typeof data!=='object') return;
+  const remoteStamp=String(data?.meta?.updatedAt || '').trim();
+  const localStamp=getLocalBankStamp();
+  let shouldApplyRemoteBank=true;
+  if(source==='remote' && localStamp && remoteStamp){
+    const remoteTime=new Date(remoteStamp).getTime();
+    const localTime=new Date(localStamp).getTime();
+    if(Number.isFinite(remoteTime) && Number.isFinite(localTime) && remoteTime + 1000 < localTime){
+      console.log('[CloudSync] Remote bank is older than local bank. Keeping local bank and scheduling re-upload.');
+      shouldApplyRemoteBank=false;
+      queueCloudSave('local-newer-than-remote-bank');
+    }
+  }
   if(data.adminPin){
     CLOUD_STATE.pinOverride=String(data.adminPin);
     safeStorageSet(ADMIN_PIN_KEY, CLOUD_STATE.pinOverride);
   }
-  if(data.bank){
+  if(shouldApplyRemoteBank && data.bank){
     EXAM_BANK=normalizeExamBank(data.bank, EXAM_BANK, activeExamBoard);
     syncSubjectBankReference();
-    safeStorageSet(STORAGE_KEY_BANK, JSON.stringify(EXAM_BANK));
+    persistLargeValue(STORAGE_KEY_BANK, JSON.stringify(EXAM_BANK));
+    if(remoteStamp) saveLocalBankMeta(remoteStamp);
     refreshUiFromBank(currentSubjectKey);
   }
-  const stamp=data?.meta?.updatedAt;
-  if(stamp) CLOUD_STATE.lastUpdatedAt=stamp;
-  if(source==='remote') applyCloudStatus('cloud');
+  if(data.attempts){
+    ATTEMPTS_MAP=mergeAttemptsMaps(data.attempts, ATTEMPTS_MAP);
+    persistJsonStore(ATTEMPTS_KEY, ATTEMPTS_MAP);
+  }
+  if(data.mistakes){
+    MISTAKES_MAP=mergeMistakesMaps(data.mistakes, MISTAKES_MAP);
+    persistJsonStore(MISTAKES_KEY, MISTAKES_MAP);
+  }
+  if(data.theoryAnswers){
+    THEORY_ANSWERS_MAP=mergeTheoryAnswerMaps(data.theoryAnswers, THEORY_ANSWERS_MAP);
+    persistJsonStore(THEORY_ANSWERS_KEY, THEORY_ANSWERS_MAP);
+  }
+  updateStudentSummary();
+  if(remoteStamp) CLOUD_STATE.lastUpdatedAt=remoteStamp;
+  if(source==='remote'){
+    if(hasPendingCloudSync()) applyCloudStatus('pending');
+    else applyCloudStatus('cloud');
+  }
 }
 
 async function initRemoteSync(){
@@ -1363,8 +1635,9 @@ async function initRemoteSync(){
       updateDiagnosticsPanel();
     });
     console.log('[CloudSync] Cloud sync fully active. Mode: cloud');
-    applyCloudStatus('cloud');
+    applyCloudStatus(hasPendingCloudSync() ? 'pending' : 'cloud');
     updateDiagnosticsPanel();
+    if(hasPendingCloudSync()) flushPendingCloudSync('post-connect-upload');
   }catch(error){
     CLOUD_STATE.ready=false;
     CLOUD_STATE.enabled=false;
@@ -1379,7 +1652,11 @@ async function initRemoteSync(){
     }else if(/invalid|api.key|not.found/i.test(CLOUD_STATE.error)){
       userNote+=' — Firebase config may be incorrect. Check firebase-sync-config.json.';
     }
-    applyCloudStatus('error', userNote);
+    if(/network|timeout|fetch|offline|unavailable/i.test(CLOUD_STATE.error) || navigator.onLine===false || hasPendingCloudSync()){
+      applyCloudStatus('pending', 'Cloud is temporarily unavailable. Saved changes will upload automatically when internet returns.');
+    }else{
+      applyCloudStatus('error', userNote);
+    }
     updateDiagnosticsPanel();
   }
 }
@@ -1396,7 +1673,9 @@ function updateDiagnosticsPanel(){
     'Firebase init: ' + (CLOUD_STATE.enabled ? 'Yes ✓' : 'No ✗'),
     'Firestore path: ' + (cfg.collection || '?') + ' / ' + (cfg.documentId || '?'),
     'Firestore ready: ' + (CLOUD_STATE.ready ? 'Yes ✓' : 'No ✗'),
+    'Browser online: ' + (navigator.onLine===false ? 'No ✗' : 'Yes ✓'),
     'Storage mode: ' + (CLOUD_STATE.mode || 'unknown').toUpperCase(),
+    'Pending upload: ' + (hasPendingCloudSync() ? 'Yes — ' + ((CLOUD_PENDING_STATE.reasons || []).join(', ') || 'changes queued') : 'No'),
     'Last sync: ' + (CLOUD_STATE.lastUpdatedAt ? localTimeLabel(CLOUD_STATE.lastUpdatedAt) : 'Never'),
     'Error: ' + (CLOUD_STATE.error || 'None')
   ];
@@ -1404,6 +1683,448 @@ function updateDiagnosticsPanel(){
   panel.style.display='block';
 }
 
+
+function getStudentNameValue(){
+  return (document.getElementById('studentName')?.value || name || 'Student').trim() || 'Student';
+}
+function getStudentKey(value=null){
+  return slugify(value || getStudentNameValue()) || 'student';
+}
+function getStudentAttempts(value=null){
+  return ATTEMPTS_MAP[getStudentKey(value)] || [];
+}
+function getStudentMistakes(value=null){
+  return MISTAKES_MAP[getStudentKey(value)] || [];
+}
+function persistPendingCloudState(){ persistJsonStore(CLOUD_PENDING_KEY, CLOUD_PENDING_STATE); }
+function hasPendingCloudSync(){ return !!(CLOUD_PENDING_STATE && CLOUD_PENDING_STATE.dirty); }
+function markPendingCloudSync(reason='update'){
+  const clean=String(reason || 'update').trim();
+  if(!CLOUD_PENDING_STATE || typeof CLOUD_PENDING_STATE!=='object') CLOUD_PENDING_STATE={dirty:false,reasons:[],updatedAt:''};
+  CLOUD_PENDING_STATE.dirty=true;
+  CLOUD_PENDING_STATE.updatedAt=new Date().toISOString();
+  const current=Array.isArray(CLOUD_PENDING_STATE.reasons) ? CLOUD_PENDING_STATE.reasons.slice() : [];
+  if(clean && !current.includes(clean)) current.unshift(clean);
+  CLOUD_PENDING_STATE.reasons=current.slice(0,12);
+  persistPendingCloudState();
+}
+function clearPendingCloudSync(){
+  CLOUD_PENDING_STATE={dirty:false,reasons:[],updatedAt:''};
+  persistPendingCloudState();
+}
+function compareIsoStamps(a,b){
+  const aTime=new Date(a || 0).getTime();
+  const bTime=new Date(b || 0).getTime();
+  const safeA=Number.isFinite(aTime) ? aTime : 0;
+  const safeB=Number.isFinite(bTime) ? bTime : 0;
+  if(safeA===safeB) return 0;
+  return safeA > safeB ? 1 : -1;
+}
+function getEntryBestStamp(entry){
+  if(!entry || typeof entry!=='object') return '';
+  return String(entry.updatedAt || entry.savedAt || entry.createdAt || entry.submittedAt || entry.completedAt || '').trim();
+}
+function mergeArrayByKey(remoteArr, localArr, keyFn, limit=150){
+  const byKey={};
+  [...(Array.isArray(remoteArr) ? remoteArr : []), ...(Array.isArray(localArr) ? localArr : [])].forEach((item, index)=>{
+    if(!item || typeof item!=='object') return;
+    const key=String(keyFn(item, index) || '').trim();
+    if(!key) return;
+    const next={...item};
+    const prev=byKey[key];
+    if(!prev || compareIsoStamps(getEntryBestStamp(next), getEntryBestStamp(prev)) >= 0){
+      byKey[key]=next;
+    }
+  });
+  return Object.values(byKey).sort((a,b)=>compareIsoStamps(getEntryBestStamp(b), getEntryBestStamp(a))).slice(0,limit);
+}
+function mergeAttemptsMaps(remoteMap={}, localMap={}){
+  const merged={};
+  const keys=new Set([...Object.keys(remoteMap || {}), ...Object.keys(localMap || {})]);
+  keys.forEach(studentKey=>{
+    merged[studentKey]=mergeArrayByKey(remoteMap?.[studentKey], localMap?.[studentKey], item=>item.attemptId || `${studentKey}-${item.subjectKey || 'subject'}-${item.createdAt || item.updatedAt || ''}`, 200);
+  });
+  return merged;
+}
+function mergeMistakesMaps(remoteMap={}, localMap={}){
+  const merged={};
+  const keys=new Set([...Object.keys(remoteMap || {}), ...Object.keys(localMap || {})]);
+  keys.forEach(studentKey=>{
+    merged[studentKey]=mergeArrayByKey(remoteMap?.[studentKey], localMap?.[studentKey], item=>item.signature || `${studentKey}-${item.subjectKey || 'subject'}-${item.question || ''}`, 300);
+  });
+  return merged;
+}
+function mergeTheoryAnswerMaps(remoteMap={}, localMap={}){
+  const merged={};
+  const keys=new Set([...Object.keys(remoteMap || {}), ...Object.keys(localMap || {})]);
+  keys.forEach(studentKey=>{
+    merged[studentKey]=mergeArrayByKey(remoteMap?.[studentKey], localMap?.[studentKey], item=>item.answerId || `${studentKey}-${item.subjectKey || 'subject'}-${item.question || ''}-${item.savedAt || ''}`, 250);
+  });
+  return merged;
+}
+function buildStudentProfilesFromAttempts(attemptMap={}){
+  const profiles={};
+  Object.entries(attemptMap || {}).forEach(([studentKey, attempts])=>{
+    const rows=Array.isArray(attempts) ? attempts : [];
+    const sorted=rows.slice().sort((a,b)=>compareIsoStamps(getEntryBestStamp(b), getEntryBestStamp(a)));
+    const last=sorted[0] || null;
+    const best=sorted.reduce((max,item)=>Math.max(max, Number(item.scorePercent || 0)), 0);
+    profiles[studentKey]={
+      studentKey,
+      studentName:last?.studentName || studentKey,
+      lastScore:last ? Number(last.scorePercent || 0) : null,
+      bestScore:rows.length ? best : null,
+      attempts:rows.length,
+      updatedAt:last?.updatedAt || last?.createdAt || ''
+    };
+  });
+  return profiles;
+}
+function chooseNewestBank(remoteBank, remoteStamp){
+  const localStamp=getLocalBankStamp();
+  if(remoteBank && compareIsoStamps(remoteStamp, localStamp) > 0){
+    return normalizeExamBank(remoteBank, EXAM_BANK, activeExamBoard);
+  }
+  return EXAM_BANK;
+}
+function buildRemotePayload(reason='cloud-update', remoteBase=null){
+  const latestStamp=new Date().toISOString();
+  const remoteData=(remoteBase && typeof remoteBase==='object') ? remoteBase : {};
+  const chosenBank=chooseNewestBank(remoteData.bank, remoteData?.meta?.updatedAt);
+  const mergedAttempts=mergeAttemptsMaps(remoteData.attempts || {}, ATTEMPTS_MAP);
+  const mergedMistakes=mergeMistakesMaps(remoteData.mistakes || {}, MISTAKES_MAP);
+  const mergedTheory=mergeTheoryAnswerMaps(remoteData.theoryAnswers || {}, THEORY_ANSWERS_MAP);
+  ATTEMPTS_MAP=mergedAttempts;
+  MISTAKES_MAP=mergedMistakes;
+  THEORY_ANSWERS_MAP=mergedTheory;
+  persistJsonStore(ATTEMPTS_KEY, ATTEMPTS_MAP);
+  persistJsonStore(MISTAKES_KEY, MISTAKES_MAP);
+  persistJsonStore(THEORY_ANSWERS_KEY, THEORY_ANSWERS_MAP);
+  EXAM_BANK=normalizeExamBank(chosenBank, EXAM_BANK, activeExamBoard);
+  syncSubjectBankReference();
+  saveLocalBankMeta(latestStamp);
+  persistLargeValue(STORAGE_KEY_BANK, JSON.stringify(EXAM_BANK));
+  return {
+    bank:EXAM_BANK,
+    adminPin:getAdminPin(),
+    studentProfiles:buildStudentProfilesFromAttempts(ATTEMPTS_MAP),
+    attempts:ATTEMPTS_MAP,
+    mistakes:MISTAKES_MAP,
+    theoryAnswers:THEORY_ANSWERS_MAP,
+    meta:{
+      updatedAt:latestStamp,
+      reason,
+      pendingReasons:Array.isArray(CLOUD_PENDING_STATE?.reasons) ? CLOUD_PENDING_STATE.reasons.slice(0,12) : []
+    }
+  };
+}
+function persistAttempts(){ persistJsonStore(ATTEMPTS_KEY, ATTEMPTS_MAP); queueCloudSave('attempts-updated'); }
+function persistMistakes(){ persistJsonStore(MISTAKES_KEY, MISTAKES_MAP); queueCloudSave('mistakes-updated'); }
+function persistTheoryAnswers(){ persistJsonStore(THEORY_ANSWERS_KEY, THEORY_ANSWERS_MAP); queueCloudSave('theory-answers-updated'); }
+function updateStudentSummary(){
+  const attempts=getStudentAttempts();
+  const last=attempts[0];
+  const best=attempts.reduce((max,item)=>Math.max(max, Number(item.scorePercent||0)), 0);
+  const lastEl=document.getElementById('studentLastScore');
+  const bestEl=document.getElementById('studentBestScore');
+  const countEl=document.getElementById('studentAttemptCount');
+  if(lastEl) lastEl.textContent=last ? `${last.scorePercent}%` : '—';
+  if(bestEl) bestEl.textContent=attempts.length ? `${best}%` : '—';
+  if(countEl) countEl.textContent=String(attempts.length);
+}
+function getQuestionTopicLabel(q){
+  return q.topicLabel || currentSubject?.topics?.[q.t] || `Topic ${Number(q.t||0)+1}`;
+}
+function getQuestionSubjectLabel(q){
+  return q.subjectLabel || currentSubject?.label || '';
+}
+function buildTopicPerformanceSnapshot(){
+  const stats={};
+  pool.forEach((q,index)=>{
+    const topic=getQuestionTopicLabel(q);
+    if(!stats[topic]) stats[topic]={topic,total:0,correct:0,wrong:0};
+    stats[topic].total += 1;
+    const isTheory=String(q.type||'objective').toLowerCase()==='theory';
+    let isCorrect=false;
+    if(isTheory){
+      const score=Number(theorySelfScores[index] ?? 0);
+      const maxScore=Number(q.scorePoints || 1);
+      isCorrect=maxScore ? (score / maxScore) >= 0.5 : false;
+    }else{
+      isCorrect=userAnswers[index]===q.correctIndex;
+    }
+    if(isCorrect) stats[topic].correct += 1;
+    else stats[topic].wrong += 1;
+  });
+  return Object.values(stats).map(item=>({...item, percent:item.total ? Math.round((item.correct/item.total)*100) : 0})).sort((a,b)=>a.percent-b.percent);
+}
+function buildRevisionAdvice(topicStats){
+  if(!topicStats.length){
+    return {message:'Complete more quizzes to unlock topic-by-topic revision advice.', chips:[]};
+  }
+  const weak=topicStats.filter(item=>item.percent < 60);
+  const strong=topicStats.filter(item=>item.percent >= 80);
+  let message='';
+  if(weak.length){
+    const lead=weak[0].topic;
+    let extra='focus on worked examples, key definitions, formulas, and step-by-step corrections.';
+    if(/electric|circuit|ohm/i.test(lead)) extra='especially revise Ohm’s law, circuit rules, and circuit calculations.';
+    else if(/heat|thermal|temperature/i.test(lead)) extra='especially revise heat equations, definitions, and practical examples.';
+    else if(/motion|force|projectile/i.test(lead)) extra='especially revise formulas, laws of motion, and worked examples.';
+    else if(/chem|acid|base|salt|organic/i.test(lead)) extra='especially revise definitions, balancing, and common reaction patterns.';
+    else if(/biology|cell|genetics|ecology/i.test(lead)) extra='especially revise key definitions, labelled diagrams, and process steps.';
+    message=`You need to revise ${weak.map(item=>item.topic).join(', ')}, ${extra}`;
+  }else{
+    message='Good job. Keep repeating mixed practice and your mistake bank to maintain strong topic mastery.';
+  }
+  const chips=[
+    ...weak.map(item=>`<span class="topic-chip weak">${escapeHtml(item.topic)} • ${item.percent}%</span>`),
+    ...strong.slice(0,4).map(item=>`<span class="topic-chip strong">${escapeHtml(item.topic)} • ${item.percent}%</span>`)
+  ];
+  return {message, chips};
+}
+function renderRevisionInsight(topicStats){
+  const card=document.getElementById('revisionInsightCard');
+  const textEl=document.getElementById('revisionInsightText');
+  const listEl=document.getElementById('topicStrengthList');
+  if(!card || !textEl || !listEl) return;
+  const advice=buildRevisionAdvice(topicStats);
+  card.style.display='block';
+  textEl.textContent=advice.message;
+  listEl.innerHTML=advice.chips.length ? advice.chips.join('') : '<span class="topic-chip fair">Keep practicing for stronger revision insights.</span>';
+}
+function getCurrentAttemptPayload(){
+  const studentName=getStudentNameValue();
+  const topicStats=buildTopicPerformanceSnapshot();
+  const weakTopics=topicStats.filter(item=>item.percent < 60).map(item=>item.topic);
+  const strongTopics=topicStats.filter(item=>item.percent >= 80).map(item=>item.topic);
+  if(quizMode==='waec-theory'){
+    const maxTotal=pool.reduce((sum,q)=>sum + Number(q.scorePoints || 0),0);
+    const awarded=theorySelfScores.reduce((sum,val)=>sum + (Number.isFinite(val) ? val : 0),0);
+    const percent=maxTotal ? Math.round((awarded/maxTotal)*100) : 0;
+    return {
+      attemptId: currentAttemptId,
+      studentName,
+      board: activeExamBoard,
+      subjectKey: currentSubjectKey,
+      subjectLabel: currentSubject?.label || '',
+      mode: quizMode,
+      topicSelection: activeRunTopicValue,
+      scorePercent: percent,
+      correct: awarded,
+      wrong: theorySelfScores.filter(val=>!Number.isFinite(val) || Number(val)===0).length,
+      totalQuestions: pool.length,
+      timeUsedSeconds: elapsed,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      topicStats,
+      weakTopics,
+      strongTopics,
+      answers: pool.map((q,index)=>({
+        question:q.q,
+        topic:getQuestionTopicLabel(q),
+        year:q.yr,
+        studentAnswer:String(userAnswers[index] || ''),
+        selfScore:Number.isFinite(theorySelfScores[index]) ? theorySelfScores[index] : null,
+        maxScore:Number(q.scorePoints || 0)
+      }))
+    };
+  }
+  const percent=pool.length ? Math.round((correct/pool.length)*100) : 0;
+  return {
+    attemptId: currentAttemptId,
+    studentName,
+    board: activeExamBoard,
+    subjectKey: currentSubjectKey,
+    subjectLabel: currentSubject?.label || '',
+    mode: quizMode,
+    topicSelection: activeRunTopicValue,
+    scorePercent: percent,
+    correct,
+    wrong: pool.length-correct,
+    totalQuestions: pool.length,
+    timeUsedSeconds: elapsed,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    topicStats,
+    weakTopics,
+    strongTopics
+  };
+}
+function saveCurrentAttempt(){
+  if(!currentAttemptId) return;
+  const key=getStudentKey();
+  const entry=getCurrentAttemptPayload();
+  const existing=ATTEMPTS_MAP[key] || [];
+  const index=existing.findIndex(item=>item.attemptId===currentAttemptId);
+  if(index>=0) existing[index]=entry;
+  else existing.unshift(entry);
+  ATTEMPTS_MAP[key]=existing.slice(0,120);
+  persistAttempts();
+  updateStudentSummary();
+}
+function saveTheoryAnswerArchive(){
+  const key=getStudentKey();
+  const subjectBucket=THEORY_ANSWERS_MAP[key] || [];
+  pool.forEach((q,index)=>{
+    if(String(q.type||'').toLowerCase()!=='theory') return;
+    const answerText=String(userAnswers[index] || '').trim();
+    if(!answerText) return;
+    const item={
+      answerId:`${currentAttemptId || 'theory'}-${index}-${Date.now()}`,
+      savedAt:new Date().toISOString(),
+      board:activeExamBoard,
+      subjectKey:currentSubjectKey,
+      subjectLabel:currentSubject?.label || '',
+      topic:getQuestionTopicLabel(q),
+      question:q.q,
+      answer:answerText,
+      modelAnswer:q.modelAnswer || '',
+      markingGuide:q.markingGuide || []
+    };
+    subjectBucket.unshift(item);
+  });
+  THEORY_ANSWERS_MAP[key]=subjectBucket.slice(0,120);
+  persistTheoryAnswers();
+}
+function recordMistakesFromRun(){
+  const key=getStudentKey();
+  const bucket=MISTAKES_MAP[key] || [];
+  const seen=new Set(bucket.map(item=>item.signature));
+  pool.forEach((q,index)=>{
+    if(String(q.type||'objective').toLowerCase()==='theory') return;
+    const chosen=userAnswers[index];
+    if(chosen===q.correctIndex) return;
+    const signature=`${activeExamBoard}|${currentSubjectKey}|${q.q}`;
+    const letters=optionLetters(q.options.length);
+    const item={
+      signature,
+      board:activeExamBoard,
+      subjectKey:currentSubjectKey,
+      subjectLabel:getQuestionSubjectLabel(q),
+      topic:getQuestionTopicLabel(q),
+      year:q.yr,
+      question:q.q,
+      options:q.options.map(opt=>opt.text),
+      correctIndex:q.correctIndex,
+      chosenIndex:Number.isInteger(chosen) ? chosen : -1,
+      explanation:q.exp || '',
+      savedAt:new Date().toISOString()
+    };
+    if(!seen.has(signature)){
+      bucket.unshift(item);
+      seen.add(signature);
+    }else{
+      const pos=bucket.findIndex(entry=>entry.signature===signature);
+      if(pos>=0) bucket[pos]=item;
+    }
+  });
+  MISTAKES_MAP[key]=bucket.slice(0,250);
+  persistMistakes();
+}
+function renderProgressScreen(){
+  const attempts=getStudentAttempts();
+  const summary=document.getElementById('progressSummaryGrid');
+  const history=document.getElementById('progressHistoryList');
+  const adviceText=document.getElementById('progressAdviceText');
+  const topicList=document.getElementById('progressTopicList');
+  const avg=attempts.length ? Math.round(attempts.reduce((sum,item)=>sum + Number(item.scorePercent||0),0)/attempts.length) : 0;
+  const best=attempts.length ? Math.max(...attempts.map(item=>Number(item.scorePercent||0))) : 0;
+  const last=attempts[0]?.scorePercent ?? '—';
+  summary.innerHTML=[
+    `<div class="simple-pill"><strong>${attempts.length}</strong><span>Attempts</span></div>`,
+    `<div class="simple-pill"><strong>${last}${last==='—'?'':'%'}</strong><span>Last Score</span></div>`,
+    `<div class="simple-pill"><strong>${best}%</strong><span>Best Score</span></div>`,
+    `<div class="simple-pill"><strong>${avg}%</strong><span>Average Score</span></div>`
+  ].join('');
+  const aggregate={};
+  attempts.forEach(item=>{
+    (item.topicStats || []).forEach(stat=>{
+      if(!aggregate[stat.topic]) aggregate[stat.topic]={topic:stat.topic,total:0,correct:0};
+      aggregate[stat.topic].total += Number(stat.total||0);
+      aggregate[stat.topic].correct += Number(stat.correct||0);
+    });
+  });
+  const topicStats=Object.values(aggregate).map(item=>({...item, percent:item.total ? Math.round((item.correct/item.total)*100) : 0})).sort((a,b)=>a.percent-b.percent);
+  const advice=buildRevisionAdvice(topicStats);
+  adviceText.textContent=advice.message;
+  topicList.innerHTML=advice.chips.length ? advice.chips.join('') : '<span class="topic-chip fair">No topic data yet.</span>';
+  if(!attempts.length){
+    history.innerHTML='<div class="empty-state">No saved attempts yet. Start a quiz and come back here to review progress over time.</div>';
+    return;
+  }
+  history.innerHTML=attempts.slice(0,25).map(item=>`
+    <div class="history-item">
+      <div class="history-meta">${escapeHtml(item.createdAt ? new Date(item.createdAt).toLocaleString() : '')} • ${escapeHtml((item.board || '').toUpperCase())} • ${escapeHtml(item.subjectLabel || '')}</div>
+      <div class="history-title">${escapeHtml(item.mode || 'practice')} • ${item.scorePercent}% • ${item.correct}/${item.totalQuestions}</div>
+      <div class="history-sub">${escapeHtml(item.weakTopics?.length ? 'Weak: ' + item.weakTopics.join(', ') : 'No weak-topic warning on this attempt.')}</div>
+    </div>`).join('');
+}
+function openProgressScreen(){
+  updateStudentSummary();
+  renderProgressScreen();
+  show('progressScreen');
+}
+function renderMistakesScreen(){
+  const mistakes=getStudentMistakes().filter(item=>item.board===activeExamBoard);
+  const wrap=document.getElementById('mistakeList');
+  const summary=document.getElementById('mistakeSummaryGrid');
+  const uniqueSubjects=new Set(mistakes.map(item=>item.subjectLabel));
+  summary.innerHTML=[
+    `<div class="simple-pill"><strong>${mistakes.length}</strong><span>${escapeHtml(getExamBoardLabel(activeExamBoard))} Mistakes</span></div>`,
+    `<div class="simple-pill"><strong>${uniqueSubjects.size}</strong><span>Subjects Touched</span></div>`
+  ].join('');
+  if(!mistakes.length){
+    wrap.innerHTML='<div class="empty-state">No saved mistakes yet for this exam board. Wrong answers will appear here after a quiz.</div>';
+    return;
+  }
+  wrap.innerHTML=mistakes.slice(0,80).map(item=>{
+    const correctLetter=optionLetters((item.options || []).length)[item.correctIndex] || '';
+    const chosenLetter=item.chosenIndex>=0 ? optionLetters((item.options || []).length)[item.chosenIndex] : '—';
+    return `
+      <div class="mistake-item">
+        <div class="mistake-meta">${escapeHtml(item.subjectLabel || '')} • ${escapeHtml(item.topic || '')} • ${escapeHtml(item.year || '')}</div>
+        <div class="mistake-title">${escapeHtml(item.question || '')}</div>
+        <div class="mistake-sub">Your answer: ${escapeHtml(chosenLetter)} • Correct answer: ${escapeHtml(correctLetter)} • ${escapeHtml(item.explanation || '')}</div>
+      </div>`;
+  }).join('');
+}
+function openMistakesScreen(){
+  renderMistakesScreen();
+  show('mistakesScreen');
+}
+function startMistakePractice(){
+  const mistakes=getStudentMistakes().filter(item=>item.board===activeExamBoard);
+  if(!mistakes.length){
+    alert('There are no saved mistakes yet for this exam board.');
+    return;
+  }
+  name=getStudentNameValue();
+  currentAttemptId='att-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
+  pool=shuffle(mistakes.map(item=>prepareQuestion({
+    type:'objective',
+    q:item.question,
+    o:item.options,
+    a:item.correctIndex,
+    exp:item.explanation,
+    yr:item.year,
+    t:0,
+    paper:'Mistake Review',
+    topicLabel:item.topic,
+    subjectLabel:item.subjectLabel
+  })));
+  idx=0;correct=0;missed=[];elapsed=0;
+  userAnswers=Array(pool.length).fill(null);
+  theorySelfScores=[];
+  activeRunTopicValue='mistakes';
+  clearInterval(qTimer);
+  clearInterval(sessTimer);
+  prepareQuizScreen(activeExamBoard==='waec' ? 'waec-untimed' : 'practice');
+  show('quizScreen');
+  document.getElementById('timerVal').textContent='No Timer';
+  document.getElementById('timerVal').className='timer-val no-timer';
+  loadQ();
+}
 function getQuestionTypeLabel(type){
   return String(type||'objective').toLowerCase()==='theory' ? 'Theory' : 'Objective';
 }
@@ -1419,7 +2140,9 @@ function getAnsweredTheoryCount(){
   return userAnswers.filter(value=>typeof value==='string' && value.trim()).length;
 }
 function isUntimedMode(mode=getSelectedMode()){
-  return mode==='waec-objective-untimed' || mode==='waec-theory';
+  if(mode==='waec-theory' || mode==='waec-practice') return true;
+  if(mode==='waec-test') return (document.getElementById('testTimerSelect')?.value || 'on') === 'off';
+  return false;
 }
 function renderModeOptions(){
   const select=document.getElementById('modeSelect');
@@ -1427,9 +2150,9 @@ function renderModeOptions(){
   const previous=select.value;
   const options=activeExamBoard==='waec'
     ? [
-        {value:'waec-objective', text:'📝 WAEC Objective Practice (Timed)'},
-        {value:'waec-objective-untimed', text:'📘 WAEC Objective Practice (No Timer)'},
-        {value:'waec-theory', text:'✍️ WAEC Theory Self Review (No Timer)'}
+        {value:'waec-practice', text:'📘 WAEC Practice Mode'},
+        {value:'waec-test', text:'🖥️ WAEC CBT/Test Mode'},
+        {value:'waec-theory', text:'✍️ WAEC Theory Practice Mode'}
       ]
     : [
         {value:'practice', text:'⚡ Live Practice Mode'},
@@ -1484,7 +2207,7 @@ function updateTheoryResultsSummary(){
   document.getElementById('rTLbl').textContent='Time';
   document.getElementById('rC').textContent=`${awarded}/${maxTotal}`;
   document.getElementById('rW').textContent=String(pending);
-  document.getElementById('rT').textContent=(quizMode==='waec-untimed' || quizMode==='waec-theory') ? 'Off' : fmt(elapsed);
+  document.getElementById('rT').textContent=(quizMode==='waec-untimed' || quizMode==='waec-theory' || (quizMode==='waec-test' && !testTimerEnabled)) ? 'Off' : fmt(elapsed);
   setResultVisual(pct);
 }
 function renderTheoryReview(){
@@ -1506,7 +2229,7 @@ function renderTheoryReview(){
     }
     const answerText=String(userAnswers[i] || '').trim() || 'No answer was entered.';
     card.innerHTML=`
-      <div class="theory-review-meta">Question ${i+1}${q.paper ? ' • ' + escapeHtml(q.paper) : ''}${q.yr ? ' • ' + escapeHtml(q.yr) : ''}${currentSubject.topics[q.t] ? ' • ' + escapeHtml(currentSubject.topics[q.t]) : ''}</div>
+      <div class="theory-review-meta">Question ${i+1}${q.paper ? ' • ' + escapeHtml(q.paper) : ''}${q.yr ? ' • ' + escapeHtml(q.yr) : ''}${getQuestionTopicLabel(q) ? ' • ' + escapeHtml(getQuestionTopicLabel(q)) : ''}</div>
       <div class="rev-q">${i+1}. ${escapeHtml(q.q)}</div>
       <div class="theory-block"><strong>Your Answer</strong><div class="theory-answer-text">${escapeHtml(answerText)}</div></div>
       <div class="theory-block"><strong>Model Answer</strong><div class="theory-model-text">${escapeHtml(q.modelAnswer || 'No model answer added yet.')}</div></div>
@@ -1524,9 +2247,11 @@ function renderTheoryReview(){
       const value=event.target.value;
       theorySelfScores[qIndex]=value==='' ? null : clamp(parseInt(value,10),0,pool[qIndex]?.scorePoints || 0);
       updateTheoryResultsSummary();
+      saveCurrentAttempt();
     });
   });
   updateTheoryResultsSummary();
+  saveCurrentAttempt();
 }
 
 function setCurrentSubject(key){
@@ -1690,6 +2415,7 @@ function updateModeUI(){
   const mode=getSelectedMode();
   const topicGroup=document.getElementById('topicGroup');
   const timeGroup=document.getElementById('timeGroup');
+  const timerGroup=document.getElementById('testTimerGroup');
   const topicSelect=document.getElementById('topicSelect');
   const timeInput=document.getElementById('timePerQuestion');
   const modeHelp=document.getElementById('modeHelp');
@@ -1697,26 +2423,29 @@ function updateModeUI(){
 
   topicGroup.classList.remove('is-disabled');
   timeGroup.classList.remove('is-disabled');
+  if(timerGroup) timerGroup.style.display='none';
+
   if(activeExamBoard==='waec' && mode==='waec-theory'){
-    if(modeHelp) modeHelp.textContent='Theory mode shows only WAEC theory questions. Students type their answers first, then score themselves with the model answer and marking guide. No timer is used.';
-    if(startBtn) startBtn.textContent='START THEORY REVIEW →';
+    if(modeHelp) modeHelp.textContent='Theory Practice Mode shows WAEC-style theory questions. Students type answers, compare with the model answer, then self-score using the marking guide.';
+    if(startBtn) startBtn.textContent='START THEORY PRACTICE →';
     timeGroup.classList.add('is-disabled');
     if(timeInput) timeInput.value=getSavedTime();
-  }else if(activeExamBoard==='waec' && mode==='waec-objective-untimed'){
-    if(modeHelp) modeHelp.textContent='Untimed objective mode marks each answer immediately after it is clicked, so students get instant correction with no countdown.';
-    if(startBtn) startBtn.textContent='START WAEC UNTIMED →';
+  }else if(activeExamBoard==='waec' && mode==='waec-practice'){
+    if(modeHelp) modeHelp.textContent='Practice Mode shows one objective question at a time, marks it instantly, shows the correct answer, and explains the key idea before moving on.';
+    if(startBtn) startBtn.textContent='START PRACTICE →';
     timeGroup.classList.add('is-disabled');
     if(timeInput) timeInput.value=getSavedTime();
-  }else if(activeExamBoard==='waec'){
-    if(modeHelp) modeHelp.textContent='Timed objective mode uses your saved per-question timer, but correct answers are shown only after the test is submitted or completed.';
-    if(startBtn) startBtn.textContent='START WAEC QUIZ →';
+  }else if(activeExamBoard==='waec' && mode==='waec-test'){
+    if(modeHelp) modeHelp.textContent='CBT/Test Mode hides answers until submission, allows next/previous navigation, and can run with or without a timer.';
+    if(startBtn) startBtn.textContent='START TEST MODE →';
+    if(timerGroup) timerGroup.style.display='';
   }else if(mode==='cbt'){
-    if(modeHelp) modeHelp.textContent='CBT mode uses the full subject bank, picks up to 40 objective questions, and runs on one fixed 40-minute timer.';
+    if(modeHelp) modeHelp.textContent='JAMB CBT mode uses the full subject bank, picks up to 40 objective questions, and runs on one fixed 40-minute timer.';
     if(startBtn) startBtn.textContent='START CBT →';
     topicGroup.classList.add('is-disabled');
     if(topicSelect) topicSelect.value='all';
   }else{
-    if(modeHelp) modeHelp.textContent='Practice mode uses the selected topic and your saved per-question timer.';
+    if(modeHelp) modeHelp.textContent='JAMB practice mode uses the selected topic and your saved per-question timer.';
     if(startBtn) startBtn.textContent='START QUIZ →';
   }
   updateHomeStats();
@@ -1727,12 +2456,7 @@ function updateHomeStats(){
   document.getElementById('statTopics').textContent=currentSubject?.topics?.length || 0;
   const mode=getSelectedMode();
   const timeLabel=document.getElementById('statTimeLabel');
-  if(activeExamBoard==='waec' && mode==='waec-theory'){
-    document.getElementById('statPerQ').textContent='Off';
-    if(timeLabel) timeLabel.textContent='Timer';
-    return;
-  }
-  if(activeExamBoard==='waec' && mode==='waec-objective-untimed'){
+  if(activeExamBoard==='waec' && (mode==='waec-practice' || mode==='waec-theory' || (mode==='waec-test' && document.getElementById('testTimerSelect')?.value==='off'))){
     document.getElementById('statPerQ').textContent='Off';
     if(timeLabel) timeLabel.textContent='Timer';
     return;
@@ -1742,10 +2466,19 @@ function updateHomeStats(){
     if(timeLabel) timeLabel.textContent='Fixed Time';
     return;
   }
+  if(activeExamBoard==='waec' && mode==='waec-test'){
+    const raw=parseInt(document.getElementById('timePerQuestion')?.value,10);
+    const display=Number.isFinite(raw)?clamp(raw,5,300):getSavedTime();
+    const total=Math.max(1, getSelectedQuestionCount()) * display;
+    document.getElementById('statPerQ').textContent=fmt(total);
+    if(timeLabel) timeLabel.textContent='Test Time';
+    return;
+  }
   const raw=parseInt(document.getElementById('timePerQuestion')?.value,10);
   const display=Number.isFinite(raw)?clamp(raw,5,300):getSavedTime();
   document.getElementById('statPerQ').textContent=`${display}s`;
   if(timeLabel) timeLabel.textContent='Per Q';
+  updateStudentSummary();
 }
 
 function renderAdminSummary(){
@@ -1818,7 +2551,7 @@ function syncAdminSelectors(){
 
 function refreshAfterBankChange(preferredSubjectKey=null){
   refreshUiFromBank(preferredSubjectKey);
-  persistSubjectBank();
+  persistSubjectBank('question-bank-updated');
 }
 
 function openAdmin(){
@@ -2221,12 +2954,12 @@ function startSelectedMode(){
     startCbtQuiz();
     return;
   }
-  if(mode==='waec-objective'){
-    startWaecTimedQuiz();
+  if(mode==='waec-practice'){
+    startWaecUntimedQuiz();
     return;
   }
-  if(mode==='waec-objective-untimed'){
-    startWaecUntimedQuiz();
+  if(mode==='waec-test'){
+    startWaecTestMode();
     return;
   }
   if(mode==='waec-theory'){
@@ -2255,6 +2988,8 @@ function startQuiz(){
   setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
   const topicValue=document.getElementById('topicSelect').value;
   document.getElementById('topicSelect').dataset.lastValue=topicValue;
+  activeRunTopicValue=topicValue;
+  currentAttemptId='att-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
 
   const rawTime=parseInt(document.getElementById('timePerQuestion').value,10);
   timePerQuestion=Number.isFinite(rawTime)?clamp(rawTime,5,300):30;
@@ -2289,6 +3024,8 @@ function startTheoryQuiz(){
   setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
   const topicValue=document.getElementById('topicSelect').value;
   document.getElementById('topicSelect').dataset.lastValue=topicValue;
+  activeRunTopicValue=topicValue;
+  currentAttemptId='att-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
 
   const scopedQuestions=topicValue==='all'
     ? [...currentSubject.questions]
@@ -2317,6 +3054,8 @@ function startWaecTimedQuiz(){
   setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
   const topicValue=document.getElementById('topicSelect').value;
   document.getElementById('topicSelect').dataset.lastValue=topicValue;
+  activeRunTopicValue=topicValue;
+  currentAttemptId='att-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
 
   const rawTime=parseInt(document.getElementById('timePerQuestion').value,10);
   timePerQuestion=Number.isFinite(rawTime)?clamp(rawTime,5,300):30;
@@ -2351,6 +3090,8 @@ function startWaecUntimedQuiz(){
   setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
   const topicValue=document.getElementById('topicSelect').value;
   document.getElementById('topicSelect').dataset.lastValue=topicValue;
+  activeRunTopicValue=topicValue;
+  currentAttemptId='att-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
 
   const scopedQuestions=topicValue==='all'
     ? [...currentSubject.questions]
@@ -2375,9 +3116,64 @@ function startWaecUntimedQuiz(){
   loadQ();
 }
 
+function startWaecTestMode(){
+  name=document.getElementById('studentName').value.trim()||'Student';
+  setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
+  const topicValue=document.getElementById('topicSelect').value;
+  document.getElementById('topicSelect').dataset.lastValue=topicValue;
+  activeRunTopicValue=topicValue;
+  currentAttemptId='att-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
+
+  const rawTime=parseInt(document.getElementById('timePerQuestion').value,10);
+  timePerQuestion=Number.isFinite(rawTime)?clamp(rawTime,5,300):30;
+  document.getElementById('timePerQuestion').value=timePerQuestion;
+  safeStorageSet('quizDefaultTime', String(timePerQuestion));
+  testTimerEnabled=(document.getElementById('testTimerSelect')?.value || 'on') !== 'off';
+
+  const scopedQuestions=topicValue==='all'
+    ? [...currentSubject.questions]
+    : currentSubject.questions.filter(q=>q.t===Number(topicValue));
+  const sourceQuestions=filterQuestionsForMode(scopedQuestions, 'waec-test');
+
+  if(!sourceQuestions.length){
+    alert('There are no WAEC objective questions in this subject/topic yet. Add some from Manage Question Bank.');
+    return;
+  }
+
+  pool=shuffle(sourceQuestions.map(prepareQuestion));
+  idx=0;correct=0;missed=[];elapsed=0;
+  userAnswers=Array(pool.length).fill(null);
+  theorySelfScores=[];
+  clearInterval(qTimer);
+  clearInterval(sessTimer);
+  prepareQuizScreen('waec-test');
+  show('quizScreen');
+
+  if(testTimerEnabled){
+    timeLeft=Math.max(60, pool.length * timePerQuestion);
+    tick();
+    qTimer=setInterval(()=>{
+      timeLeft--;
+      elapsed++;
+      tick();
+      if(timeLeft<=0){
+        clearInterval(qTimer);
+        endQuiz(true);
+      }
+    },1000);
+  }else{
+    document.getElementById('timerVal').textContent='No Timer';
+    document.getElementById('timerVal').className='timer-val no-timer';
+    sessTimer=setInterval(()=>elapsed++,1000);
+  }
+  loadQ();
+}
+
 function startCbtQuiz(){
   name=document.getElementById('studentName').value.trim()||'Student';
   setCurrentSubject(document.getElementById('subjectSelect').value || currentSubjectKey);
+  activeRunTopicValue='all';
+  currentAttemptId='att-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
   const sourceQuestions=filterQuestionsForMode([...currentSubject.questions], 'cbt');
 
   if(!sourceQuestions.length){
@@ -2414,23 +3210,22 @@ function loadQ(){
   const answeredCount=quizMode==='waec-theory'
     ? getAnsweredTheoryCount()
     : userAnswers.filter(value=>value!==null && value!==-1).length;
-  document.getElementById('qCount').textContent=quizMode==='cbt'
+  document.getElementById('qCount').textContent=(quizMode==='cbt' || quizMode==='waec-theory' || quizMode==='waec-untimed' || quizMode==='waec-timed' || quizMode==='waec-test')
     ? `${idx+1} / ${pool.length} • ${answeredCount} answered`
-    : quizMode==='waec-theory'
-      ? `${idx+1} / ${pool.length} • ${answeredCount} answered`
-      : quizMode==='waec-untimed' || quizMode==='waec-timed'
-        ? `${idx+1} / ${pool.length} • ${answeredCount} answered`
-        : `${idx+1} / ${pool.length}`;
-  const topicName=currentSubject.topics[q.t] || 'Custom Topic';
+    : `${idx+1} / ${pool.length}`;
+  const topicName=getQuestionTopicLabel(q);
+  const subjectLabel=getQuestionSubjectLabel(q) || currentSubject.label;
   document.getElementById('topicBadge').textContent=quizMode==='cbt'
-    ? `${currentSubject.label} • CBT Mode • ${topicName}`
+    ? `${subjectLabel} • CBT Mode • ${topicName}`
     : quizMode==='waec-theory'
-      ? `${currentSubject.label} • Theory Self Review • ${topicName}`
+      ? `${subjectLabel} • Theory Practice • ${topicName}`
       : quizMode==='waec-untimed'
-        ? `${currentSubject.label} • Instant Review • ${topicName}`
+        ? `${subjectLabel} • Practice Mode • ${topicName}`
         : quizMode==='waec-timed'
-          ? `${currentSubject.label} • Timed Objective • ${topicName}`
-          : (q.paper ? `${topicName} • ${q.paper}` : topicName);
+          ? `${subjectLabel} • Timed Objective • ${topicName}`
+          : quizMode==='waec-test'
+            ? `${subjectLabel} • Test Mode • ${topicName}`
+            : (q.paper ? `${topicName} • ${q.paper}` : topicName);
   document.getElementById('qYear').textContent=q.paper ? `${q.yr} • ${q.paper}` : q.yr;
   document.getElementById('qText').textContent=q.q;
   const grid=document.getElementById('optionsGrid');
@@ -2449,13 +3244,8 @@ function loadQ(){
     const prevBtn=document.getElementById('btnPrev');
     const nextBtn=document.getElementById('btnNext');
     const submitBtn=document.getElementById('btnSubmitQuiz');
-    if(quizMode==='waec-timed'){
-      prevBtn.className='btn-outline btn-nav';
-      prevBtn.disabled=true;
-    }else{
-      prevBtn.className='btn-outline btn-nav show';
-      prevBtn.disabled=idx===0;
-    }
+    prevBtn.className='btn-outline btn-nav show';
+    prevBtn.disabled=idx===0;
     nextBtn.className='btn-next show';
     nextBtn.textContent=idx===pool.length-1 ? 'REVIEW THEORY →' : 'NEXT QUESTION →';
     submitBtn.className='btn-submit-quiz show';
@@ -2468,7 +3258,7 @@ function loadQ(){
   q.options.forEach((option,optionIndex)=>{
     const b=document.createElement('button');
     const selectedAnswer=userAnswers[idx];
-    b.className='option-btn'+(quizMode==='cbt' && selectedAnswer===optionIndex ? ' selected' : '');
+    b.className='option-btn'+((quizMode==='cbt' || quizMode==='waec-test') && selectedAnswer===optionIndex ? ' selected' : '');
     b.innerHTML=`<span class="option-letter">${letters[optionIndex]}</span><span>${escapeHtml(option.text)}</span>`;
     b.onclick=()=>pick(optionIndex);
     if(quizMode==='practice' && selectedAnswer!==null){
@@ -2477,18 +3267,13 @@ function loadQ(){
     grid.appendChild(b);
   });
 
-  if(quizMode==='cbt' || quizMode==='waec-timed'){
+  if(quizMode==='cbt' || quizMode==='waec-timed' || quizMode==='waec-test'){
     document.getElementById('feedbackBox').className='feedback-box';
     const prevBtn=document.getElementById('btnPrev');
     const nextBtn=document.getElementById('btnNext');
     const submitBtn=document.getElementById('btnSubmitQuiz');
-    if(quizMode==='waec-timed'){
-      prevBtn.className='btn-outline btn-nav';
-      prevBtn.disabled=true;
-    }else{
-      prevBtn.className='btn-outline btn-nav show';
-      prevBtn.disabled=idx===0;
-    }
+    prevBtn.className='btn-outline btn-nav show';
+    prevBtn.disabled=idx===0;
     nextBtn.className='btn-next show';
     nextBtn.textContent=idx===pool.length-1 ? 'FINISH →' : 'NEXT QUESTION →';
     submitBtn.className='btn-submit-quiz show';
@@ -2506,6 +3291,14 @@ function loadQ(){
           timeout();
         }
       },1000);
+    }else if(quizMode==='waec-test'){
+      if(testTimerEnabled){
+        document.getElementById('timerVal').textContent=formatCountdown(timeLeft);
+        document.getElementById('timerVal').className='timer-val'+(timeLeft<=300?' urgent':'');
+      }else{
+        document.getElementById('timerVal').textContent='No Timer';
+        document.getElementById('timerVal').className='timer-val no-timer';
+      }
     }else{
       document.getElementById('timerVal').textContent=formatCountdown(timeLeft);
       document.getElementById('timerVal').className='timer-val'+(timeLeft<=300?' urgent':'');
@@ -2544,7 +3337,7 @@ function loadQ(){
 
 function tick(){
   const el=document.getElementById('timerVal');
-  if(quizMode==='cbt'){
+  if(quizMode==='cbt' || quizMode==='waec-test'){
     el.textContent=formatCountdown(timeLeft);
     el.className='timer-val'+(timeLeft<=300?' urgent':'');
     return;
@@ -2587,7 +3380,7 @@ function timeout(){
 }
 
 function pick(i){
-  if(quizMode==='cbt' || quizMode==='waec-timed'){
+  if(quizMode==='cbt' || quizMode==='waec-timed' || quizMode==='waec-test'){
     userAnswers[idx]=i;
     document.querySelectorAll('.option-btn').forEach((btn,buttonIndex)=>{
       btn.classList.toggle('selected', buttonIndex===i);
@@ -2650,7 +3443,7 @@ function prevQuestion(){
     if(idx>0){ idx--; loadQ(); }
     return;
   }
-  if(quizMode!=='cbt' && quizMode!=='waec-untimed' && quizMode!=='waec-timed') return;
+  if(quizMode!=='cbt' && quizMode!=='waec-untimed' && quizMode!=='waec-timed' && quizMode!=='waec-test') return;
   if(idx>0){
     idx--;
     loadQ();
@@ -2668,7 +3461,7 @@ function nextQuestion(){
     loadQ();
     return;
   }
-  if(quizMode==='cbt' || quizMode==='waec-timed'){
+  if(quizMode==='cbt' || quizMode==='waec-timed' || quizMode==='waec-test'){
     if(idx>=pool.length-1){
       submitQuizEarly();
       return;
@@ -2702,14 +3495,14 @@ function submitQuizEarly(){
     }
     return;
   }
-  if(quizMode!=='cbt' && quizMode!=='waec-timed'){
+  if(quizMode!=='cbt' && quizMode!=='waec-timed' && quizMode!=='waec-test'){
     endQuiz();
     return;
   }
   const unanswered=userAnswers.filter(value=>value===null).length;
   const prompt=unanswered
     ? `You still have ${unanswered} unanswered question(s). Submit anyway?`
-: (quizMode==='waec-timed' ? 'Submit this timed WAEC test now?' : 'Submit this CBT now?');
+: (quizMode==='waec-timed' || quizMode==='waec-test' ? 'Submit this WAEC test now?' : 'Submit this CBT now?');
   if(window.confirm(prompt)){
     endQuiz();
   }
@@ -2719,7 +3512,7 @@ function endQuiz(fromTimer=false){
   clearInterval(qTimer);
   clearInterval(sessTimer);
 
-  if(quizMode==='cbt' || quizMode==='waec-timed'){
+  if(quizMode==='cbt' || quizMode==='waec-timed' || quizMode==='waec-test'){
     correct=0;
     missed=[];
     pool.forEach((q,questionIndex)=>{
@@ -2730,7 +3523,7 @@ function endQuiz(fromTimer=false){
         missed.push({q,chosen:chosen===null ? -1 : chosen});
       }
     });
-    elapsed=quizMode==='cbt' ? (CBT_TOTAL_SECONDS-timeLeft) : elapsed;
+    elapsed=(quizMode==='cbt' && timeLeft!==undefined) ? (CBT_TOTAL_SECONDS-timeLeft) : elapsed;
   }
 
   if(quizMode==='waec-theory'){
@@ -2738,6 +3531,9 @@ function endQuiz(fromTimer=false){
     document.getElementById('rTLbl').textContent='Timer';
     document.getElementById('rT').textContent='Off';
     document.getElementById('reviewSec').style.display='block';
+    renderRevisionInsight(buildTopicPerformanceSnapshot());
+    saveTheoryAnswerArchive();
+    saveCurrentAttempt();
     show('resultsScreen');
     renderTheoryReview();
     return;
@@ -2752,8 +3548,11 @@ function endQuiz(fromTimer=false){
   document.getElementById('rTLbl').textContent='Time';
   document.getElementById('rC').textContent=correct;
   document.getElementById('rW').textContent=pool.length-correct;
-  document.getElementById('rT').textContent=(quizMode==='waec-untimed' || quizMode==='waec-theory') ? 'Off' : fmt(elapsed);
+  document.getElementById('rT').textContent=(quizMode==='waec-untimed' || quizMode==='waec-theory' || (quizMode==='waec-test' && !testTimerEnabled)) ? 'Off' : fmt(elapsed);
   setResultVisual(pct);
+  renderRevisionInsight(buildTopicPerformanceSnapshot());
+  recordMistakesFromRun();
+  saveCurrentAttempt();
   show('resultsScreen');
 }
 
@@ -2807,6 +3606,7 @@ function goHome(){
   show('homeScreen');
   updateModeUI();
   updateHomeStats();
+  updateStudentSummary();
 }
 
 function goHomeUniversal(){
@@ -2909,6 +3709,26 @@ function calcEvaluate(){
   }
 }
 
+function handleConnectivityChange(){
+  if(navigator.onLine===false){
+    if(CLOUD_STATE.enabled || hasPendingCloudSync()){
+      applyCloudStatus('pending', 'You are offline. New changes will stay on this device and upload automatically when internet returns.');
+      updateDiagnosticsPanel();
+    }
+    return;
+  }
+  if(CLOUD_STATE.ready && hasPendingCloudSync()){
+    applyCloudStatus('syncing', 'Internet restored. Uploading your saved bank, scores, mistakes, and theory answers...');
+    updateDiagnosticsPanel();
+    flushPendingCloudSync('internet-restored-upload');
+    return;
+  }
+  if(CLOUD_STATE.ready){
+    applyCloudStatus('cloud');
+    updateDiagnosticsPanel();
+  }
+}
+
 function initQuizApp(){
   activeExamBoard=getSavedExamBoard();
   syncSubjectBankReference();
@@ -2949,10 +3769,16 @@ function initQuizApp(){
     if(Number.isFinite(raw)){
       const clean=clamp(raw,5,300);
       safeStorageSet('quizDefaultTime', String(clean));
-      if(getSelectedMode()!=='cbt' && !isUntimedMode()){
-        document.getElementById('statPerQ').textContent=`${clean}s`;
-      }
+      updateHomeStats();
     }
+  });
+
+  document.getElementById('testTimerSelect').addEventListener('change',()=>{
+    updateModeUI();
+  });
+
+  document.getElementById('studentName').addEventListener('input',()=>{
+    updateStudentSummary();
   });
 
   document.getElementById('adminSubjectForTopic').addEventListener('change',()=>{
@@ -2987,8 +3813,16 @@ function initQuizApp(){
     if(event.key==='Enter') unlockAdmin();
   });
 
+  window.addEventListener('online', handleConnectivityChange);
+  window.addEventListener('offline', handleConnectivityChange);
   initRemoteSync();
+  hydratePersistentStores();
+  handleConnectivityChange();
+  updateStudentSummary();
   updateGlobalHomeButton();
+  window.addEventListener('beforeunload',()=>{
+    try{ persistLargeValue(STORAGE_KEY_BANK, JSON.stringify(EXAM_BANK)); }catch(error){}
+  });
 }
 
 document.addEventListener('DOMContentLoaded', initQuizApp);

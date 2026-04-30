@@ -961,7 +961,7 @@ const BIG_DB_STORE='kv';
 let ACTIVE_REMOTE_SYNC=null;
 let cloudFns=null;
 let cloudSaveTimer=null;
-const CLOUD_STATE={enabled:false,ready:false,mode:'local',note:'',error:'',docRef:null,unsubscribe:null,pinOverride:null,lastUpdatedAt:''};
+const CLOUD_STATE={enabled:false,ready:false,mode:'local',note:'',error:'',docRef:null,unsubscribe:[],pinOverride:null,lastUpdatedAt:'',legacyMainDocFieldsPresent:false};
 let activeExamBoard=getSavedExamBoard();
 let EXAM_BANK=loadExamBank();
 let SUBJECT_BANK=getActiveSubjectBank(activeExamBoard);
@@ -1493,6 +1493,143 @@ async function flushPendingCloudSync(reason='queued-upload'){
   return writeRemoteSnapshot(reason);
 }
 
+function getCloudCollectionRef(kind){
+  if(!cloudFns || !CLOUD_STATE.docRef) return null;
+  return cloudFns.collection(CLOUD_STATE.docRef, kind);
+}
+function getCloudStudentDocRef(kind, studentKey){
+  const colRef=getCloudCollectionRef(kind);
+  if(!colRef || !studentKey) return null;
+  return cloudFns.doc(colRef, studentKey);
+}
+function getArrayCollectionStamp(items=[]){
+  const sorted=(Array.isArray(items) ? items : []).slice().sort((a,b)=>compareIsoStamps(getEntryBestStamp(b), getEntryBestStamp(a)));
+  return getEntryBestStamp(sorted[0]) || new Date().toISOString();
+}
+function buildCloudStudentDocsFromState(){
+  const profiles=buildStudentProfilesFromAttempts(ATTEMPTS_MAP);
+  const keys=new Set([
+    ...Object.keys(profiles || {}),
+    ...Object.keys(ATTEMPTS_MAP || {}),
+    ...Object.keys(MISTAKES_MAP || {}),
+    ...Object.keys(THEORY_ANSWERS_MAP || {})
+  ]);
+  const docs={profiles:{},attempts:{},mistakes:{},theoryAnswers:{}};
+  keys.forEach(studentKey=>{
+    const profile=profiles[studentKey] || {
+      studentKey,
+      studentName:studentKey,
+      lastScore:null,
+      bestScore:null,
+      attempts:0,
+      updatedAt:new Date().toISOString()
+    };
+    docs.profiles[studentKey]={...profile,studentKey,updatedAt:profile.updatedAt || new Date().toISOString()};
+    docs.attempts[studentKey]={studentKey,updatedAt:getArrayCollectionStamp(ATTEMPTS_MAP?.[studentKey]),items:Array.isArray(ATTEMPTS_MAP?.[studentKey]) ? ATTEMPTS_MAP[studentKey].slice(0,200) : []};
+    docs.mistakes[studentKey]={studentKey,updatedAt:getArrayCollectionStamp(MISTAKES_MAP?.[studentKey]),items:Array.isArray(MISTAKES_MAP?.[studentKey]) ? MISTAKES_MAP[studentKey].slice(0,300) : []};
+    docs.theoryAnswers[studentKey]={studentKey,updatedAt:getArrayCollectionStamp(THEORY_ANSWERS_MAP?.[studentKey]),items:Array.isArray(THEORY_ANSWERS_MAP?.[studentKey]) ? THEORY_ANSWERS_MAP[studentKey].slice(0,250) : []};
+  });
+  return docs;
+}
+function applyRemoteStudentCollections(data={},source='remote'){
+  if(data.attempts){
+    ATTEMPTS_MAP=mergeAttemptsMaps(data.attempts, ATTEMPTS_MAP);
+    persistJsonStore(ATTEMPTS_KEY, ATTEMPTS_MAP);
+  }
+  if(data.mistakes){
+    MISTAKES_MAP=mergeMistakesMaps(data.mistakes, MISTAKES_MAP);
+    persistJsonStore(MISTAKES_KEY, MISTAKES_MAP);
+  }
+  if(data.theoryAnswers){
+    THEORY_ANSWERS_MAP=mergeTheoryAnswerMaps(data.theoryAnswers, THEORY_ANSWERS_MAP);
+    persistJsonStore(THEORY_ANSWERS_KEY, THEORY_ANSWERS_MAP);
+  }
+  updateStudentSummary();
+  if(source==='remote'){
+    if(hasPendingCloudSync()) applyCloudStatus('pending');
+    else applyCloudStatus('cloud');
+  }
+}
+async function fetchAllStudentCollectionDocs(){
+  const refs={
+    profiles:getCloudCollectionRef('studentProfiles'),
+    attempts:getCloudCollectionRef('studentAttempts'),
+    mistakes:getCloudCollectionRef('studentMistakes'),
+    theoryAnswers:getCloudCollectionRef('studentTheoryAnswers')
+  };
+  const [profilesSnap, attemptsSnap, mistakesSnap, theorySnap]=await Promise.all([
+    refs.profiles ? cloudFns.getDocs(refs.profiles) : Promise.resolve(null),
+    refs.attempts ? cloudFns.getDocs(refs.attempts) : Promise.resolve(null),
+    refs.mistakes ? cloudFns.getDocs(refs.mistakes) : Promise.resolve(null),
+    refs.theoryAnswers ? cloudFns.getDocs(refs.theoryAnswers) : Promise.resolve(null)
+  ]);
+  const out={profiles:{},attempts:{},mistakes:{},theoryAnswers:{}};
+  profilesSnap && profilesSnap.forEach(docSnap=>{ out.profiles[docSnap.id]=docSnap.data() || {}; });
+  attemptsSnap && attemptsSnap.forEach(docSnap=>{ const data=docSnap.data() || {}; out.attempts[docSnap.id]=Array.isArray(data.items) ? data.items : []; });
+  mistakesSnap && mistakesSnap.forEach(docSnap=>{ const data=docSnap.data() || {}; out.mistakes[docSnap.id]=Array.isArray(data.items) ? data.items : []; });
+  theorySnap && theorySnap.forEach(docSnap=>{ const data=docSnap.data() || {}; out.theoryAnswers[docSnap.id]=Array.isArray(data.items) ? data.items : []; });
+  return out;
+}
+async function writeStudentCollectionDocs(studentDocs=null){
+  if(!CLOUD_STATE.ready || !cloudFns || !CLOUD_STATE.docRef) return;
+  const docs=studentDocs || buildCloudStudentDocsFromState();
+  const writes=[];
+  Object.entries(docs.profiles || {}).forEach(([studentKey,payload])=>{ const ref=getCloudStudentDocRef('studentProfiles', studentKey); if(ref) writes.push(cloudFns.setDoc(ref, payload, {merge:true})); });
+  Object.entries(docs.attempts || {}).forEach(([studentKey,payload])=>{ const ref=getCloudStudentDocRef('studentAttempts', studentKey); if(ref) writes.push(cloudFns.setDoc(ref, payload, {merge:true})); });
+  Object.entries(docs.mistakes || {}).forEach(([studentKey,payload])=>{ const ref=getCloudStudentDocRef('studentMistakes', studentKey); if(ref) writes.push(cloudFns.setDoc(ref, payload, {merge:true})); });
+  Object.entries(docs.theoryAnswers || {}).forEach(([studentKey,payload])=>{ const ref=getCloudStudentDocRef('studentTheoryAnswers', studentKey); if(ref) writes.push(cloudFns.setDoc(ref, payload, {merge:true})); });
+  await Promise.all(writes);
+}
+async function trimLegacyMainDocFields(){
+  if(!cloudFns?.updateDoc || !cloudFns?.deleteField || !CLOUD_STATE.docRef) return;
+  try{
+    await cloudFns.updateDoc(CLOUD_STATE.docRef, {
+      studentProfiles:cloudFns.deleteField(),
+      attempts:cloudFns.deleteField(),
+      mistakes:cloudFns.deleteField(),
+      theoryAnswers:cloudFns.deleteField()
+    });
+    CLOUD_STATE.legacyMainDocFieldsPresent=false;
+  }catch(error){
+    console.warn('[CloudSync] Could not trim legacy main-doc fields:', error?.message || error);
+  }
+}
+function subscribeToStudentCollections(){
+  if(!cloudFns?.onSnapshot || !Array.isArray(CLOUD_STATE.unsubscribe)) return;
+  const refs=[
+    ['profiles', getCloudCollectionRef('studentProfiles')],
+    ['attempts', getCloudCollectionRef('studentAttempts')],
+    ['mistakes', getCloudCollectionRef('studentMistakes')],
+    ['theoryAnswers', getCloudCollectionRef('studentTheoryAnswers')]
+  ];
+  refs.forEach(([type, ref])=>{
+    if(!ref) return;
+    const unsub=cloudFns.onSnapshot(ref,(snap)=>{
+      const pack={};
+      if(type==='profiles'){
+        pack.profiles={};
+        snap.forEach(docSnap=>{ pack.profiles[docSnap.id]=docSnap.data() || {}; });
+      }else if(type==='attempts'){
+        pack.attempts={};
+        snap.forEach(docSnap=>{ const data=docSnap.data() || {}; pack.attempts[docSnap.id]=Array.isArray(data.items) ? data.items : []; });
+      }else if(type==='mistakes'){
+        pack.mistakes={};
+        snap.forEach(docSnap=>{ const data=docSnap.data() || {}; pack.mistakes[docSnap.id]=Array.isArray(data.items) ? data.items : []; });
+      }else{
+        pack.theoryAnswers={};
+        snap.forEach(docSnap=>{ const data=docSnap.data() || {}; pack.theoryAnswers[docSnap.id]=Array.isArray(data.items) ? data.items : []; });
+      }
+      applyRemoteStudentCollections(pack,'remote');
+      updateDiagnosticsPanel();
+    },(error)=>{
+      console.error('[CloudSync] Student collection sync error:', error?.message || error);
+      CLOUD_STATE.error=error?.message || 'Student collection sync failed.';
+      applyCloudStatus('error', 'Firestore student data sync failed: ' + CLOUD_STATE.error);
+      updateDiagnosticsPanel();
+    });
+    CLOUD_STATE.unsubscribe.push(unsub);
+  });
+}
 async function writeRemoteSnapshot(reason='bank-update'){
   if(!CLOUD_STATE.ready || !cloudFns || !CLOUD_STATE.docRef) return false;
   try{
@@ -1505,7 +1642,20 @@ async function writeRemoteSnapshot(reason='bank-update'){
       console.warn('[CloudSync] Could not fetch latest remote snapshot before write:', fetchError?.message || fetchError);
     }
     const payload=buildRemotePayload(reason, remoteBase);
-    await cloudFns.setDoc(CLOUD_STATE.docRef,payload,{merge:true});
+    const studentDocs=buildCloudStudentDocsFromState();
+    const hasLegacyMain=!!(remoteBase && (remoteBase.studentProfiles || remoteBase.attempts || remoteBase.mistakes || remoteBase.theoryAnswers));
+    if(hasLegacyMain){
+      await writeStudentCollectionDocs(studentDocs);
+      await trimLegacyMainDocFields();
+    }
+    await cloudFns.setDoc(CLOUD_STATE.docRef, {
+      bank:payload.bank,
+      adminPin:payload.adminPin,
+      meta:payload.meta
+    }, {merge:true});
+    if(!hasLegacyMain){
+      await writeStudentCollectionDocs(studentDocs);
+    }
     CLOUD_STATE.lastUpdatedAt=payload.meta.updatedAt;
     CLOUD_STATE.error='';
     clearPendingCloudSync();
@@ -1554,6 +1704,7 @@ function applyRemotePayload(data,source='remote'){
       queueCloudSave('local-newer-than-remote-bank');
     }
   }
+  CLOUD_STATE.legacyMainDocFieldsPresent=!!(data.studentProfiles || data.attempts || data.mistakes || data.theoryAnswers);
   if(data.adminPin){
     CLOUD_STATE.pinOverride=String(data.adminPin);
     safeStorageSet(ADMIN_PIN_KEY, CLOUD_STATE.pinOverride);
@@ -1565,19 +1716,15 @@ function applyRemotePayload(data,source='remote'){
     if(remoteStamp) saveLocalBankMeta(remoteStamp);
     refreshUiFromBank(currentSubjectKey);
   }
-  if(data.attempts){
-    ATTEMPTS_MAP=mergeAttemptsMaps(data.attempts, ATTEMPTS_MAP);
-    persistJsonStore(ATTEMPTS_KEY, ATTEMPTS_MAP);
+  if(data.attempts || data.mistakes || data.theoryAnswers){
+    applyRemoteStudentCollections({
+      attempts:data.attempts || null,
+      mistakes:data.mistakes || null,
+      theoryAnswers:data.theoryAnswers || null
+    }, source);
+  }else{
+    updateStudentSummary();
   }
-  if(data.mistakes){
-    MISTAKES_MAP=mergeMistakesMaps(data.mistakes, MISTAKES_MAP);
-    persistJsonStore(MISTAKES_KEY, MISTAKES_MAP);
-  }
-  if(data.theoryAnswers){
-    THEORY_ANSWERS_MAP=mergeTheoryAnswerMaps(data.theoryAnswers, THEORY_ANSWERS_MAP);
-    persistJsonStore(THEORY_ANSWERS_KEY, THEORY_ANSWERS_MAP);
-  }
-  updateStudentSummary();
   if(remoteStamp) CLOUD_STATE.lastUpdatedAt=remoteStamp;
   if(source==='remote'){
     if(hasPendingCloudSync()) applyCloudStatus('pending');
@@ -1610,8 +1757,13 @@ async function initRemoteSync(){
     const db=storeMod.getFirestore(firebaseApp);
     cloudFns={
       getDoc:storeMod.getDoc,
+      getDocs:storeMod.getDocs,
       setDoc:storeMod.setDoc,
-      onSnapshot:storeMod.onSnapshot
+      updateDoc:storeMod.updateDoc,
+      deleteField:storeMod.deleteField,
+      onSnapshot:storeMod.onSnapshot,
+      collection:storeMod.collection,
+      doc:storeMod.doc
     };
     CLOUD_STATE.docRef=storeMod.doc(db, ACTIVE_REMOTE_SYNC.collection, ACTIVE_REMOTE_SYNC.documentId);
     CLOUD_STATE.enabled=true;
@@ -1627,10 +1779,14 @@ async function initRemoteSync(){
       await writeRemoteSnapshot('seed-initial-cloud-bank');
     }
 
-    if(CLOUD_STATE.unsubscribe){
-      try{CLOUD_STATE.unsubscribe();}catch(error){}
+    const studentCollections=await fetchAllStudentCollectionDocs();
+    applyRemoteStudentCollections(studentCollections,'remote');
+
+    if(Array.isArray(CLOUD_STATE.unsubscribe) && CLOUD_STATE.unsubscribe.length){
+      CLOUD_STATE.unsubscribe.forEach(fn=>{ try{ typeof fn==='function' && fn(); }catch(error){} });
     }
-    CLOUD_STATE.unsubscribe=cloudFns.onSnapshot(CLOUD_STATE.docRef,(snap)=>{
+    CLOUD_STATE.unsubscribe=[];
+    const mainUnsub=cloudFns.onSnapshot(CLOUD_STATE.docRef,(snap)=>{
       if(!snap.exists()) return;
       console.log('[CloudSync] Live snapshot received. Applying update...');
       applyRemotePayload(snap.data(),'remote');
@@ -1641,16 +1797,20 @@ async function initRemoteSync(){
       applyCloudStatus('error', 'Firestore live sync error: ' + CLOUD_STATE.error + '. This may be caused by security rules blocking access.');
       updateDiagnosticsPanel();
     });
+    CLOUD_STATE.unsubscribe.push(mainUnsub);
+    subscribeToStudentCollections();
     console.log('[CloudSync] Cloud sync fully active. Mode: cloud');
     applyCloudStatus(hasPendingCloudSync() ? 'pending' : 'cloud');
     updateDiagnosticsPanel();
+    if(CLOUD_STATE.legacyMainDocFieldsPresent){
+      markPendingCloudSync('migrate-legacy-main-doc');
+    }
     if(hasPendingCloudSync()) flushPendingCloudSync('post-connect-upload');
   }catch(error){
     CLOUD_STATE.ready=false;
     CLOUD_STATE.enabled=false;
     CLOUD_STATE.error=error?.message || 'Firebase could not be initialized.';
     console.error('[CloudSync] Init failed:', CLOUD_STATE.error);
-    // Provide specific guidance based on error type
     let userNote='Cloud sync failed: ' + CLOUD_STATE.error;
     if(/permission|denied|unauthorized/i.test(CLOUD_STATE.error)){
       userNote+=' — Firestore security rules may be blocking access to the quiz path.';
@@ -1678,10 +1838,12 @@ function updateDiagnosticsPanel(){
     'Config file: ' + (cfg.enabled===true ? 'Loaded ✓' : 'Not loaded or disabled ✗'),
     'Firebase project: ' + (cfg.firebaseConfig?.projectId || 'N/A'),
     'Firebase init: ' + (CLOUD_STATE.enabled ? 'Yes ✓' : 'No ✗'),
-    'Firestore path: ' + (cfg.collection || '?') + ' / ' + (cfg.documentId || '?'),
+    'Firestore root: ' + (cfg.collection || '?') + ' / ' + (cfg.documentId || '?'),
+    'Student collections: studentProfiles, studentAttempts, studentMistakes, studentTheoryAnswers',
     'Firestore ready: ' + (CLOUD_STATE.ready ? 'Yes ✓' : 'No ✗'),
     'Browser online: ' + (navigator.onLine===false ? 'No ✗' : 'Yes ✓'),
     'Storage mode: ' + (CLOUD_STATE.mode || 'unknown').toUpperCase(),
+    'Legacy oversized main-doc fields present: ' + (CLOUD_STATE.legacyMainDocFieldsPresent ? 'Yes' : 'No'),
     'Pending upload: ' + (hasPendingCloudSync() ? 'Yes — ' + ((CLOUD_PENDING_STATE.reasons || []).join(', ') || 'changes queued') : 'No'),
     'Last sync: ' + (CLOUD_STATE.lastUpdatedAt ? localTimeLabel(CLOUD_STATE.lastUpdatedAt) : 'Never'),
     'Error: ' + (CLOUD_STATE.error || 'None')
@@ -1821,6 +1983,7 @@ function buildRemotePayload(reason='cloud-update', remoteBase=null){
     meta:{
       updatedAt:latestStamp,
       reason,
+      storageLayout:'split-student-collections-v1',
       pendingReasons:Array.isArray(CLOUD_PENDING_STATE?.reasons) ? CLOUD_PENDING_STATE.reasons.slice(0,12) : []
     }
   };

@@ -1502,6 +1502,67 @@ function getCloudStudentDocRef(kind, studentKey){
   if(!colRef || !studentKey) return null;
   return cloudFns.doc(colRef, studentKey);
 }
+
+function getCloudBankSubjectsCollectionRef(){
+  if(!cloudFns || !CLOUD_STATE.docRef) return null;
+  return cloudFns.collection(CLOUD_STATE.docRef, 'bankSubjects');
+}
+function getCloudBankSubjectDocId(board, subjectKey){
+  const safeBoard=board==='waec' ? 'waec' : 'jamb';
+  return `${safeBoard}__${slugify(subjectKey)}`;
+}
+function getCloudBankSubjectDocRef(board, subjectKey){
+  const colRef=getCloudBankSubjectsCollectionRef();
+  if(!colRef || !subjectKey) return null;
+  return cloudFns.doc(colRef, getCloudBankSubjectDocId(board, subjectKey));
+}
+function buildExamBankFromSubjectDocsMap(docMap={}){
+  const examBank=createEmptyExamBank();
+  Object.values(docMap || {}).forEach((payload)=>{
+    if(!payload || typeof payload!=='object') return;
+    const board=(String(payload.board || '').toLowerCase()==='waec') ? 'waec' : 'jamb';
+    const subjectKey=slugify(payload.subjectKey || payload.key || payload.subject?.label || payload.subject?.name || 'subject');
+    const normalized=normalizeSubject(subjectKey, payload.subject || payload);
+    if(normalized) ensureExamBucket(examBank, board)[subjectKey]=normalized;
+  });
+  return examBank;
+}
+async function fetchAllBankSubjectDocs(){
+  const colRef=getCloudBankSubjectsCollectionRef();
+  if(!colRef || !cloudFns?.getDocs) return { examBank:createEmptyExamBank(), rawDocs:{} };
+  const snap=await cloudFns.getDocs(colRef);
+  const rawDocs={};
+  snap.forEach(docSnap=>{ rawDocs[docSnap.id]=docSnap.data() || {}; });
+  return { examBank:buildExamBankFromSubjectDocsMap(rawDocs), rawDocs };
+}
+async function writeBankSubjectDocs(){
+  if(!CLOUD_STATE.ready || !cloudFns || !CLOUD_STATE.docRef) return;
+  const desiredDocs={};
+  ['jamb','waec'].forEach(board=>{
+    Object.entries(ensureExamBucket(EXAM_BANK, board)).forEach(([subjectKey, subject])=>{
+      const docId=getCloudBankSubjectDocId(board, subjectKey);
+      desiredDocs[docId]={
+        board,
+        subjectKey,
+        updatedAt:new Date().toISOString(),
+        subject:deepClone(subject)
+      };
+    });
+  });
+  const existing=await fetchAllBankSubjectDocs();
+  const writes=[];
+  Object.entries(desiredDocs).forEach(([docId,payload])=>{
+    const ref=cloudFns.doc(getCloudBankSubjectsCollectionRef(), docId);
+    writes.push(cloudFns.setDoc(ref, payload, {merge:true}));
+  });
+  Object.keys(existing.rawDocs || {}).forEach(docId=>{
+    if(!desiredDocs[docId] && cloudFns.deleteDoc){
+      const ref=cloudFns.doc(getCloudBankSubjectsCollectionRef(), docId);
+      writes.push(cloudFns.deleteDoc(ref));
+    }
+  });
+  await Promise.all(writes);
+}
 function getArrayCollectionStamp(items=[]){
   const sorted=(Array.isArray(items) ? items : []).slice().sort((a,b)=>compareIsoStamps(getEntryBestStamp(b), getEntryBestStamp(a)));
   return getEntryBestStamp(sorted[0]) || new Date().toISOString();
@@ -1594,6 +1655,17 @@ async function trimLegacyMainDocFields(){
     console.warn('[CloudSync] Could not trim legacy main-doc fields:', error?.message || error);
   }
 }
+
+async function trimLegacyMainDocBankField(){
+  if(!cloudFns?.updateDoc || !cloudFns?.deleteField || !CLOUD_STATE.docRef) return;
+  try{
+    await cloudFns.updateDoc(CLOUD_STATE.docRef, {
+      bank:cloudFns.deleteField()
+    });
+  }catch(error){
+    console.warn('[CloudSync] Could not trim legacy main-doc bank field:', error?.message || error);
+  }
+}
 function subscribeToStudentCollections(){
   if(!cloudFns?.onSnapshot || !Array.isArray(CLOUD_STATE.unsubscribe)) return;
   const refs=[
@@ -1635,24 +1707,40 @@ async function writeRemoteSnapshot(reason='bank-update'){
   try{
     applyCloudStatus('syncing');
     let remoteBase=null;
+    let remoteBankDocs={ examBank:createEmptyExamBank(), rawDocs:{} };
     try{
       const latestSnap=await cloudFns.getDoc(CLOUD_STATE.docRef);
       remoteBase=latestSnap.exists() ? latestSnap.data() : null;
     }catch(fetchError){
       console.warn('[CloudSync] Could not fetch latest remote snapshot before write:', fetchError?.message || fetchError);
     }
-    const payload=buildRemotePayload(reason, remoteBase);
+    try{
+      remoteBankDocs=await fetchAllBankSubjectDocs();
+    }catch(bankFetchError){
+      console.warn('[CloudSync] Could not fetch bank subject docs before write:', bankFetchError?.message || bankFetchError);
+    }
+    const remoteForMerge={...(remoteBase || {}), bank:remoteBankDocs.examBank};
+    const payload=buildRemotePayload(reason, remoteForMerge);
     const studentDocs=buildCloudStudentDocsFromState();
     const hasLegacyMain=!!(remoteBase && (remoteBase.studentProfiles || remoteBase.attempts || remoteBase.mistakes || remoteBase.theoryAnswers));
+    const hasLegacyBank=!!(remoteBase && remoteBase.bank && Object.keys(remoteBankDocs.rawDocs || {}).length===0);
+    await writeBankSubjectDocs();
     if(hasLegacyMain){
       await writeStudentCollectionDocs(studentDocs);
       await trimLegacyMainDocFields();
     }
     await cloudFns.setDoc(CLOUD_STATE.docRef, {
-      bank:payload.bank,
       adminPin:payload.adminPin,
-      meta:payload.meta
+      meta:{...payload.meta, storageLayout:'split-bank-subject-docs-v2'},
+      bankSummary:{
+        jambSubjects:getBoardSubjectCount('jamb'),
+        waecSubjects:getBoardSubjectCount('waec'),
+        updatedAt:payload.meta.updatedAt
+      }
     }, {merge:true});
+    if(hasLegacyBank){
+      await trimLegacyMainDocBankField();
+    }
     if(!hasLegacyMain){
       await writeStudentCollectionDocs(studentDocs);
     }
@@ -1760,6 +1848,7 @@ async function initRemoteSync(){
       getDocs:storeMod.getDocs,
       setDoc:storeMod.setDoc,
       updateDoc:storeMod.updateDoc,
+      deleteDoc:storeMod.deleteDoc,
       deleteField:storeMod.deleteField,
       onSnapshot:storeMod.onSnapshot,
       collection:storeMod.collection,
@@ -1771,9 +1860,14 @@ async function initRemoteSync(){
     console.log('[CloudSync] Firebase initialized. Reading doc:', ACTIVE_REMOTE_SYNC.collection + '/' + ACTIVE_REMOTE_SYNC.documentId);
 
     const firstSnap=await cloudFns.getDoc(CLOUD_STATE.docRef);
+    const bankDocs=await fetchAllBankSubjectDocs();
     if(firstSnap.exists()){
       console.log('[CloudSync] Firestore document found. Applying remote data...');
-      applyRemotePayload(firstSnap.data(),'remote');
+      const initialData={...(firstSnap.data() || {}), bank:bankDocs.examBank};
+      applyRemotePayload(initialData,'remote');
+      if((firstSnap.data() || {}).bank && !Object.keys(bankDocs.rawDocs || {}).length){
+        markPendingCloudSync('migrate-legacy-main-doc-bank');
+      }
     }else{
       console.log('[CloudSync] No existing document. Seeding initial cloud bank...');
       await writeRemoteSnapshot('seed-initial-cloud-bank');
@@ -1786,10 +1880,12 @@ async function initRemoteSync(){
       CLOUD_STATE.unsubscribe.forEach(fn=>{ try{ typeof fn==='function' && fn(); }catch(error){} });
     }
     CLOUD_STATE.unsubscribe=[];
-    const mainUnsub=cloudFns.onSnapshot(CLOUD_STATE.docRef,(snap)=>{
+    const mainUnsub=cloudFns.onSnapshot(CLOUD_STATE.docRef, async (snap)=>{
       if(!snap.exists()) return;
       console.log('[CloudSync] Live snapshot received. Applying update...');
-      applyRemotePayload(snap.data(),'remote');
+      let bankDocs={ examBank:createEmptyExamBank(), rawDocs:{} };
+      try{ bankDocs=await fetchAllBankSubjectDocs(); }catch(error){}
+      applyRemotePayload({...(snap.data() || {}), bank:bankDocs.examBank},'remote');
       updateDiagnosticsPanel();
     },(error)=>{
       console.error('[CloudSync] Live sync error:', error?.message || error);
@@ -1799,6 +1895,18 @@ async function initRemoteSync(){
     });
     CLOUD_STATE.unsubscribe.push(mainUnsub);
     subscribeToStudentCollections();
+    const bankSubjectsRef=getCloudBankSubjectsCollectionRef();
+    if(bankSubjectsRef && cloudFns.onSnapshot){
+      const bankUnsub=cloudFns.onSnapshot(bankSubjectsRef,(snap)=>{
+        const rawDocs={};
+        snap.forEach(docSnap=>{ rawDocs[docSnap.id]=docSnap.data() || {}; });
+        applyRemotePayload({ bank:buildExamBankFromSubjectDocsMap(rawDocs), meta:{ updatedAt:CLOUD_STATE.lastUpdatedAt || new Date().toISOString() } },'remote');
+        updateDiagnosticsPanel();
+      },(error)=>{
+        console.error('[CloudSync] Bank subject sync error:', error?.message || error);
+      });
+      CLOUD_STATE.unsubscribe.push(bankUnsub);
+    }
     console.log('[CloudSync] Cloud sync fully active. Mode: cloud');
     applyCloudStatus(hasPendingCloudSync() ? 'pending' : 'cloud');
     updateDiagnosticsPanel();
@@ -1839,6 +1947,7 @@ function updateDiagnosticsPanel(){
     'Firebase project: ' + (cfg.firebaseConfig?.projectId || 'N/A'),
     'Firebase init: ' + (CLOUD_STATE.enabled ? 'Yes ✓' : 'No ✗'),
     'Firestore root: ' + (cfg.collection || '?') + ' / ' + (cfg.documentId || '?'),
+    'Bank collection: bankSubjects (split by exam + subject)',
     'Student collections: studentProfiles, studentAttempts, studentMistakes, studentTheoryAnswers',
     'Firestore ready: ' + (CLOUD_STATE.ready ? 'Yes ✓' : 'No ✗'),
     'Browser online: ' + (navigator.onLine===false ? 'No ✗' : 'Yes ✓'),
@@ -1983,7 +2092,7 @@ function buildRemotePayload(reason='cloud-update', remoteBase=null){
     meta:{
       updatedAt:latestStamp,
       reason,
-      storageLayout:'split-student-collections-v1',
+      storageLayout:'split-bank-subject-docs-v2',
       pendingReasons:Array.isArray(CLOUD_PENDING_STATE?.reasons) ? CLOUD_PENDING_STATE.reasons.slice(0,12) : []
     }
   };

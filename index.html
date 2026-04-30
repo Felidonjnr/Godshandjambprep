@@ -307,6 +307,9 @@ body::before{content:'';position:fixed;inset:0;background:
 .theory-score-row{display:flex;flex-wrap:wrap;align-items:center;gap:.7rem;margin-top:.9rem;}
 .theory-score-row select{max-width:170px;background:#0D1220;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:.65rem .8rem;color:var(--text);}
 .theory-score-note{font-size:.78rem;color:var(--muted);line-height:1.5;}
+.theory-inline-actions{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:.85rem;}
+.theory-feedback-panel{display:none;margin-top:1rem;}
+.theory-feedback-panel.show{display:block;}
 .mode-section-tag{display:inline-flex;align-items:center;gap:.45rem;padding:.32rem .75rem;border-radius:999px;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.22);font-size:.74rem;color:var(--gold);margin-top:.4rem;}
 .mode-section-tag::before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.9;}
 .hidden{display:none !important;}
@@ -703,8 +706,12 @@ Mentions the key formula"></textarea>
         <div class="mode-section-tag">Theory Self Review</div>
         <div class="form-group" style="margin-top:1rem;margin-bottom:0;">
           <label>Your Answer</label>
-          <textarea id="theoryAnswerInput" class="theory-answer-box" placeholder="Write your answer here. You will review yourself with the model answer after submission."></textarea>
-          <div class="form-help" id="theoryModeHelp">Write your answer fully, then move to the next question. You will score yourself after submission.</div>
+          <textarea id="theoryAnswerInput" class="theory-answer-box" placeholder="Write your answer here, then tap Show Feedback to compare with the model answer."></textarea>
+          <div class="form-help" id="theoryModeHelp">Write your answer fully, then tap Show Feedback to see the model answer, marking points, and score yourself immediately.</div>
+          <div class="theory-inline-actions">
+            <button class="btn-mini" id="theoryRevealBtn" type="button" onclick="revealTheoryFeedback()">🔎 Show Feedback</button>
+          </div>
+          <div class="theory-feedback-panel" id="theoryInstantFeedback"></div>
         </div>
       </div>
     </div>
@@ -2193,6 +2200,60 @@ function saveCurrentTheoryAnswer(){
   if(!input || idx<0 || idx>=userAnswers.length) return;
   userAnswers[idx]=input.value || '';
 }
+function renderTheoryInstantFeedback(){
+  if(quizMode!=='waec-theory') return;
+  const panel=document.getElementById('theoryInstantFeedback');
+  if(!panel) return;
+  const q=pool[idx];
+  if(!q){ panel.className='theory-feedback-panel'; panel.innerHTML=''; return; }
+  const shown=!!theoryFeedbackShown[idx];
+  if(!shown){
+    panel.className='theory-feedback-panel';
+    panel.innerHTML='';
+    return;
+  }
+  const guideItems=(q.markingGuide || []).map(item=>`<li>${escapeHtml(item)}</li>`).join('') || '<li>No detailed guide added yet.</li>';
+  const answerText=String(userAnswers[idx] || '').trim() || 'No answer was entered.';
+  const currentValue=Number.isFinite(theorySelfScores[idx]) ? theorySelfScores[idx] : '';
+  const scoreOptions=['<option value="">Choose score</option>'];
+  for(let score=0; score<=Number(q.scorePoints||0); score++){
+    scoreOptions.push(`<option value="${score}" ${String(currentValue)===String(score) ? 'selected' : ''}>${score} / ${q.scorePoints}</option>`);
+  }
+  panel.className='theory-feedback-panel show';
+  panel.innerHTML=`
+    <div class="theory-review-card" style="margin-bottom:0;">
+      <div class="theory-review-meta">Immediate Feedback${q.paper ? ' • ' + escapeHtml(q.paper) : ''}${q.yr ? ' • ' + escapeHtml(q.yr) : ''}</div>
+      <div class="theory-block"><strong>Your Answer</strong><div class="theory-answer-text">${escapeHtml(answerText)}</div></div>
+      <div class="theory-block"><strong>Model Answer</strong><div class="theory-model-text">${escapeHtml(q.modelAnswer || 'No model answer added yet.')}</div></div>
+      <div class="theory-block"><strong>Marking Guide</strong><ul class="theory-guide-list">${guideItems}</ul></div>
+      ${q.exp ? `<div class="theory-block"><strong>Note</strong><div class="theory-model-text">${escapeHtml(q.exp)}</div></div>` : ''}
+      <div class="theory-score-row">
+        <select id="theoryInlineScoreSelect">${scoreOptions.join('')}</select>
+        <div class="theory-score-note">Score yourself now. This saves immediately for later review.</div>
+      </div>
+    </div>`;
+  const select=document.getElementById('theoryInlineScoreSelect');
+  if(select){
+    select.addEventListener('change',event=>{
+      const value=event.target.value;
+      theorySelfScores[idx]=value==='' ? null : clamp(parseInt(value,10),0,pool[idx]?.scorePoints || 0);
+      saveCurrentAttempt();
+    });
+  }
+}
+function revealTheoryFeedback(){
+  if(quizMode!=='waec-theory') return;
+  saveCurrentTheoryAnswer();
+  if(idx<0 || idx>=pool.length) return;
+  theoryFeedbackShown[idx]=true;
+  renderTheoryInstantFeedback();
+  const nextBtn=document.getElementById('btnNext');
+  if(nextBtn){
+    nextBtn.className='btn-next show';
+    nextBtn.textContent=idx===pool.length-1 ? 'REVIEW THEORY →' : 'NEXT QUESTION →';
+  }
+  saveCurrentAttempt();
+}
 function setResultVisual(percent){
   const safe=clamp(Math.round(percent||0),0,100);
   document.getElementById('sPct').textContent=safe+'%';
@@ -3030,6 +3091,7 @@ function startQuiz(){
   idx=0;correct=0;missed=[];elapsed=0;
   userAnswers=Array(pool.length).fill(null);
   theorySelfScores=[];
+  theoryFeedbackShown=[];
   clearInterval(qTimer);
   clearInterval(sessTimer);
   prepareQuizScreen('practice');
@@ -3070,6 +3132,7 @@ function startTheoryQuiz(){
   idx=0;correct=0;missed=[];elapsed=0;
   userAnswers=Array(pool.length).fill('');
   theorySelfScores=Array(pool.length).fill(null);
+  theoryFeedbackShown=Array(pool.length).fill(false);
   clearInterval(qTimer);
   clearInterval(sessTimer);
   prepareQuizScreen('waec-theory');
@@ -3107,6 +3170,7 @@ function startWaecTimedQuiz(){
   idx=0;correct=0;missed=[];elapsed=0;
   userAnswers=Array(pool.length).fill(null);
   theorySelfScores=[];
+  theoryFeedbackShown=[];
   clearInterval(qTimer);
   clearInterval(sessTimer);
   prepareQuizScreen('waec-timed');
@@ -3137,6 +3201,7 @@ function startWaecUntimedQuiz(){
   idx=0;correct=0;missed=[];elapsed=0;
   userAnswers=Array(pool.length).fill(null);
   theorySelfScores=[];
+  theoryFeedbackShown=[];
   clearInterval(qTimer);
   clearInterval(sessTimer);
   prepareQuizScreen('waec-untimed');
@@ -3174,6 +3239,7 @@ function startWaecTestMode(){
   idx=0;correct=0;missed=[];elapsed=0;
   userAnswers=Array(pool.length).fill(null);
   theorySelfScores=[];
+  theoryFeedbackShown=[];
   clearInterval(qTimer);
   clearInterval(sessTimer);
   prepareQuizScreen('waec-test');
@@ -3270,6 +3336,11 @@ function loadQ(){
     const input=document.getElementById('theoryAnswerInput');
     input.value=typeof userAnswers[idx]==='string' ? userAnswers[idx] : '';
     input.focus();
+    const revealBtn=document.getElementById('theoryRevealBtn');
+    if(revealBtn){
+      revealBtn.textContent=theoryFeedbackShown[idx] ? '✅ Feedback Shown' : '🔎 Show Feedback';
+    }
+    renderTheoryInstantFeedback();
     document.getElementById('feedbackBox').className='feedback-box';
     const prevBtn=document.getElementById('btnPrev');
     const nextBtn=document.getElementById('btnNext');
@@ -3277,7 +3348,9 @@ function loadQ(){
     prevBtn.className='btn-outline btn-nav show';
     prevBtn.disabled=idx===0;
     nextBtn.className='btn-next show';
-    nextBtn.textContent=idx===pool.length-1 ? 'REVIEW THEORY →' : 'NEXT QUESTION →';
+    nextBtn.textContent=theoryFeedbackShown[idx]
+      ? (idx===pool.length-1 ? 'REVIEW THEORY →' : 'NEXT QUESTION →')
+      : 'SHOW FEEDBACK →';
     submitBtn.className='btn-submit-quiz show';
     submitBtn.style.display='block';
     submitBtn.textContent='✅ Submit Theory Answers';
@@ -3483,6 +3556,10 @@ function prevQuestion(){
 function nextQuestion(){
   if(quizMode==='waec-theory'){
     saveCurrentTheoryAnswer();
+    if(!theoryFeedbackShown[idx]){
+      revealTheoryFeedback();
+      return;
+    }
     if(idx>=pool.length-1){
       submitQuizEarly();
       return;

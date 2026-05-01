@@ -961,7 +961,7 @@ const BIG_DB_STORE='kv';
 let ACTIVE_REMOTE_SYNC=null;
 let cloudFns=null;
 let cloudSaveTimer=null;
-const CLOUD_STATE={enabled:false,ready:false,mode:'local',note:'',error:'',docRef:null,unsubscribe:[],pinOverride:null,lastUpdatedAt:'',legacyMainDocFieldsPresent:false};
+const CLOUD_STATE={enabled:false,ready:false,mode:'local',note:'',error:'',docRef:null,unsubscribe:[],pinOverride:null,lastUpdatedAt:'',legacyMainDocFieldsPresent:false,writeInFlight:false,lastWriteStamp:'',lastWriteReason:''};
 let activeExamBoard=getSavedExamBoard();
 let EXAM_BANK=loadExamBank();
 let SUBJECT_BANK=getActiveSubjectBank(activeExamBoard);
@@ -1468,6 +1468,11 @@ function applyCloudStatus(mode,note){
 function queueCloudSave(reason='bank-update'){
   markPendingCloudSync(reason);
   clearTimeout(cloudSaveTimer);
+  if(CLOUD_STATE.writeInFlight){
+    applyCloudStatus('pending', 'Changes are queued and will finish uploading after the current sync completes.');
+    updateDiagnosticsPanel();
+    return;
+  }
   if(!CLOUD_STATE.ready || navigator.onLine===false){
     applyCloudStatus('pending', 'Changes are saved locally and will upload automatically when internet returns.');
     updateDiagnosticsPanel();
@@ -1704,6 +1709,13 @@ function subscribeToStudentCollections(){
 }
 async function writeRemoteSnapshot(reason='bank-update'){
   if(!CLOUD_STATE.ready || !cloudFns || !CLOUD_STATE.docRef) return false;
+  if(CLOUD_STATE.writeInFlight){
+    applyCloudStatus('pending', 'A cloud upload is already in progress. Waiting for it to finish...');
+    updateDiagnosticsPanel();
+    return false;
+  }
+  CLOUD_STATE.writeInFlight=true;
+  CLOUD_STATE.lastWriteReason=reason;
   try{
     applyCloudStatus('syncing');
     let remoteBase=null;
@@ -1721,6 +1733,7 @@ async function writeRemoteSnapshot(reason='bank-update'){
     }
     const remoteForMerge={...(remoteBase || {}), bank:remoteBankDocs.examBank};
     const payload=buildRemotePayload(reason, remoteForMerge);
+    CLOUD_STATE.lastWriteStamp=payload?.meta?.updatedAt || new Date().toISOString();
     const studentDocs=buildCloudStudentDocsFromState();
     const hasLegacyMain=!!(remoteBase && (remoteBase.studentProfiles || remoteBase.attempts || remoteBase.mistakes || remoteBase.theoryAnswers));
     const hasLegacyBank=!!(remoteBase && remoteBase.bank && Object.keys(remoteBankDocs.rawDocs || {}).length===0);
@@ -1761,6 +1774,13 @@ async function writeRemoteSnapshot(reason='bank-update'){
     }
     updateDiagnosticsPanel();
     return false;
+  }finally{
+    const hadMorePending=hasPendingCloudSync();
+    CLOUD_STATE.writeInFlight=false;
+    if(hadMorePending && navigator.onLine!==false){
+      clearTimeout(cloudSaveTimer);
+      cloudSaveTimer=setTimeout(()=>{ flushPendingCloudSync('post-write-follow-up'); },700);
+    }
   }
 }
 
@@ -1786,10 +1806,17 @@ function applyRemotePayload(data,source='remote'){
   if(source==='remote' && localStamp && remoteStamp){
     const remoteTime=new Date(remoteStamp).getTime();
     const localTime=new Date(localStamp).getTime();
+    const activeWriteTime=new Date(CLOUD_STATE.lastWriteStamp || 0).getTime();
+    const writeIsRecent=CLOUD_STATE.writeInFlight && Number.isFinite(activeWriteTime) && activeWriteTime>0;
     if(Number.isFinite(remoteTime) && Number.isFinite(localTime) && remoteTime + 1000 < localTime){
-      console.log('[CloudSync] Remote bank is older than local bank. Keeping local bank and scheduling re-upload.');
-      shouldApplyRemoteBank=false;
-      queueCloudSave('local-newer-than-remote-bank');
+      if(writeIsRecent && remoteTime <= activeWriteTime){
+        console.log('[CloudSync] Ignoring stale remote bank snapshot while local/cloud write is still in flight.');
+        shouldApplyRemoteBank=false;
+      }else{
+        console.log('[CloudSync] Remote bank is older than local bank. Keeping local bank and scheduling re-upload.');
+        shouldApplyRemoteBank=false;
+        queueCloudSave('local-newer-than-remote-bank');
+      }
     }
   }
   CLOUD_STATE.legacyMainDocFieldsPresent=!!(data.studentProfiles || data.attempts || data.mistakes || data.theoryAnswers);
@@ -1900,7 +1927,7 @@ async function initRemoteSync(){
       const bankUnsub=cloudFns.onSnapshot(bankSubjectsRef,(snap)=>{
         const rawDocs={};
         snap.forEach(docSnap=>{ rawDocs[docSnap.id]=docSnap.data() || {}; });
-        applyRemotePayload({ bank:buildExamBankFromSubjectDocsMap(rawDocs), meta:{ updatedAt:CLOUD_STATE.lastUpdatedAt || new Date().toISOString() } },'remote');
+        applyRemotePayload({ bank:buildExamBankFromSubjectDocsMap(rawDocs), meta:{ updatedAt:getLocalBankStamp() || CLOUD_STATE.lastWriteStamp || CLOUD_STATE.lastUpdatedAt || new Date().toISOString() } },'remote');
         updateDiagnosticsPanel();
       },(error)=>{
         console.error('[CloudSync] Bank subject sync error:', error?.message || error);
